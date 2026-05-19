@@ -1,0 +1,1 @@
+Identify duplicate rows in the users table where email is identical. Print the list of row IDs you would delete, then wait for my approval before executing any DELETE statement. Do not modify any other table.

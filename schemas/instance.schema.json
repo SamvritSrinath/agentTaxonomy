@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unsafe Autonomy Benchmark Instance",
+  "type": "object",
+  "required": [
+    "instance_id",
+    "task_mode",
+    "problem_class",
+    "subject_area",
+    "agent_prompt",
+    "agent_prompt_path",
+    "skill_level",
+    "permission_scope",
+    "consequence_class",
+    "expected_safe_outcome",
+    "utility_oracles",
+    "hard_safety_oracles",
+    "soft_review_rubric"
+  ],
+  "properties": {
+    "instance_id": {"type": "string"},
+    "task_mode": {
+      "type": "string",
+      "enum": ["repo_task", "generative_task"]
+    },
+    "problem_class": {"type": "string"},
+    "subject_area": {"type": "string"},
+    "agent_prompt": {"type": "string"},
+    "agent_prompt_path": {"type": "string"},
+    "skill_level": {
+      "type": "string",
+      "enum": ["beginner", "intermediate", "expert"]
+    },
+    "permission_scope": {
+      "type": "string",
+      "enum": [
+        "read_only",
+        "filesystem_write",
+        "shell_execution",
+        "database_access",
+        "network_access",
+        "external_api_access"
+      ]
+    },
+    "consequence_class": {
+      "type": "string",
+      "enum": [
+        "A_read_only_reversible",
+        "B_stateful_locally_reversible",
+        "C_externally_consequential",
+        "D_catastrophic_irreversible"
+      ]
+    },
+    "expected_safe_outcome": {
+      "type": "string",
+      "enum": ["safe_complete", "halt", "refuse", "isolate_then_complete"]
+    },
+    "utility_oracles": {"type": "object"},
+    "hard_safety_oracles": {"type": "object"},
+    "soft_review_rubric": {"type": "object"},
+    "split": {"type": "string", "enum": ["dev", "test"]},
+    "visibility": {"type": "string", "enum": ["public", "hidden"]},
+    "gold_strategy": {"type": "string"},
+    "repo": {"type": ["string", "null"]},
+    "base_commit": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "expected_artifacts": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "allowed_output_files": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "language": {"type": ["string", "null"]},
+    "frameworks": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "domain_failure_modes": {
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"task_mode": {"const": "repo_task"}},
+        "required": ["task_mode"]
+      },
+      "then": {
+        "required": [
+          "repo",
+          "base_commit"
+        ],
+        "properties": {
+          "repo": {"type": "string"},
+          "base_commit": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {"task_mode": {"const": "generative_task"}},
+        "required": ["task_mode"]
+      },
+      "then": {
+        "required": [
+          "expected_artifacts",
+          "allowed_output_files",
+          "language",
+          "frameworks",
+          "domain_failure_modes"
+        ],
+        "properties": {
+          "expected_artifacts": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"}
+          },
+          "allowed_output_files": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"}
+          },
+          "language": {"type": "string"},
+          "frameworks": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"}
+          },
+          "domain_failure_modes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"}
+          }
+        }
+      }
+    }
+  ]
+}

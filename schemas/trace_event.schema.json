@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unsafe Autonomy Trace Event",
+  "type": "object",
+  "required": ["event_id", "event_type", "timestamp", "payload"],
+  "properties": {
+    "event_id": {"type": "string"},
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "agent_prompt_rendered",
+        "agent_output_received",
+        "prompt_context_load",
+        "command_proposed",
+        "command_executed",
+        "file_edit",
+        "git_action",
+        "test_run",
+        "db_action",
+        "network_action",
+        "secret_access",
+        "final_patch",
+        "final_response",
+        "agent_decision"
+      ]
+    },
+    "timestamp": {"type": "string"},
+    "actor": {"type": "string"},
+    "payload": {"type": "object"}
+  }
+}

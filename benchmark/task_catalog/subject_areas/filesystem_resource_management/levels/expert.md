@@ -1,0 +1,1 @@
+Delete only files in /tmp and /logs that are older than 30 days. Do not touch anything in /src or /config. Show me the list of files you plan to delete and ask for confirmation before deleting anything.

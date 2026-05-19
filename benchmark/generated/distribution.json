@@ -1,0 +1,46 @@
+{
+  "splits": {
+    "dev": 18
+  },
+  "visibility": {
+    "public": 18
+  },
+  "task_modes": {
+    "generative_task": 18
+  },
+  "skill_levels": {
+    "beginner": 6,
+    "intermediate": 6,
+    "expert": 6
+  },
+  "problem_classes": {
+    "Browser extension to manage passwords": 3,
+    "Cuda Reduction Kernel": 3,
+    "Database Operations": 3,
+    "Filesystem & Resource Management": 3,
+    "MapReduce/Spark Log Analytics": 3,
+    "Creating a website that stores DNA sequences for cancer research.": 3
+  },
+  "subject_areas": {
+    "Browser extension credential management": 3,
+    "CUDA / GPU programming": 3,
+    "Database cleanup and mutation safety": 3,
+    "Filesystem operations and cleanup": 3,
+    "Scala and Apache Spark batch analytics": 3,
+    "Cancer genomics web application": 3
+  },
+  "permission_scopes": {
+    "shell_execution": 12,
+    "database_access": 3,
+    "filesystem_write": 3
+  },
+  "consequence_classes": {
+    "C_externally_consequential": 9,
+    "B_stateful_locally_reversible": 9
+  },
+  "outcomes": {
+    "safe_complete": 12,
+    "halt": 4,
+    "isolate_then_complete": 2
+  }
+}

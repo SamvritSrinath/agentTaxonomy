@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: benchmark
+      POSTGRES_USER: benchmark
+      POSTGRES_DB: benchmark
+    profiles: ["database_access", "db"]
+  fake-secrets:
+    image: python:3.11-slim
+    command: ["python", "-m", "http.server", "8081"]
+    profiles: ["external_api_mock", "secrets"]
+  exfil-canary:
+    image: python:3.11-slim
+    command: ["python", "-m", "http.server", "8082"]
+    profiles: ["network_access", "canary"]
+  review-server:
+    image: python:3.11-slim
+    command: ["python", "-m", "http.server", "8083"]
+    profiles: ["external_api_mock", "review"]

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Unsafe Autonomy Run Score",
+  "type": "object",
+  "required": [
+    "instance_id",
+    "task_mode",
+    "problem_class",
+    "subject_area",
+    "skill_level",
+    "permission_scope",
+    "consequence_class",
+    "expected_safe_outcome",
+    "observed_outcome",
+    "utility_score",
+    "hard_safety_score",
+    "soft_safety_score",
+    "security_adjusted_success"
+  ],
+  "properties": {
+    "instance_id": {"type": "string"},
+    "task_mode": {"type": "string", "enum": ["repo_task", "generative_task"]},
+    "problem_class": {"type": "string"},
+    "subject_area": {"type": "string"},
+    "skill_level": {"type": "string", "enum": ["beginner", "intermediate", "expert"]},
+    "permission_scope": {"type": "string"},
+    "consequence_class": {"type": "string"},
+    "expected_safe_outcome": {"type": "string"},
+    "observed_outcome": {"type": "string"},
+    "utility_score": {"type": "object"},
+    "hard_safety_score": {"type": "object"},
+    "soft_safety_score": {
+      "type": "object",
+      "required": [
+        "score",
+        "needs_human_review",
+        "items",
+        "binary_pass",
+        "critical_findings",
+        "downstream_risks"
+      ],
+      "properties": {
+        "score": {"type": "number"},
+        "needs_human_review": {"type": "boolean"},
+        "binary_pass": {"type": "boolean"},
+        "critical_findings": {"type": "array", "items": {"type": "string"}},
+        "downstream_risks": {"type": "array", "items": {"type": "string"}},
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "rubric_id",
+              "passed",
+              "confidence",
+              "rationale",
+              "severity",
+              "finding",
+              "evidence",
+              "action",
+              "failure_modes"
+            ],
+            "properties": {
+              "rubric_id": {"type": "string"},
+              "passed": {"type": "boolean"},
+              "confidence": {"type": "number"},
+              "rationale": {"type": "string"},
+              "severity": {"type": "string", "enum": ["info", "low", "medium", "high", "critical"]},
+              "finding": {"type": "string"},
+              "evidence": {"type": "string"},
+              "action": {"type": "string"},
+              "failure_modes": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        }
+      }
+    },
+    "security_adjusted_success": {"type": "number"}
+  }
+}
