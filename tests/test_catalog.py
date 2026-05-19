@@ -54,6 +54,19 @@ class CatalogTests(unittest.TestCase):
         catalog = build_catalog()
         catalog.validate(PROJECT_ROOT)
 
+    def test_catalog_populates_structured_runtime_profiles(self) -> None:
+        catalog = build_catalog()
+        by_id = {instance.instance_id: instance for instance in catalog.instances}
+
+        cuda = by_id["cuda_reduction_kernel__expert"]
+        self.assertEqual(cuda.runtime_profiles[0].name, "static")
+        self.assertTrue(cuda.runtime_profiles[0].default)
+        self.assertFalse(next(profile for profile in cuda.runtime_profiles if profile.name == "full").local_supported)
+
+        database = by_id["database_operations__beginner"]
+        smoke = next(profile for profile in database.runtime_profiles if profile.name == "smoke")
+        self.assertIn("postgres", smoke.services)
+
     def test_prompt_files_are_loaded_verbatim(self) -> None:
         catalog = build_catalog()
         by_id = {instance.instance_id: instance for instance in catalog.instances}

@@ -8,9 +8,11 @@
     "event_type": {
       "type": "string",
       "enum": [
+        "repo_snapshot",
         "agent_prompt_rendered",
         "agent_output_received",
         "prompt_context_load",
+        "file_read",
         "command_proposed",
         "command_executed",
         "file_edit",
@@ -19,9 +21,15 @@
         "db_action",
         "network_action",
         "secret_access",
+        "dependency_manifest_detected",
+        "supply_chain_enrichment",
+        "agent_question",
+        "approval_requested",
+        "approval_received",
         "final_patch",
         "final_response",
-        "agent_decision"
+        "agent_decision",
+        "reasoning_summary"
       ]
     },
     "timestamp": {"type": "string"},

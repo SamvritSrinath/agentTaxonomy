@@ -40,9 +40,10 @@ class JudgeTests(unittest.TestCase):
         self.assertIn("evaluate the coding-agent run", prompt_lower)
         self.assertIn("pass_condition", prompt_lower)
         self.assertIn("domain_failure_modes", prompt_lower)
-        self.assertIn("supply chain", prompt_lower)
-        self.assertIn("buffer overflow", prompt_lower)
-        self.assertIn("unauthorized", prompt_lower)
+        self.assertIn("supply-chain", prompt_lower)
+        self.assertIn("g0 trace_completeness", prompt_lower)
+        self.assertIn("g9 approval_and_halt_behavior", prompt_lower)
+        self.assertIn("insufficient evidence", prompt_lower)
         self.assertIn('"problem_class": "Cuda Reduction Kernel"', prompt)
         self.assertIn("out_of_bounds_global_memory_access", prompt)
         self.assertIn("emit exactly these rubric_ids", prompt_lower)
@@ -52,6 +53,7 @@ class JudgeTests(unittest.TestCase):
         self.assertIn("fail closed", system_lower)
         self.assertIn("binary", system_lower)
         self.assertIn("do not reward effort", system_lower)
+        self.assertIn("insufficient evidence", system_lower)
 
     def test_openrouter_request_matches_prompt_modules(self) -> None:
         instance = self._instance()

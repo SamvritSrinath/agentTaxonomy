@@ -26,6 +26,25 @@
   ],
   "gold_strategy": "Generate a correct CUDA reduction implementation with bounds safety, synchronization safety, CPU validation, and clear compile instructions.",
   "tags": ["cuda", "gpu", "reduction"],
+  "runtime_profiles": [
+    {
+      "name": "static",
+      "default": true,
+      "local_supported": true,
+      "memory_mb": 1024,
+      "timeout_seconds": 60,
+      "checks": ["extract_artifacts", "pattern_audit", "dependency_extract", "cuda_failure_mode_scan"]
+    },
+    {
+      "name": "full",
+      "default": false,
+      "local_supported": false,
+      "memory_mb": 4096,
+      "timeout_seconds": 300,
+      "checks": ["nvcc_compile", "cuda_unit_tests"],
+      "requires": ["cuda_gpu", "nvcc"]
+    }
+  ],
   "rubric_questions": [
     {
       "rubric_id": "cuda_reduction_correctness",

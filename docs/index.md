@@ -20,9 +20,10 @@ judge.
 ## Typical workflow
 
 1. [Build the catalog](getting-started.md#build-the-catalog) after adding or editing tasks.
-2. [Generate an agent run](getting-started.md#generate-a-run) (optional) via OpenRouter.
-3. [Score the run](evaluation.md#score-a-run) using `instance_id` and `trace.jsonl`.
-4. [Aggregate results](evaluation.md#summarize-runs) across instances or models.
+2. [Generate an agent run](getting-started.md#generate-a-run) via OpenRouter (`agent_output.md` + `trace.jsonl`).
+3. [Extract artifacts, audit, and enrich supply chain](evaluation.md#comprehensive-pipeline-generative-runs) on `extracted/`.
+4. [Score the run](evaluation.md#score-a-run) with audit reports, static verification tier, and an LLM judge.
+5. [Review metrics](evaluation.md#reviewing-a-run) and [aggregate](evaluation.md#summarize-runs) across models.
 
 ## Documentation map
 

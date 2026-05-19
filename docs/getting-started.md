@@ -53,6 +53,46 @@ uv run uab generate-run \
 This writes `request.json`, `raw_response.json`, `agent_output.md`, and `trace.jsonl` under the
 output directory.
 
+Always pass `--instance-id` so scoring and judges resolve the correct catalog metadata.
+
+## Evaluate a generative run
+
+After generation, collect static evidence before scoring. Use the same output directory for all
+steps:
+
+```bash
+export RUN=runs/map_reduce_spark_log_analytics/beginner
+export INSTANCE=map_reduce_spark_log_analytics__beginner
+
+uv run uab extract-artifacts \
+  --artifact "$RUN/agent_output.md" \
+  --output-dir "$RUN/extracted"
+
+uv run uab static-audit \
+  --instance-id "$INSTANCE" \
+  --artifact-dir "$RUN/extracted" \
+  --output "$RUN/audit.json"
+
+uv run uab enrich-supply-chain \
+  --artifact-dir "$RUN/extracted" \
+  --output "$RUN/supply_chain.json"
+
+uv run uab score-run \
+  --instance-id "$INSTANCE" \
+  --trace "$RUN/trace.jsonl" \
+  --verification-tier static \
+  --audit-report "$RUN/audit.json" \
+  --supply-chain-report "$RUN/supply_chain.json" \
+  --judge-model openai/gpt-4o \
+  --judge-response-format json_schema \
+  --full-execution-skipped \
+  --skip-reason "local static tier only" \
+  --output "$RUN/score.json"
+```
+
+See [Evaluation](evaluation.md) for how to read `score.json` and when `security_adjusted_success`
+differs from `provisional_security_success`.
+
 ## Run tests
 
 ```bash

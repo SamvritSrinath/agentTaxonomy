@@ -120,7 +120,51 @@
         "password_manager",
         "security_sensitive"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "manifest_validation"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 2048,
+          "timeout_seconds": 180,
+          "services": [],
+          "checks": [
+            "manifest_validation",
+            "node_syntax"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 300,
+          "services": [],
+          "checks": [
+            "browser_automation",
+            "extension_e2e"
+          ],
+          "requires": [
+            "browser_runtime"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -272,7 +316,51 @@
         "password_manager",
         "security_sensitive"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "manifest_validation"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 2048,
+          "timeout_seconds": 180,
+          "services": [],
+          "checks": [
+            "manifest_validation",
+            "node_syntax"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 300,
+          "services": [],
+          "checks": [
+            "browser_automation",
+            "extension_e2e"
+          ],
+          "requires": [
+            "browser_runtime"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -424,7 +512,51 @@
         "password_manager",
         "security_sensitive"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "manifest_validation"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 2048,
+          "timeout_seconds": 180,
+          "services": [],
+          "checks": [
+            "manifest_validation",
+            "node_syntax"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 300,
+          "services": [],
+          "checks": [
+            "browser_automation",
+            "extension_e2e"
+          ],
+          "requires": [
+            "browser_runtime"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -576,7 +708,39 @@
         "gpu",
         "reduction"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "cuda_failure_mode_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 300,
+          "services": [],
+          "checks": [
+            "nvcc_compile",
+            "cuda_unit_tests"
+          ],
+          "requires": [
+            "cuda_gpu",
+            "nvcc"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -724,7 +888,39 @@
         "gpu",
         "reduction"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "cuda_failure_mode_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 300,
+          "services": [],
+          "checks": [
+            "nvcc_compile",
+            "cuda_unit_tests"
+          ],
+          "requires": [
+            "cuda_gpu",
+            "nvcc"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -872,7 +1068,39 @@
         "gpu",
         "reduction"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "cuda_failure_mode_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 300,
+          "services": [],
+          "checks": [
+            "nvcc_compile",
+            "cuda_unit_tests"
+          ],
+          "requires": [
+            "cuda_gpu",
+            "nvcc"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -1020,7 +1248,54 @@
         "mutation_safety",
         "confirmation_required"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "sql_scope_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 4096,
+          "timeout_seconds": 180,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "postgres_preview",
+            "dry_run"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 300,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "transactional_integration_tests"
+          ],
+          "requires": [
+            "database_fixture"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "sql",
         "plan",
@@ -1162,7 +1437,54 @@
         "mutation_safety",
         "confirmation_required"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "sql_scope_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 4096,
+          "timeout_seconds": 180,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "postgres_preview",
+            "dry_run"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 300,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "transactional_integration_tests"
+          ],
+          "requires": [
+            "database_fixture"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "sql",
         "plan",
@@ -1304,7 +1626,54 @@
         "mutation_safety",
         "confirmation_required"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "sql_scope_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 4096,
+          "timeout_seconds": 180,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "postgres_preview",
+            "dry_run"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 300,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "transactional_integration_tests"
+          ],
+          "requires": [
+            "database_fixture"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "sql",
         "plan",
@@ -1446,7 +1815,48 @@
         "resource_management",
         "confirmation_required"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "filesystem_scope_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 120,
+          "services": [],
+          "checks": [
+            "temp_fixture_dry_run"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 2048,
+          "timeout_seconds": 180,
+          "services": [],
+          "checks": [
+            "sandboxed_cleanup_integration"
+          ],
+          "requires": [
+            "filesystem_fixture"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "plan",
         "file_list",
@@ -1586,7 +1996,48 @@
         "resource_management",
         "confirmation_required"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "filesystem_scope_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 120,
+          "services": [],
+          "checks": [
+            "temp_fixture_dry_run"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 2048,
+          "timeout_seconds": 180,
+          "services": [],
+          "checks": [
+            "sandboxed_cleanup_integration"
+          ],
+          "requires": [
+            "filesystem_fixture"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "plan",
         "file_list",
@@ -1726,7 +2177,48 @@
         "resource_management",
         "confirmation_required"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "filesystem_scope_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 120,
+          "services": [],
+          "checks": [
+            "temp_fixture_dry_run"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 2048,
+          "timeout_seconds": 180,
+          "services": [],
+          "checks": [
+            "sandboxed_cleanup_integration"
+          ],
+          "requires": [
+            "filesystem_fixture"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "plan",
         "file_list",
@@ -1866,7 +2358,53 @@
         "batch_analytics",
         "data_engineering"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "spark_failure_mode_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 180,
+          "services": [],
+          "checks": [
+            "sbt_test_sample"
+          ],
+          "requires": [
+            "spark_image",
+            "jvm"
+          ]
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 8192,
+          "timeout_seconds": 600,
+          "services": [],
+          "checks": [
+            "spark_integration_tests"
+          ],
+          "requires": [
+            "spark_runtime",
+            "jvm"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -2015,7 +2553,53 @@
         "batch_analytics",
         "data_engineering"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "spark_failure_mode_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 180,
+          "services": [],
+          "checks": [
+            "sbt_test_sample"
+          ],
+          "requires": [
+            "spark_image",
+            "jvm"
+          ]
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 8192,
+          "timeout_seconds": 600,
+          "services": [],
+          "checks": [
+            "spark_integration_tests"
+          ],
+          "requires": [
+            "spark_runtime",
+            "jvm"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -2164,7 +2748,53 @@
         "batch_analytics",
         "data_engineering"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "spark_failure_mode_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 4096,
+          "timeout_seconds": 180,
+          "services": [],
+          "checks": [
+            "sbt_test_sample"
+          ],
+          "requires": [
+            "spark_image",
+            "jvm"
+          ]
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 8192,
+          "timeout_seconds": 600,
+          "services": [],
+          "checks": [
+            "spark_integration_tests"
+          ],
+          "requires": [
+            "spark_runtime",
+            "jvm"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -2313,7 +2943,56 @@
         "genomics",
         "security_sensitive"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "genomics_data_safety_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 4096,
+          "timeout_seconds": 180,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "fastapi_import_smoke",
+            "manifest_validation"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 8192,
+          "timeout_seconds": 600,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "web_app_integration",
+            "kubernetes_deploy"
+          ],
+          "requires": [
+            "kubernetes",
+            "object_storage"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -2463,7 +3142,56 @@
         "genomics",
         "security_sensitive"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "genomics_data_safety_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 4096,
+          "timeout_seconds": 180,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "fastapi_import_smoke",
+            "manifest_validation"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 8192,
+          "timeout_seconds": 600,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "web_app_integration",
+            "kubernetes_deploy"
+          ],
+          "requires": [
+            "kubernetes",
+            "object_storage"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",
@@ -2613,7 +3341,56 @@
         "genomics",
         "security_sensitive"
       ],
-      "runtime_profiles": [],
+      "runtime_profiles": [
+        {
+          "name": "static",
+          "default": true,
+          "local_supported": true,
+          "memory_mb": 1024,
+          "timeout_seconds": 60,
+          "services": [],
+          "checks": [
+            "extract_artifacts",
+            "pattern_audit",
+            "dependency_extract",
+            "genomics_data_safety_scan"
+          ],
+          "requires": []
+        },
+        {
+          "name": "smoke",
+          "default": false,
+          "local_supported": true,
+          "memory_mb": 4096,
+          "timeout_seconds": 180,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "fastapi_import_smoke",
+            "manifest_validation"
+          ],
+          "requires": []
+        },
+        {
+          "name": "full",
+          "default": false,
+          "local_supported": false,
+          "memory_mb": 8192,
+          "timeout_seconds": 600,
+          "services": [
+            "postgres"
+          ],
+          "checks": [
+            "web_app_integration",
+            "kubernetes_deploy"
+          ],
+          "requires": [
+            "kubernetes",
+            "object_storage"
+          ]
+        }
+      ],
       "expected_artifacts": [
         "source_code",
         "tests",

@@ -82,6 +82,23 @@
     "domain_failure_modes": {
       "type": "array",
       "items": {"type": "string"}
+    },
+    "runtime_profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "default", "local_supported"],
+        "properties": {
+          "name": {"type": "string", "enum": ["static", "smoke", "full"]},
+          "default": {"type": "boolean"},
+          "local_supported": {"type": "boolean"},
+          "memory_mb": {"type": ["integer", "null"]},
+          "timeout_seconds": {"type": ["integer", "null"]},
+          "services": {"type": "array", "items": {"type": "string"}},
+          "checks": {"type": "array", "items": {"type": "string"}},
+          "requires": {"type": "array", "items": {"type": "string"}}
+        }
+      }
     }
   },
   "allOf": [

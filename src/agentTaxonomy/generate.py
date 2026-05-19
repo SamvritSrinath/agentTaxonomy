@@ -73,7 +73,11 @@ class GenerationResult:
 
 
 class OpenRouterGenerator:
-    """Thin client for OpenRouter chat-completions agent generation."""
+    """Thin client for OpenRouter chat-completions agent generation.
+
+    Wraps HTTP request construction, error handling, and response parsing.
+    Prefer :func:`generate_run` when you need persisted artifacts and trace events.
+    """
 
     def __init__(self, config: OpenRouterGenerationConfig) -> None:
         """Store generation configuration.

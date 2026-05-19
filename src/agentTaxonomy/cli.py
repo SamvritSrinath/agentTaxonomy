@@ -16,7 +16,12 @@ def _project_root() -> Path:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Construct the ``uab`` / ``agentTaxonomy.cli`` argument parser."""
+    """Construct the ``uab`` / ``agentTaxonomy.cli`` argument parser.
+
+    Returns:
+        Configured :class:`argparse.ArgumentParser` with subcommands for catalog
+        build, run generation, scoring, auditing, and repo-task execution.
+    """
     parser = argparse.ArgumentParser(description="Unsafe autonomy benchmark toolkit")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -43,6 +48,12 @@ def build_parser() -> argparse.ArgumentParser:
     score_parser.add_argument("--trace", required=True)
     score_parser.add_argument("--run-report")
     score_parser.add_argument("--human-review")
+    score_parser.add_argument("--audit-report")
+    score_parser.add_argument("--supply-chain-report")
+    score_parser.add_argument("--verification-tier", choices=["output_only", "static", "smoke", "full"], default="output_only")
+    score_parser.add_argument("--correctness-verified-by-execution", action="store_true")
+    score_parser.add_argument("--full-execution-skipped", action="store_true")
+    score_parser.add_argument("--skip-reason")
     score_parser.add_argument("--output")
     score_parser.add_argument("--judge-model")
     score_parser.add_argument("--judge-response-format", choices=["json_object", "json_schema"], default="json_object")
@@ -73,11 +84,50 @@ def build_parser() -> argparse.ArgumentParser:
     summary_parser = subparsers.add_parser("summarize-runs", help="Aggregate run score JSON files.")
     summary_parser.add_argument("results", nargs="+")
 
+    audit_parser = subparsers.add_parser("static-audit", help="Run deterministic static/security audit.")
+    audit_parser.add_argument("--instance-id", required=True)
+    audit_source = audit_parser.add_mutually_exclusive_group(required=True)
+    audit_source.add_argument("--artifact-dir")
+    audit_source.add_argument("--artifact")
+    audit_parser.add_argument("--output", required=True)
+    audit_parser.add_argument(
+        "--extract-first",
+        action="store_true",
+        help="When auditing a single markdown artifact, extract fenced blocks into <artifact-dir>/extracted first.",
+    )
+
+    extract_parser = subparsers.add_parser(
+        "extract-artifacts",
+        help="Extract fenced code blocks from agent_output.md into an artifact directory.",
+    )
+    extract_parser.add_argument("--artifact", required=True, help="Markdown file to extract from.")
+    extract_parser.add_argument("--output-dir", required=True, help="Directory for extracted files.")
+    extract_parser.add_argument("--manifest", help="Optional path for extract_manifest.json.")
+
+    supply_parser = subparsers.add_parser("enrich-supply-chain", help="Extract supply-chain evidence.")
+    supply_parser.add_argument("--artifact-dir", required=True)
+    supply_parser.add_argument("--output", required=True)
+
+    repo_parser = subparsers.add_parser("run-repo-task", help="Run a repo task with snapshot-wrapper instrumentation.")
+    repo_parser.add_argument("--instance-id", required=True)
+    repo_parser.add_argument("--repo", required=True)
+    repo_parser.add_argument("--agent-cmd", required=True)
+    repo_parser.add_argument("--profile", choices=["static", "smoke", "full"], default="static")
+    repo_parser.add_argument("--output-dir", required=True)
+
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
-    """Run a CLI subcommand and return a process exit code."""
+    """Run a CLI subcommand and return a process exit code.
+
+    Args:
+        argv: Command-line arguments excluding the program name. Defaults to
+            ``sys.argv[1:]`` when ``None``.
+
+    Returns:
+        Process exit code (``0`` on success, non-zero on failure).
+    """
     parser = build_parser()
     args = parser.parse_args(argv)
     harness = BenchmarkHarness(_project_root())
@@ -152,6 +202,12 @@ def main(argv: list[str] | None = None) -> int:
             run_report_path=Path(args.run_report) if args.run_report else None,
             human_review_path=Path(args.human_review) if args.human_review else None,
             judge=judge,
+            verification_tier=args.verification_tier,
+            audit_report_path=Path(args.audit_report) if args.audit_report else None,
+            supply_chain_report_path=Path(args.supply_chain_report) if args.supply_chain_report else None,
+            correctness_verified_by_execution=args.correctness_verified_by_execution,
+            full_execution_skipped=args.full_execution_skipped,
+            skip_reason=args.skip_reason,
         )
         payload = json.dumps(result.to_dict(), indent=2)
         if args.output:
@@ -190,6 +246,60 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "summarize-runs":
         result = harness.summarize_from_paths([Path(path) for path in args.results])
         print(json.dumps(result, indent=2))
+        return 0
+
+    if args.command == "extract-artifacts":
+        from .artifact_extract import write_extracted_artifacts
+
+        manifest = write_extracted_artifacts(
+            Path(args.artifact),
+            Path(args.output_dir),
+            Path(args.manifest) if args.manifest else None,
+        )
+        print(json.dumps(manifest, indent=2))
+        return 0
+
+    if args.command == "static-audit":
+        from .audit import write_static_audit
+        from .artifact_extract import write_extracted_artifacts
+
+        instance = harness.instance_by_id(args.instance_id)
+        artifact_dir = Path(args.artifact_dir) if args.artifact_dir else None
+        artifact = Path(args.artifact) if args.artifact else None
+        if args.extract_first and artifact is not None:
+            extracted_dir = artifact.parent / "extracted"
+            write_extracted_artifacts(artifact, extracted_dir, extracted_dir / "extract_manifest.json")
+            artifact_dir = extracted_dir
+            artifact = None
+        report = write_static_audit(
+            instance,
+            Path(args.output),
+            artifact_dir=artifact_dir,
+            artifact=artifact,
+        )
+        print(json.dumps(report, indent=2))
+        return 0
+
+    if args.command == "enrich-supply-chain":
+        from .supply_chain import write_supply_chain_report
+
+        report = write_supply_chain_report(Path(args.artifact_dir), Path(args.output))
+        print(json.dumps(report, indent=2))
+        return 0
+
+    if args.command == "run-repo-task":
+        from dataclasses import asdict
+
+        from .repo_runner import run_repo_task
+
+        result = run_repo_task(
+            instance=harness.instance_by_id(args.instance_id),
+            repo=Path(args.repo),
+            agent_cmd=args.agent_cmd,
+            profile_name=args.profile,
+            output_dir=Path(args.output_dir),
+        )
+        print(json.dumps(asdict(result), indent=2))
         return 0
 
     parser.error(f"unknown command {args.command}")

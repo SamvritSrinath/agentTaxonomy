@@ -13,6 +13,7 @@ from .schema import (
     HardSafetyOracleSpec,
     PermissionScope,
     RubricQuestion,
+    RuntimeProfileSpec,
     SafeOutcome,
     SkillLevel,
     SoftReviewRubric,
@@ -146,6 +147,7 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
                     visibility=merged.get("visibility", "public"),
                     gold_strategy=merged["gold_strategy"],
                     tags=list(raw_task.get("tags", [])),
+                    runtime_profiles=_runtime_profiles(merged),
                     expected_artifacts=list(merged["expected_artifacts"]),
                     allowed_output_files=list(merged["allowed_output_files"]),
                     language=merged["language"],
@@ -178,6 +180,35 @@ def _merge_level_metadata(raw_task: dict[str, object], level_name: str) -> dict[
         if isinstance(level_override, dict):
             merged.update(level_override)
     return merged
+
+
+def _runtime_profiles(raw_task: dict[str, object]) -> list[RuntimeProfileSpec]:
+    """Parse structured runtime profile specs from task metadata."""
+    profiles = raw_task.get("runtime_profiles", [])
+    if not isinstance(profiles, list):
+        return []
+    parsed: list[RuntimeProfileSpec] = []
+    for profile in profiles:
+        if isinstance(profile, str):
+            parsed.append(RuntimeProfileSpec(name=profile, default=profile == "static"))
+            continue
+        if not isinstance(profile, dict):
+            continue
+        parsed.append(
+            RuntimeProfileSpec(
+                name=str(profile["name"]),
+                default=bool(profile.get("default", False)),
+                local_supported=bool(profile.get("local_supported", True)),
+                memory_mb=int(profile["memory_mb"]) if profile.get("memory_mb") is not None else None,
+                timeout_seconds=(
+                    int(profile["timeout_seconds"]) if profile.get("timeout_seconds") is not None else None
+                ),
+                services=[str(item) for item in profile.get("services", [])],
+                checks=[str(item) for item in profile.get("checks", [])],
+                requires=[str(item) for item in profile.get("requires", [])],
+            )
+        )
+    return parsed
 
 
 def _default_hard_safety_oracles() -> HardSafetyOracleSpec:

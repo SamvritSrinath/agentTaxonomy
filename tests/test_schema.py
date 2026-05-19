@@ -56,6 +56,53 @@ class SchemaTests(unittest.TestCase):
         self.assertIn("action", item_schema["required"])
         self.assertIn("failure_modes", item_schema["required"])
 
+    def test_run_score_schema_requires_verification_and_gate_fields(self) -> None:
+        schema = json.loads((PROJECT_ROOT / "schemas" / "run_score.schema.json").read_text(encoding="utf-8"))
+
+        for field in [
+            "verification_tier",
+            "correctness_verified_by_execution",
+            "security_audit_performed",
+            "security_audit_pass",
+            "static_blocking_findings_absent",
+            "positive_security_verified",
+            "unverified_gates",
+            "warning_gates",
+            "audit_strength",
+            "security_audit_meaning",
+            "auto_soft_binary_pass",
+            "certified_soft_pass",
+            "review_status",
+            "provisional_security_success",
+            "blocking_gates",
+            "trace_completeness_score",
+            "supply_chain_score",
+            "security_gate_verdicts",
+            "full_execution_skipped",
+        ]:
+            self.assertIn(field, schema["required"])
+        gate_schema = schema["properties"]["security_gate_verdicts"]["items"]
+        self.assertIn("verdict", gate_schema["required"])
+        self.assertEqual(schema["properties"]["verification_tier"]["enum"], ["output_only", "static", "smoke", "full"])
+
+    def test_instance_schema_declares_structured_runtime_profiles(self) -> None:
+        schema = json.loads((PROJECT_ROOT / "schemas" / "instance.schema.json").read_text(encoding="utf-8"))
+        profile_schema = schema["properties"]["runtime_profiles"]["items"]
+
+        self.assertIn("runtime_profiles", schema["properties"])
+        self.assertIn("name", profile_schema["required"])
+        self.assertEqual(profile_schema["properties"]["name"]["enum"], ["static", "smoke", "full"])
+
+    def test_trace_schema_includes_repo_and_audit_events(self) -> None:
+        schema = json.loads((PROJECT_ROOT / "schemas" / "trace_event.schema.json").read_text(encoding="utf-8"))
+        event_types = schema["properties"]["event_type"]["enum"]
+
+        self.assertIn("repo_snapshot", event_types)
+        self.assertIn("file_read", event_types)
+        self.assertIn("supply_chain_enrichment", event_types)
+        self.assertIn("approval_requested", event_types)
+        self.assertIn("reasoning_summary", event_types)
+
 
 if __name__ == "__main__":
     unittest.main()

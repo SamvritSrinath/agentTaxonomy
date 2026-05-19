@@ -15,7 +15,26 @@
     "utility_score",
     "hard_safety_score",
     "soft_safety_score",
-    "security_adjusted_success"
+    "security_adjusted_success",
+    "verification_tier",
+    "correctness_verified_by_execution",
+    "security_audit_performed",
+    "security_audit_pass",
+    "static_blocking_findings_absent",
+    "positive_security_verified",
+    "unverified_gates",
+    "warning_gates",
+    "audit_strength",
+    "security_audit_meaning",
+    "auto_soft_binary_pass",
+    "certified_soft_pass",
+    "review_status",
+    "provisional_security_success",
+    "blocking_gates",
+    "trace_completeness_score",
+    "supply_chain_score",
+    "security_gate_verdicts",
+    "full_execution_skipped"
   ],
   "properties": {
     "instance_id": {"type": "string"},
@@ -75,6 +94,57 @@
         }
       }
     },
-    "security_adjusted_success": {"type": "number"}
+    "security_adjusted_success": {"type": "number"},
+    "verification_tier": {"type": "string", "enum": ["output_only", "static", "smoke", "full"]},
+    "correctness_verified_by_execution": {"type": "boolean"},
+    "security_audit_performed": {"type": "boolean"},
+    "security_audit_pass": {"type": "boolean"},
+    "static_blocking_findings_absent": {"type": "boolean"},
+    "positive_security_verified": {"type": "boolean"},
+    "unverified_gates": {"type": "array", "items": {"type": "string"}},
+    "warning_gates": {"type": "array", "items": {"type": "string"}},
+    "audit_strength": {"type": "string"},
+    "security_audit_meaning": {"type": "string"},
+    "auto_soft_binary_pass": {"type": "boolean"},
+    "certified_soft_pass": {"type": "boolean"},
+    "review_status": {"type": "string", "enum": ["certified", "pending_human_review"]},
+    "provisional_security_success": {"type": "number"},
+    "blocking_gates": {"type": "array", "items": {"type": "string"}},
+    "trace_completeness_score": {"type": "number"},
+    "supply_chain_score": {"type": "number"},
+    "security_gate_verdicts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gate_id",
+          "name",
+          "verdict",
+          "passed",
+          "blocking",
+          "evidence",
+          "source",
+          "severity",
+          "finding",
+          "positive_evidence",
+          "checks_run"
+        ],
+        "properties": {
+          "gate_id": {"type": "string"},
+          "name": {"type": "string"},
+          "verdict": {"type": "string", "enum": ["pass", "fail", "unknown"]},
+          "passed": {"type": "boolean"},
+          "blocking": {"type": "boolean"},
+          "evidence": {"type": "string"},
+          "source": {"type": "string"},
+          "severity": {"type": "string"},
+          "finding": {"type": "string"},
+          "positive_evidence": {"type": "boolean"},
+          "checks_run": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "full_execution_skipped": {"type": "boolean"},
+    "skip_reason": {"type": ["string", "null"]}
   }
 }

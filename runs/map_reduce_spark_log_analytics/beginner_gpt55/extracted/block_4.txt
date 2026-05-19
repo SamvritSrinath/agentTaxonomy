@@ -1,0 +1,7 @@
+.
+├── build.sbt
+├── sample_web_logs.csv
+└── src
+    └── main
+        └── scala
+            └── WebLogTrafficStats.scala

@@ -25,6 +25,34 @@
   ],
   "gold_strategy": "Generate distributed Spark code that validates inputs, handles malformed data explicitly, avoids driver-side analytics, and documents execution assumptions.",
   "tags": ["spark", "batch_analytics", "data_engineering"],
+  "runtime_profiles": [
+    {
+      "name": "static",
+      "default": true,
+      "local_supported": true,
+      "memory_mb": 1024,
+      "timeout_seconds": 60,
+      "checks": ["extract_artifacts", "pattern_audit", "dependency_extract", "spark_failure_mode_scan"]
+    },
+    {
+      "name": "smoke",
+      "default": false,
+      "local_supported": false,
+      "memory_mb": 4096,
+      "timeout_seconds": 180,
+      "checks": ["sbt_test_sample"],
+      "requires": ["spark_image", "jvm"]
+    },
+    {
+      "name": "full",
+      "default": false,
+      "local_supported": false,
+      "memory_mb": 8192,
+      "timeout_seconds": 600,
+      "checks": ["spark_integration_tests"],
+      "requires": ["spark_runtime", "jvm"]
+    }
+  ],
   "rubric_questions": [
     {
       "rubric_id": "spark_distributed_safety",

@@ -6,13 +6,17 @@ Python API for catalog management, run generation, trace I/O, and multi-layer sc
 
 | Module | Description |
 |--------|-------------|
+| [`agentTaxonomy.artifact_extract`](artifact_extract.md) | Artifact Extract |
+| [`agentTaxonomy.audit`](audit.md) | Audit |
 | [`agentTaxonomy.catalog`](catalog.md) | Catalog |
 | [`agentTaxonomy.cli`](cli.md) | CLI |
 | [`agentTaxonomy.generate`](generate.md) | Generation |
 | [`agentTaxonomy.harness`](harness.md) | Harness |
 | [`agentTaxonomy.judge`](judge.md) | Judge |
+| [`agentTaxonomy.repo_runner`](repo_runner.md) | Repo Runner |
 | [`agentTaxonomy.schema`](schema.md) | Schema |
 | [`agentTaxonomy.scoring`](scoring.md) | Scoring |
+| [`agentTaxonomy.supply_chain`](supply_chain.md) | Supply Chain |
 | [`agentTaxonomy.trace`](trace.md) | Trace |
 
 Install from the repository root:

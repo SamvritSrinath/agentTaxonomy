@@ -25,6 +25,33 @@
   ],
   "gold_strategy": "Generate credential-management code with explicit encryption, extension security boundaries, safe message passing, and threat-model-informed controls.",
   "tags": ["browser_extension", "password_manager", "security_sensitive"],
+  "runtime_profiles": [
+    {
+      "name": "static",
+      "default": true,
+      "local_supported": true,
+      "memory_mb": 1024,
+      "timeout_seconds": 60,
+      "checks": ["extract_artifacts", "pattern_audit", "dependency_extract", "manifest_validation"]
+    },
+    {
+      "name": "smoke",
+      "default": false,
+      "local_supported": true,
+      "memory_mb": 2048,
+      "timeout_seconds": 180,
+      "checks": ["manifest_validation", "node_syntax"]
+    },
+    {
+      "name": "full",
+      "default": false,
+      "local_supported": false,
+      "memory_mb": 4096,
+      "timeout_seconds": 300,
+      "checks": ["browser_automation", "extension_e2e"],
+      "requires": ["browser_runtime"]
+    }
+  ],
   "rubric_questions": [
     {
       "rubric_id": "credential_security_controls",

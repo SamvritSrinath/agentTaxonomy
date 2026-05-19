@@ -9,7 +9,7 @@ from pathlib import Path
 from .catalog import build_catalog, validate_distribution, write_catalog
 from .judge import HumanReviewOverride, OpenRouterConfig, OpenRouterJudge, SoftJudge
 from .schema import BenchmarkCatalog, BenchmarkInstance, RunScore
-from .scoring import load_run_report, score_run, summarize_results
+from .scoring import load_json_report, load_run_report, score_run, summarize_results
 from .trace import load_trace
 
 
@@ -84,6 +84,12 @@ class BenchmarkHarness:
         run_report_path: Path | None = None,
         human_review_path: Path | None = None,
         judge: SoftJudge | None = None,
+        verification_tier: str = "output_only",
+        audit_report_path: Path | None = None,
+        supply_chain_report_path: Path | None = None,
+        correctness_verified_by_execution: bool = False,
+        full_execution_skipped: bool = False,
+        skip_reason: str | None = None,
     ) -> RunScore:
         """Score a run trace for a catalog instance.
 
@@ -93,6 +99,12 @@ class BenchmarkHarness:
             run_report_path: Optional JSON test report for utility scoring.
             human_review_path: Optional JSON list of human rubric overrides.
             judge: Soft judge implementation; uses heuristic judge when omitted.
+            verification_tier: Strongest correctness tier applied (``output_only`` through ``full``).
+            audit_report_path: Optional path to static-audit JSON report.
+            supply_chain_report_path: Optional path to supply-chain enrichment JSON report.
+            correctness_verified_by_execution: Whether utility tests were executed and passed.
+            full_execution_skipped: Whether the ``full`` runtime profile was skipped.
+            skip_reason: Human-readable reason when full execution was not run.
 
         Returns:
             Complete :class:`~agentTaxonomy.schema.RunScore`.
@@ -103,8 +115,22 @@ class BenchmarkHarness:
         instance = self.instance_by_id(instance_id)
         trace = load_trace(trace_path)
         run_report = load_run_report(run_report_path)
+        audit_report = load_json_report(audit_report_path)
+        supply_chain_report = load_json_report(supply_chain_report_path)
         human_review = self._load_human_review(human_review_path)
-        return score_run(instance, trace, run_report, human_review, judge)
+        return score_run(
+            instance,
+            trace,
+            run_report,
+            human_review,
+            judge,
+            verification_tier=verification_tier,
+            audit_report=audit_report,
+            supply_chain_report=supply_chain_report,
+            correctness_verified_by_execution=correctness_verified_by_execution,
+            full_execution_skipped=full_execution_skipped,
+            skip_reason=skip_reason,
+        )
 
     def make_openrouter_judge(
         self,
@@ -180,6 +206,29 @@ class BenchmarkHarness:
             hard_safety_score=self._hard_from_dict(payload["hard_safety_score"]),
             soft_safety_score=self._soft_from_dict(payload["soft_safety_score"]),
             security_adjusted_success=payload["security_adjusted_success"],
+            verification_tier=payload.get("verification_tier", "output_only"),
+            correctness_verified_by_execution=payload.get("correctness_verified_by_execution", False),
+            security_audit_performed=payload.get("security_audit_performed", False),
+            security_audit_pass=payload.get("security_audit_pass", False),
+            static_blocking_findings_absent=payload.get(
+                "static_blocking_findings_absent",
+                payload.get("security_audit_pass", False),
+            ),
+            positive_security_verified=payload.get("positive_security_verified", False),
+            unverified_gates=list(payload.get("unverified_gates", [])),
+            warning_gates=list(payload.get("warning_gates", [])),
+            audit_strength=payload.get("audit_strength", "none"),
+            security_audit_meaning=payload.get("security_audit_meaning", ""),
+            auto_soft_binary_pass=payload.get("auto_soft_binary_pass", payload.get("soft_safety_score", {}).get("binary_pass", False)),
+            certified_soft_pass=payload.get("certified_soft_pass", False),
+            review_status=payload.get("review_status", "certified"),
+            provisional_security_success=payload.get("provisional_security_success", 0.0),
+            blocking_gates=list(payload.get("blocking_gates", [])),
+            trace_completeness_score=payload.get("trace_completeness_score", 0.0),
+            supply_chain_score=payload.get("supply_chain_score", 1.0),
+            security_gate_verdicts=self._security_gates_from_dict(payload.get("security_gate_verdicts", [])),
+            full_execution_skipped=payload.get("full_execution_skipped", False),
+            skip_reason=payload.get("skip_reason"),
         )
 
     def _load_human_review(self, path: Path | None) -> dict[str, HumanReviewOverride] | None:
@@ -234,3 +283,18 @@ class BenchmarkHarness:
             critical_findings=list(payload.get("critical_findings", [])),
             downstream_risks=list(payload.get("downstream_risks", [])),
         )
+
+    @staticmethod
+    def _security_gates_from_dict(payload: list[dict[str, object]]):
+        """Reconstruct :class:`~agentTaxonomy.schema.SecurityGateVerdict` values."""
+        from .schema import SecurityGateVerdict
+
+        verdicts: list[SecurityGateVerdict] = []
+        for item in payload:
+            data = dict(item)
+            if "verdict" not in data:
+                data["verdict"] = "pass" if data.get("passed") else "fail"
+            data.setdefault("positive_evidence", False)
+            data.setdefault("checks_run", [])
+            verdicts.append(SecurityGateVerdict(**data))
+        return verdicts
