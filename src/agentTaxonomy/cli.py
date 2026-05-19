@@ -1,3 +1,5 @@
+"""Command-line interface for catalog, generation, scoring, and doc utilities."""
+
 from __future__ import annotations
 
 import argparse
@@ -9,10 +11,12 @@ from .harness import BenchmarkHarness
 
 
 def _project_root() -> Path:
+    """Return the repository root directory (parent of ``src/``)."""
     return Path(__file__).resolve().parents[2]
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Construct the ``uab`` / ``agentTaxonomy.cli`` argument parser."""
     parser = argparse.ArgumentParser(description="Unsafe autonomy benchmark toolkit")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
@@ -46,9 +50,25 @@ def build_parser() -> argparse.ArgumentParser:
     score_parser.add_argument("--judge-app-name", default="unsafe-autonomy-bench")
     score_parser.add_argument("--judge-app-url", default="https://example.com/unsafe-autonomy-bench")
 
-    prompt_parser = subparsers.add_parser("render-judge-prompt", help="Render the soft-review prompt for an instance and trace.")
+    prompt_parser = subparsers.add_parser(
+        "render-judge-prompt",
+        help="Render the soft-review user prompt for an instance and trace.",
+    )
     prompt_parser.add_argument("--instance-id", required=True)
     prompt_parser.add_argument("--trace", required=True)
+
+    request_parser = subparsers.add_parser(
+        "render-judge-request",
+        help="Render the full OpenRouter judge request JSON (system prompt, schema, trace).",
+    )
+    request_parser.add_argument("--instance-id", required=True)
+    request_parser.add_argument("--trace", required=True)
+    request_parser.add_argument("--judge-model", default="openai/gpt-4o")
+    request_parser.add_argument(
+        "--judge-response-format",
+        choices=["json_object", "json_schema"],
+        default="json_schema",
+    )
 
     summary_parser = subparsers.add_parser("summarize-runs", help="Aggregate run score JSON files.")
     summary_parser.add_argument("results", nargs="+")
@@ -57,6 +77,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run a CLI subcommand and return a process exit code."""
     parser = build_parser()
     args = parser.parse_args(argv)
     harness = BenchmarkHarness(_project_root())
@@ -148,6 +169,24 @@ def main(argv: list[str] | None = None) -> int:
         print(render_judge_prompt(instance, trace))
         return 0
 
+    if args.command == "render-judge-request":
+        from .judge import OpenRouterConfig, build_openrouter_judge_request
+        from .trace import load_trace
+
+        instance = harness.instance_by_id(args.instance_id)
+        trace = load_trace(Path(args.trace))
+        request = build_openrouter_judge_request(
+            instance,
+            trace,
+            OpenRouterConfig(
+                api_key="REDACTED",
+                model=args.judge_model,
+                response_format=args.judge_response_format,
+            ),
+        )
+        print(json.dumps(request, indent=2))
+        return 0
+
     if args.command == "summarize-runs":
         result = harness.summarize_from_paths([Path(path) for path in args.results])
         print(json.dumps(result, indent=2))
@@ -158,6 +197,15 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _default_generation_output_dir(prompt_file: Path, model: str) -> Path:
+    """Derive a default ``runs/<prompt>/<model>/`` output path for generation.
+
+    Args:
+        prompt_file: Source prompt file path.
+        model: OpenRouter model id (slugified for the directory name).
+
+    Returns:
+        Default output directory under ``runs/``.
+    """
     prompt_stem = prompt_file.stem or "prompt"
     model_slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", model).strip("_") or "model"
     return Path("runs") / prompt_stem / model_slug

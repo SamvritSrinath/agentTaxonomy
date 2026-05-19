@@ -1,3 +1,5 @@
+"""OpenRouter agent generation with request/response artifacts and trace recording."""
+
 from __future__ import annotations
 
 import json
@@ -22,6 +24,19 @@ DEFAULT_SYSTEM_PROMPT = (
 
 @dataclass(frozen=True)
 class OpenRouterGenerationConfig:
+    """Connection and sampling parameters for OpenRouter agent generation.
+
+    Attributes:
+        api_key: OpenRouter API bearer token.
+        model: Model identifier (for example ``moonshotai/kimi-k2.5``).
+        api_base: Chat completions endpoint URL.
+        app_name: Application title sent in headers.
+        app_url: HTTP referer sent in headers.
+        temperature: Sampling temperature for generation.
+        max_tokens: Maximum tokens in the completion.
+        timeout_seconds: HTTP request timeout.
+    """
+
     api_key: str
     model: str
     api_base: str = "https://openrouter.ai/api/v1/chat/completions"
@@ -34,6 +49,19 @@ class OpenRouterGenerationConfig:
 
 @dataclass(frozen=True)
 class GenerationResult:
+    """Paths and metadata produced by a single :func:`generate_run` invocation.
+
+    Attributes:
+        model: Model id used for generation.
+        prompt_file: Absolute path to the prompt file.
+        output_dir: Directory containing artifacts and trace.
+        request_path: Path to redacted ``request.json``.
+        raw_response_path: Path to ``raw_response.json``.
+        agent_output_path: Path to ``agent_output.md``.
+        trace_path: Path to ``trace.jsonl``.
+        content: Extracted assistant message text.
+    """
+
     model: str
     prompt_file: str
     output_dir: str
@@ -45,14 +73,37 @@ class GenerationResult:
 
 
 class OpenRouterGenerator:
+    """Thin client for OpenRouter chat-completions agent generation."""
+
     def __init__(self, config: OpenRouterGenerationConfig) -> None:
+        """Store generation configuration.
+
+        Args:
+            config: OpenRouter connection and sampling settings.
+        """
         self.config = config
 
     def generate(self, prompt: str, system_prompt: str = DEFAULT_SYSTEM_PROMPT) -> dict[str, Any]:
+        """Send a prompt to OpenRouter and return the raw JSON response.
+
+        Args:
+            prompt: User-turn task prompt.
+            system_prompt: System-turn instruction. Defaults to :data:`DEFAULT_SYSTEM_PROMPT`.
+
+        Returns:
+            Parsed OpenRouter API response payload.
+
+        Raises:
+            RuntimeError: On HTTP or network failures.
+
+        Use when:
+            Low-level access to the API; prefer :func:`generate_run` for full artifact capture.
+        """
         request_body = self._build_request(prompt, system_prompt)
         return self._send_request(request_body)
 
     def _build_request(self, prompt: str, system_prompt: str) -> dict[str, Any]:
+        """Build the chat-completions request body."""
         return {
             "model": self.config.model,
             "temperature": self.config.temperature,
@@ -64,6 +115,7 @@ class OpenRouterGenerator:
         }
 
     def _send_request(self, body: dict[str, Any]) -> dict[str, Any]:
+        """POST the request body to OpenRouter and parse the JSON response."""
         data = json.dumps(body).encode("utf-8")
         request = urllib.request.Request(
             self.config.api_base,
@@ -97,6 +149,27 @@ def config_from_env(
     max_tokens: int = 8000,
     timeout_seconds: float = 120.0,
 ) -> OpenRouterGenerationConfig:
+    """Build generation config from explicit arguments and environment variables.
+
+    Args:
+        model: OpenRouter model id.
+        api_key: Optional API key; falls back to ``OPENROUTER_API_KEY``.
+        api_base: Chat completions endpoint.
+        app_name: Application name header value.
+        app_url: Referer header value.
+        temperature: Sampling temperature.
+        max_tokens: Maximum completion tokens.
+        timeout_seconds: HTTP timeout in seconds.
+
+    Returns:
+        Frozen :class:`OpenRouterGenerationConfig`.
+
+    Raises:
+        RuntimeError: If no API key is available.
+
+    Use when:
+        Wiring the CLI ``generate-run`` command or tests without constructing config manually.
+    """
     resolved_api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
     if not resolved_api_key:
         raise RuntimeError("OPENROUTER_API_KEY is not set and no API key was provided.")
@@ -113,6 +186,20 @@ def config_from_env(
 
 
 def extract_message_content(response_payload: dict[str, Any]) -> str:
+    """Extract assistant text from an OpenRouter chat-completions response.
+
+    Args:
+        response_payload: Parsed JSON body from OpenRouter.
+
+    Returns:
+        Message content string (JSON-encoded if the content is structured).
+
+    Raises:
+        ValueError: If the expected ``choices[0].message.content`` path is missing.
+
+    Use when:
+        Parsing generation or judge responses after ``_send_request``.
+    """
     try:
         content = response_payload["choices"][0]["message"]["content"]
     except (KeyError, IndexError, TypeError) as exc:
@@ -131,6 +218,29 @@ def generate_run(
     instance_id: str | None = None,
     generator: OpenRouterGenerator | None = None,
 ) -> GenerationResult:
+    """Run agent generation end-to-end and persist reproducible artifacts.
+
+    Writes ``request.json``, ``raw_response.json``, ``agent_output.md``, and ``trace.jsonl``
+    under ``output_dir``.
+
+    Args:
+        prompt_file: Path to the agent-facing markdown prompt.
+        output_dir: Directory for run artifacts.
+        config: OpenRouter generation configuration.
+        system_prompt: System message prepended to the task.
+        instance_id: Optional catalog instance id recorded in trace metadata.
+        generator: Optional preconfigured :class:`OpenRouterGenerator`.
+
+    Returns:
+        :class:`GenerationResult` with output paths and message content.
+
+    Raises:
+        FileNotFoundError: If ``prompt_file`` does not exist.
+        RuntimeError: On OpenRouter HTTP failures.
+
+    Use when:
+        Running the CLI ``generate-run`` command or reproducing benchmark agent outputs.
+    """
     prompt_path = prompt_file.resolve()
     if not prompt_path.exists():
         raise FileNotFoundError(f"Prompt file does not exist: {prompt_path}")
@@ -201,6 +311,7 @@ def generate_run(
 
 
 def _redact_messages(messages: object) -> object:
+    """Add content SHA-256 digests alongside message bodies for audit logs."""
     if not isinstance(messages, list):
         return messages
     redacted = []
@@ -214,4 +325,12 @@ def _redact_messages(messages: object) -> object:
 
 
 def result_to_dict(result: GenerationResult) -> dict[str, Any]:
+    """Serialize a :class:`GenerationResult` to a JSON-compatible dictionary.
+
+    Args:
+        result: Generation result to serialize.
+
+    Returns:
+        Plain dict suitable for ``json.dumps``.
+    """
     return asdict(result)

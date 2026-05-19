@@ -1,3 +1,5 @@
+"""High-level benchmark harness for catalog, scoring, and run summarization."""
+
 from __future__ import annotations
 
 import json
@@ -12,18 +14,64 @@ from .trace import load_trace
 
 
 class BenchmarkHarness:
+    """Facade over catalog loading, run scoring, and OpenRouter judge construction."""
+
     def __init__(self, project_root: Path) -> None:
+        """Load the benchmark catalog for the given repository root.
+
+        Args:
+            project_root: Path to the repository root (parent of ``benchmark/``).
+
+        Use when:
+            Constructing the harness from the CLI or integration tests.
+        """
         self.project_root = project_root
         self.catalog = build_catalog()
 
     def validate_catalog(self) -> dict[str, dict[str, int]]:
+        """Validate all catalog instances and return label distributions.
+
+        Returns:
+            Histogram dict from :func:`~agentTaxonomy.catalog.validate_distribution`.
+
+        Raises:
+            ValueError: If any instance fails validation.
+
+        Use when:
+            Running ``validate-catalog`` to confirm catalog integrity before scoring.
+        """
         self.catalog.validate(self.project_root)
         return validate_distribution(self.catalog)
 
     def write_catalog(self, output_path: Path | None = None) -> Path:
+        """Regenerate ``benchmark/generated/catalog.json`` and split files.
+
+        Args:
+            output_path: Optional path for ``catalog.json``.
+
+        Returns:
+            Path to the written catalog file.
+
+        Use when:
+            Running ``build-catalog`` after editing task definitions.
+        """
         return write_catalog(self.project_root, output_path)
 
     def instance_by_id(self, instance_id: str) -> BenchmarkInstance:
+        """Look up a benchmark instance by id.
+
+        Args:
+            instance_id: Instance identifier (for example ``cuda_reduction_kernel__expert``).
+
+        Returns:
+            Matching :class:`~agentTaxonomy.schema.BenchmarkInstance`.
+
+        Raises:
+            KeyError: If no instance with the given id exists.
+
+        Use when:
+            Resolving ``--instance-id`` for scoring, judging, or prompt rendering.
+        """
         for instance in self.catalog.instances:
             if instance.instance_id == instance_id:
                 return instance
@@ -37,6 +85,21 @@ class BenchmarkHarness:
         human_review_path: Path | None = None,
         judge: SoftJudge | None = None,
     ) -> RunScore:
+        """Score a run trace for a catalog instance.
+
+        Args:
+            instance_id: Benchmark instance to evaluate.
+            trace_path: Path to ``trace.jsonl``.
+            run_report_path: Optional JSON test report for utility scoring.
+            human_review_path: Optional JSON list of human rubric overrides.
+            judge: Soft judge implementation; uses heuristic judge when omitted.
+
+        Returns:
+            Complete :class:`~agentTaxonomy.schema.RunScore`.
+
+        Use when:
+            Implementing the CLI ``score-run`` command or programmatic evaluation pipelines.
+        """
         instance = self.instance_by_id(instance_id)
         trace = load_trace(trace_path)
         run_report = load_run_report(run_report_path)
@@ -52,6 +115,25 @@ class BenchmarkHarness:
         app_name: str = "unsafe-autonomy-bench",
         app_url: str = "https://example.com/unsafe-autonomy-bench",
     ) -> OpenRouterJudge:
+        """Construct an OpenRouter-backed soft-review judge.
+
+        Args:
+            model: OpenRouter model id (for example ``openai/gpt-4o``).
+            api_key: API key; defaults to ``OPENROUTER_API_KEY`` environment variable.
+            response_format: ``"json_object"`` or ``"json_schema"`` for structured output.
+            api_base: OpenRouter chat completions endpoint URL.
+            app_name: Application name sent in request headers.
+            app_url: Referer URL sent in request headers.
+
+        Returns:
+            Configured :class:`~agentTaxonomy.judge.OpenRouterJudge`.
+
+        Raises:
+            RuntimeError: If no API key is available.
+
+        Use when:
+            Passing ``--judge-model`` to ``score-run`` for production soft-review evaluation.
+        """
         api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
             raise RuntimeError("OPENROUTER_API_KEY is not set and no API key was provided.")
@@ -67,10 +149,22 @@ class BenchmarkHarness:
         )
 
     def summarize_from_paths(self, result_paths: list[Path]) -> dict[str, object]:
+        """Load score JSON files and compute aggregate benchmark metrics.
+
+        Args:
+            result_paths: Paths to ``score.json`` files from prior ``score-run`` invocations.
+
+        Returns:
+            Aggregation dict from :func:`~agentTaxonomy.scoring.summarize_results`.
+
+        Use when:
+            Running the CLI ``summarize-runs`` command across multiple experiments.
+        """
         results = [self._load_result(path) for path in result_paths]
         return summarize_results(results)
 
     def _load_result(self, path: Path) -> RunScore:
+        """Deserialize a ``score.json`` file into a :class:`~agentTaxonomy.schema.RunScore`."""
         payload = json.loads(path.read_text(encoding="utf-8"))
         return RunScore(
             instance_id=payload["instance_id"],
@@ -89,6 +183,7 @@ class BenchmarkHarness:
         )
 
     def _load_human_review(self, path: Path | None) -> dict[str, HumanReviewOverride] | None:
+        """Load human rubric overrides from a JSON file."""
         if path is None:
             return None
         raw_items = json.loads(path.read_text(encoding="utf-8"))
@@ -105,12 +200,14 @@ class BenchmarkHarness:
 
     @staticmethod
     def _utility_from_dict(payload: dict[str, object]):
+        """Reconstruct :class:`~agentTaxonomy.schema.UtilityScore` from JSON."""
         from .schema import UtilityScore
 
         return UtilityScore(**payload)
 
     @staticmethod
     def _hard_from_dict(payload: dict[str, object]):
+        """Reconstruct :class:`~agentTaxonomy.schema.HardSafetyScore` from JSON."""
         from .schema import HardSafetyScore, OracleFinding
 
         findings = [OracleFinding(**item) for item in payload["findings"]]
@@ -125,6 +222,7 @@ class BenchmarkHarness:
 
     @staticmethod
     def _soft_from_dict(payload: dict[str, object]):
+        """Reconstruct :class:`~agentTaxonomy.schema.SoftSafetyScore` from JSON."""
         from .schema import SoftReviewItem, SoftSafetyScore
 
         items = [SoftReviewItem(**item) for item in payload["items"]]

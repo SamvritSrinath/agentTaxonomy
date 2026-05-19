@@ -3,12 +3,15 @@ import unittest
 from agentTaxonomy.catalog import build_catalog
 from agentTaxonomy.judge import (
     HeuristicSoftJudge,
+    JUDGE_SYSTEM_PROMPT,
     OpenRouterConfig,
     OpenRouterJudge,
+    build_openrouter_judge_request,
     parse_judge_response_content,
     render_judge_prompt,
 )
-from agentTaxonomy.schema import EventType
+from agentTaxonomy.judge.scoring import aggregate_soft_safety_score
+from agentTaxonomy.schema import EventType, SoftReviewItem
 from agentTaxonomy.trace import new_event
 
 
@@ -30,32 +33,37 @@ class JudgeTests(unittest.TestCase):
             ),
         ]
 
-    def test_render_judge_prompt_is_adversarial_binary_and_actionable(self) -> None:
+    def test_render_judge_prompt_includes_rubric_and_domain_context(self) -> None:
         prompt = render_judge_prompt(self._instance(), self._trace())
         prompt_lower = prompt.lower()
 
-        self.assertIn("adversarial evaluation task", prompt_lower)
-        self.assertIn("fail closed", prompt_lower)
-        self.assertIn("binary pass or fail", prompt_lower)
-        self.assertIn("actionable remediation", prompt_lower)
+        self.assertIn("evaluate the coding-agent run", prompt_lower)
+        self.assertIn("pass_condition", prompt_lower)
+        self.assertIn("domain_failure_modes", prompt_lower)
         self.assertIn("supply chain", prompt_lower)
         self.assertIn("buffer overflow", prompt_lower)
-        self.assertIn("unauthorized actions", prompt_lower)
+        self.assertIn("unauthorized", prompt_lower)
         self.assertIn('"problem_class": "Cuda Reduction Kernel"', prompt)
         self.assertIn("out_of_bounds_global_memory_access", prompt)
-        self.assertIn("failure_modes", prompt)
-        self.assertNotIn("Return JSON with fields: score, needs_human_review, items[].", prompt)
+        self.assertIn("emit exactly these rubric_ids", prompt_lower)
 
-    def test_openrouter_json_schema_requires_actionable_binary_fields(self) -> None:
-        judge = OpenRouterJudge(OpenRouterConfig(api_key="test", model="openai/gpt-5.5", response_format="json_schema"))
-        request = judge._build_request(self._instance(), self._trace())
-        system_prompt = request["messages"][0]["content"]
-        response_format = request["response_format"]
-        schema = response_format["json_schema"]["schema"]
+    def test_judge_system_prompt_is_fail_closed_and_binary(self) -> None:
+        system_lower = JUDGE_SYSTEM_PROMPT.lower()
+        self.assertIn("fail closed", system_lower)
+        self.assertIn("binary", system_lower)
+        self.assertIn("do not reward effort", system_lower)
+
+    def test_openrouter_request_matches_prompt_modules(self) -> None:
+        instance = self._instance()
+        trace = self._trace()
+        config = OpenRouterConfig(api_key="test", model="openai/gpt-5.5", response_format="json_schema")
+        request = build_openrouter_judge_request(instance, trace, config)
+
+        self.assertEqual(request["messages"][0]["content"], JUDGE_SYSTEM_PROMPT)
+        self.assertEqual(request["messages"][1]["content"], render_judge_prompt(instance, trace))
+
+        schema = request["response_format"]["json_schema"]["schema"]
         item_schema = schema["properties"]["items"]["items"]
-
-        self.assertIn("adversarial security and utility evaluator", system_prompt)
-        self.assertIn("Do not praise effort", system_prompt)
         self.assertIn("binary_pass", schema["required"])
         self.assertIn("critical_findings", schema["required"])
         self.assertIn("downstream_risks", schema["required"])
@@ -63,6 +71,11 @@ class JudgeTests(unittest.TestCase):
         self.assertIn("evidence", item_schema["required"])
         self.assertIn("action", item_schema["required"])
         self.assertIn("failure_modes", item_schema["required"])
+
+    def test_openrouter_judge_build_request_alias(self) -> None:
+        judge = OpenRouterJudge(OpenRouterConfig(api_key="test", model="openai/gpt-5.5", response_format="json_schema"))
+        request = judge.build_request(self._instance(), self._trace())
+        self.assertIn("messages", request)
 
     def test_parse_judge_response_content_handles_fenced_json(self) -> None:
         payload = {
@@ -101,6 +114,27 @@ class JudgeTests(unittest.TestCase):
         }
         parsed = parse_judge_response_content(__import__("json").dumps(payload))
         self.assertTrue(parsed["binary_pass"])
+
+    def test_aggregate_recomputes_score_from_items(self) -> None:
+        items = [
+            SoftReviewItem(
+                rubric_id="a",
+                passed=True,
+                confidence=0.9,
+                rationale="ok",
+            ),
+            SoftReviewItem(
+                rubric_id="b",
+                passed=False,
+                confidence=0.9,
+                rationale="fail",
+                severity="high",
+                finding="bad",
+            ),
+        ]
+        score = aggregate_soft_safety_score(items)
+        self.assertAlmostEqual(score.score, 0.5)
+        self.assertFalse(score.binary_pass)
 
     def test_heuristic_judge_fails_closed_with_actionable_findings(self) -> None:
         score = HeuristicSoftJudge().evaluate(self._instance(), self._trace())

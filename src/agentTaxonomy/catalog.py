@@ -1,3 +1,5 @@
+"""Benchmark catalog construction from task definitions on disk."""
+
 from __future__ import annotations
 
 import json
@@ -78,10 +80,16 @@ DEFAULT_TEST_DISABLE_INDICATORS = [
 
 
 def build_catalog(project_root: Path | None = None) -> BenchmarkCatalog:
-    """Build the taxonomy catalog.
+    """Assemble the full benchmark catalog from on-disk task definitions.
 
-    New instances should be added through taxonomy task catalog entries rather
-    than hard-coded seed data.
+    Args:
+        project_root: Repository root. Defaults to two levels above this module.
+
+    Returns:
+        A validated-ready :class:`~agentTaxonomy.schema.BenchmarkCatalog`.
+
+    Use when:
+        Loading instances in the harness, or as the first step of ``build-catalog``.
     """
     project_root = project_root or Path(__file__).resolve().parents[2]
     task_root = project_root / "benchmark" / "task_catalog" / "subject_areas"
@@ -95,6 +103,17 @@ def build_catalog(project_root: Path | None = None) -> BenchmarkCatalog:
 
 
 def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
+    """Load generative-task instances from ``task.json`` files under ``task_root``.
+
+    Args:
+        task_root: Directory containing one folder per task (each with ``task.json``).
+
+    Returns:
+        Flat list of :class:`~agentTaxonomy.schema.BenchmarkInstance` objects, one per skill level.
+
+    Use when:
+        Implementing ``build_catalog`` or testing catalog expansion for new task sets.
+    """
     if not task_root.exists():
         return []
 
@@ -138,6 +157,18 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
 
 
 def _merge_level_metadata(raw_task: dict[str, object], level_name: str) -> dict[str, object]:
+    """Apply per-level overrides from ``task.json`` onto shared task metadata.
+
+    Args:
+        raw_task: Parsed ``task.json`` object.
+        level_name: Skill level key (``beginner``, ``intermediate``, or ``expert``).
+
+    Returns:
+        Merged metadata dict used to construct a :class:`~agentTaxonomy.schema.BenchmarkInstance`.
+
+    Use when:
+        Expanding a task into three skill-level instances inside ``build_generative_catalog``.
+    """
     merged = dict(raw_task)
     merged.pop("levels", None)
     merged.pop("level_overrides", None)
@@ -150,6 +181,14 @@ def _merge_level_metadata(raw_task: dict[str, object], level_name: str) -> dict[
 
 
 def _default_hard_safety_oracles() -> HardSafetyOracleSpec:
+    """Return the repository-default hard-safety oracle pattern lists.
+
+    Returns:
+        :class:`~agentTaxonomy.schema.HardSafetyOracleSpec` with shared destructive patterns.
+
+    Use when:
+        Constructing generative instances that do not define custom oracle specs.
+    """
     return HardSafetyOracleSpec(
         destructive_command_patterns=DEFAULT_DESTRUCTIVE_COMMAND_PATTERNS,
         destructive_sql_patterns=DEFAULT_DESTRUCTIVE_SQL_PATTERNS,
@@ -163,6 +202,17 @@ def _default_hard_safety_oracles() -> HardSafetyOracleSpec:
 
 
 def _soft_review_rubric(raw_task: dict[str, object]) -> SoftReviewRubric:
+    """Build the soft-review rubric for a task from defaults and ``rubric_questions``.
+
+    Args:
+        raw_task: Parsed ``task.json`` including optional ``rubric_questions``.
+
+    Returns:
+        :class:`~agentTaxonomy.schema.SoftReviewRubric` with standard and task-specific items.
+
+    Use when:
+        Materializing catalog instances during ``build_generative_catalog``.
+    """
     questions = [
         RubricQuestion(
             rubric_id="problem_classification",
@@ -209,6 +259,17 @@ def _soft_review_rubric(raw_task: dict[str, object]) -> SoftReviewRubric:
 
 
 def validate_distribution(catalog: BenchmarkCatalog) -> dict[str, dict[str, int]]:
+    """Compute label distribution histograms for catalog quality checks.
+
+    Args:
+        catalog: Catalog to summarize.
+
+    Returns:
+        Nested dict of count histograms (splits, skill levels, outcomes, etc.).
+
+    Use when:
+        Running ``validate-catalog`` or writing ``distribution.json``.
+    """
     split_counts = Counter(instance.split for instance in catalog.instances)
     visibility_counts = Counter(instance.visibility for instance in catalog.instances)
     mode_counts = Counter(instance.task_mode.value for instance in catalog.instances)
@@ -232,6 +293,21 @@ def validate_distribution(catalog: BenchmarkCatalog) -> dict[str, dict[str, int]
 
 
 def write_catalog(project_root: Path, output_path: Path | None = None) -> Path:
+    """Build, validate, and write the generated catalog and split artifacts.
+
+    Args:
+        project_root: Repository root containing ``benchmark/``.
+        output_path: Optional override for ``catalog.json`` destination.
+
+    Returns:
+        Path to the written ``catalog.json`` file.
+
+    Raises:
+        ValueError: If catalog validation fails.
+
+    Use when:
+        Running the CLI ``build-catalog`` command after editing task definitions.
+    """
     catalog = build_catalog(project_root)
     catalog.validate(project_root)
     if output_path is None:

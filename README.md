@@ -29,6 +29,12 @@ unsafe-autonomy-bench/
 
 ## Environment Setup
 
+Use [uv](https://docs.astral.sh/uv/) to install dependencies and run commands:
+
+```bash
+uv sync
+```
+
 The CLI reads `OPENROUTER_API_KEY` from the environment. It does not auto-load `.env` files on its own, so source the file yourself or use `direnv`.
 
 An example file is included at [.env.example](/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/.env.example:1).
@@ -43,7 +49,6 @@ set +a
 Recommended `.env`:
 
 ```bash
-PYTHONPATH=src
 OPENROUTER_API_KEY=your_openrouter_key_here
 PYTHONDONTWRITEBYTECODE=1
 ```
@@ -51,30 +56,29 @@ PYTHONDONTWRITEBYTECODE=1
 Notes:
 
 - `OPENROUTER_API_KEY` is the only variable the CLI reads directly.
-- `PYTHONPATH=src` is a local development convenience for `python3 -m agentTaxonomy.cli ...`.
-- `PYTHONDONTWRITEBYTECODE=1` is optional and just keeps `__pycache__` out of the repo while developing.
+- `PYTHONDONTWRITEBYTECODE=1` is optional and keeps `__pycache__` out of the repo while developing.
 
 ## Standard Workflow
 
-Use `python3 -m agentTaxonomy.cli ...` from the repo root. If you install the package in editable mode, the `uab` script from [pyproject.toml](/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/pyproject.toml:1) is also available.
+Use `uv run uab ...` from the repository root (or `uv run python -m agentTaxonomy.cli ...`).
 
 Build the generated catalog after any prompt or task metadata change:
 
 ```bash
-cd /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench
-PYTHONPATH=src python3 -m agentTaxonomy.cli build-catalog
+cd /<PATH_TO_PROJECT>/unsafe-autonomy-bench
+PYTHONPATH=src python -m agentTaxonomy.cli build-catalog
 ```
 
 Validate the catalog:
 
 ```bash
-PYTHONPATH=src python3 -m agentTaxonomy.cli validate-catalog
+uv run python -m agentTaxonomy.cli validate-catalog
 ```
 
 Run the test suite:
 
 ```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -p "test_*.py"
+PYTHONPATH=src python -m unittest discover -s tests -p "test_*.py"
 ```
 
 ## Adding Prompt Sets
@@ -122,10 +126,7 @@ Prompt authoring rules:
   "allowed_output_files": ["src/**", "tests/**", "README.md"],
   "language": "python",
   "frameworks": ["FastAPI"],
-  "domain_failure_modes": [
-    "sql_injection",
-    "unsafe_output_path_handling"
-  ],
+  "domain_failure_modes": ["sql_injection", "unsafe_output_path_handling"],
   "gold_strategy": "Short description of what a correct, safe solution should do.",
   "tags": ["api", "web"],
   "rubric_questions": [
@@ -189,7 +190,7 @@ Use `generate-run` to send a prompt file to an OpenRouter model and capture the 
 Example:
 
 ```bash
-PYTHONPATH=src python3 -m agentTaxonomy.cli generate-run \
+PYTHONPATH=src python -m agentTaxonomy.cli generate-run \
   --prompt-file benchmark/task_catalog/subject_areas/map_reduce_spark_log_analytics/levels/beginner.md \
   --model moonshotai/kimi-k2.5 \
   --output-dir runs/map_reduce_spark_log_analytics/beginner
@@ -198,7 +199,7 @@ PYTHONPATH=src python3 -m agentTaxonomy.cli generate-run \
 To run the same prompt with GPT-5.5 through OpenRouter:
 
 ```bash
-PYTHONPATH=src python3 -m agentTaxonomy.cli generate-run \
+PYTHONPATH=src python -m agentTaxonomy.cli generate-run \
   --prompt-file benchmark/task_catalog/subject_areas/map_reduce_spark_log_analytics/levels/beginner.md \
   --model openai/gpt-5.5 \
   --output-dir runs/map_reduce_spark_log_analytics/beginner_gpt55
@@ -233,7 +234,7 @@ For a generated run, the exact flow is:
 Minimal scoring command:
 
 ```bash
-PYTHONPATH=src python3 -m agentTaxonomy.cli score-run \
+PYTHONPATH=src python -m agentTaxonomy.cli score-run \
   --instance-id map_reduce_spark_log_analytics__beginner \
   --trace runs/map_reduce_spark_log_analytics/beginner/trace.jsonl \
   --output runs/map_reduce_spark_log_analytics/beginner/score.json
@@ -242,7 +243,7 @@ PYTHONPATH=src python3 -m agentTaxonomy.cli score-run \
 Recommended scoring command with the adversarial OpenRouter judge:
 
 ```bash
-PYTHONPATH=src python3 -m agentTaxonomy.cli score-run \
+PYTHONPATH=src python -m agentTaxonomy.cli score-run \
   --instance-id map_reduce_spark_log_analytics__beginner \
   --trace runs/map_reduce_spark_log_analytics/beginner/trace.jsonl \
   --judge-model openai/gpt-5.5 \
@@ -250,18 +251,38 @@ PYTHONPATH=src python3 -m agentTaxonomy.cli score-run \
   --output runs/map_reduce_spark_log_analytics/beginner/score.json
 ```
 
-If you want to inspect the exact judge prompt before scoring:
+If you want to inspect the judge user prompt before scoring:
 
 ```bash
-PYTHONPATH=src python3 -m agentTaxonomy.cli render-judge-prompt \
+PYTHONPATH=src python -m agentTaxonomy.cli render-judge-prompt \
   --instance-id map_reduce_spark_log_analytics__beginner \
   --trace runs/map_reduce_spark_log_analytics/beginner/trace.jsonl
 ```
 
+For the full OpenRouter payload (system prompt, JSON schema, and user prompt):
+
+```bash
+PYTHONPATH=src python -m agentTaxonomy.cli render-judge-request \
+  --instance-id map_reduce_spark_log_analytics__beginner \
+  --trace runs/map_reduce_spark_log_analytics/beginner/trace.jsonl \
+  --judge-model openai/gpt-5.5 \
+  --judge-response-format json_schema
+```
+
+Build the documentation site (MkDocs Material; autogenerates `docs/api/` stubs):
+
+```bash
+uv sync --group docs
+python scripts/build_docs.py
+python scripts/build_docs.py --serve   # http://127.0.0.1:8000
+```
+
+See [docs/README.md](docs/README.md).
+
 If you want to summarize one or more completed scores:
 
 ```bash
-PYTHONPATH=src python3 -m agentTaxonomy.cli summarize-runs \
+PYTHONPATH=src python -m agentTaxonomy.cli summarize-runs \
   runs/map_reduce_spark_log_analytics/beginner/score.json
 ```
 

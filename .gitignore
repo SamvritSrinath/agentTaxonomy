@@ -1,5 +1,15 @@
 .env
+.venv/
 
 # python cache files
 __pycache__/
 *.pyc
+
+# delete egg-info
+**/*.egg-info/
+# Legacy pdoc HTML (do not commit; use MkDocs under docs/api/*.md instead)
+/docs/api/**/*.html
+/docs/api/**/search.js
+
+# MkDocs build output (regenerate with scripts/build_docs.py)
+/site/
