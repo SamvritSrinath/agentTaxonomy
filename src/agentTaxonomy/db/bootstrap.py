@@ -124,35 +124,16 @@ def _phase(job_id: str | None, database_url: str | None, phase: str) -> None:
         update_job(session, job_id, phase=phase)
 
 
-def _find_task_prompt_variant(
-    session: Session,
-    *,
-    instance_id: str,
-    skill_level: str,
-) -> PromptVariantRecord | None:
-    """Return the bootstrap-owned prompt row, including legacy duplicate names."""
-    canonical = session.scalar(
-        select(PromptVariantRecord).where(
-            PromptVariantRecord.instance_id == instance_id,
-            PromptVariantRecord.variant_name == "canonical",
-        )
-    )
-    if canonical is not None:
-        return canonical
-    legacy_names = (
-        f"{instance_id}__{skill_level}",
-        instance_id,
-    )
-    for legacy_name in legacy_names:
-        legacy = session.scalar(
-            select(PromptVariantRecord).where(
-                PromptVariantRecord.instance_id == instance_id,
-                PromptVariantRecord.variant_name == legacy_name,
-            )
-        )
-        if legacy is not None:
-            return legacy
-    return None
+def _is_catalog_shadow_prompt(row: PromptVariantRecord) -> bool:
+    """True when a DB prompt row duplicates the on-disk catalog source."""
+    if row.variant_name == "canonical":
+        return True
+    if row.variant_name == row.instance_id:
+        return True
+    skill = row.skill_level or ""
+    if skill and row.variant_name == f"{row.instance_id}__{skill}":
+        return True
+    return False
 
 
 def _bootstrap_catalog(catalog_path: Path, *, database_url: str | None) -> StepCounts:
@@ -180,51 +161,15 @@ def _bootstrap_catalog(catalog_path: Path, *, database_url: str | None) -> StepC
 
 
 def _bootstrap_task_prompts(*, database_url: str | None) -> StepCounts:
+    """Remove DB rows that duplicate on-disk catalog prompts (experiments use custom variant names)."""
     counts = StepCounts()
-    catalog = build_catalog()
     with session_scope(database_url) as session:
-        for item in catalog.instances:
-            if not item.agent_prompt_path:
+        rows = list(session.scalars(select(PromptVariantRecord)).all())
+        for row in rows:
+            if not _is_catalog_shadow_prompt(row):
                 continue
-            relative_path = Path(item.agent_prompt_path)
-            prompt_path = (project_root() / relative_path).resolve()
-            if not prompt_path.exists():
-                continue
-            prompt_text = prompt_path.read_text(encoding="utf-8")
-            source_hash = sha256_file(prompt_path)
-            skill_level = item.skill_level or prompt_path.stem
-            variant_name = "canonical"
-            existing = _find_task_prompt_variant(
-                session,
-                instance_id=item.instance_id,
-                skill_level=skill_level,
-            )
-            if existing is not None and existing.variant_name != variant_name:
-                existing.variant_name = variant_name
-            if existing is None:
-                session.add(
-                    PromptVariantRecord(
-                        instance_id=item.instance_id,
-                        variant_name=variant_name,
-                        skill_level=skill_level,
-                        prompt_style="canonical",
-                        prompt_text=prompt_text,
-                        source_file=str(relative_path),
-                        source_file_hash=source_hash,
-                        metadata_json={"prompt_path": str(relative_path)},
-                    )
-                )
-                counts.ingested += 1
-            elif existing.source_file_hash == source_hash:
-                counts.noop += 1
-            else:
-                if prompt_path.exists() and sha256_file(prompt_path) != existing.source_file_hash:
-                    counts.stale += 1
-                    counts.stale_items.append(variant_name)
-                existing.prompt_text = prompt_text
-                existing.source_file_hash = source_hash
-                existing.source_file = str(relative_path)
-                counts.updated += 1
+            session.delete(row)
+            counts.updated += 1
     return counts
 
 

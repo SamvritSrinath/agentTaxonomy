@@ -1,3 +1,5 @@
+import { Spinner } from "./Spinner";
+
 export interface LoadingNoticeProps {
   loading: boolean;
   error?: string | null;
@@ -9,7 +11,11 @@ export function LoadingNotice({ loading, error, label = "Loading…" }: LoadingN
     return <p className="error">{error}</p>;
   }
   if (loading) {
-    return <p className="loading-notice">{label}</p>;
+    return (
+      <p className="loading-notice">
+        <Spinner label={label} size="sm" />
+      </p>
+    );
   }
   return null;
 }

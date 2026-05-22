@@ -66,6 +66,16 @@ class WorkbenchApiTests(unittest.TestCase):
             self.assertEqual(scores.status_code, 200)
             self.assertIn("canonical_evaluation_id", scores.json())
 
+            judge = client.post(
+                f"/api/runs/{result.record_id}/judge-pipeline",
+                json={"evidence_condition": "code_only", "verification_tier": "static"},
+            )
+            self.assertEqual(judge.status_code, 200)
+            self.assertIn("job_id", judge.json())
+            job = client.get(f"/api/jobs/{judge.json()['job_id']}")
+            self.assertEqual(job.status_code, 200)
+            self.assertEqual(job.json()["metadata_json"]["evidence_condition"], "code_only")
+
             instance = client.get("/api/instances/map_reduce_spark_log_analytics__beginner")
             self.assertEqual(instance.status_code, 200)
             self.assertIn("agent_prompt", instance.json())

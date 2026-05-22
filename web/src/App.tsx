@@ -5,7 +5,6 @@ import { ExportsPage } from "./pages/Exports";
 import { InstanceDetailPage } from "./pages/InstanceDetail";
 import { InstancesPage } from "./pages/Instances";
 import { JobsPage } from "./pages/Jobs";
-import { PromptDetailPage } from "./pages/PromptDetail";
 import { PromptsPage } from "./pages/Prompts";
 import { RunDetailRoute } from "./pages/RunDetail";
 import { RunsPage } from "./pages/Runs";
@@ -19,7 +18,7 @@ export function App() {
         <Route path="runs" element={<RunsPage />} />
         <Route path="runs/:runId" element={<RunDetailRoute />} />
         <Route path="prompts" element={<PromptsPage />} />
-        <Route path="prompts/:promptId" element={<PromptDetailPage />} />
+        <Route path="prompts/:promptId" element={<PromptsPage />} />
         <Route path="instances" element={<InstancesPage />} />
         <Route path="instances/:instanceId" element={<InstanceDetailPage />} />
         <Route path="jobs" element={<JobsPage />} />

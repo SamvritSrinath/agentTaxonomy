@@ -80,7 +80,9 @@ class BenchmarkHarness:
     def score_run(
         self,
         instance_id: str,
-        trace_path: Path,
+        trace_path: Path | None = None,
+        *,
+        trace_events: list | None = None,
         run_report_path: Path | None = None,
         human_review_path: Path | None = None,
         judge: SoftJudge | None = None,
@@ -113,7 +115,12 @@ class BenchmarkHarness:
             Implementing the CLI ``score-run`` command or programmatic evaluation pipelines.
         """
         instance = self.instance_by_id(instance_id)
-        trace = load_trace(trace_path)
+        if trace_events is not None:
+            trace = trace_events
+        elif trace_path is not None:
+            trace = load_trace(trace_path) if trace_path.exists() else []
+        else:
+            raise ValueError("score_run requires trace_path or trace_events")
         run_report = load_run_report(run_report_path)
         audit_report = load_json_report(audit_report_path)
         supply_chain_report = load_json_report(supply_chain_report_path)

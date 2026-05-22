@@ -14,7 +14,14 @@ from agentTaxonomy.db.ingest import (
     sha256_text,
     upsert_artifact_revision,
 )
-from agentTaxonomy.db.models import ArtifactRecord, ArtifactVersionRecord, EvaluationRecord, FindingRecord, RunRecord
+from agentTaxonomy.db.models import (
+    ArtifactRecord,
+    ArtifactVersionRecord,
+    EvaluationRecord,
+    FindingRecord,
+    PromptVariantRecord,
+    RunRecord,
+)
 from agentTaxonomy.db.services import (
     assign_annotations,
     compute_annotation_agreement,
@@ -293,17 +300,27 @@ class WorkbenchDbTests(unittest.TestCase):
                 self.assertEqual(run.instance_id, "map_reduce_spark_log_analytics__beginner")
                 self.assertEqual(run.task_mode, "generative_task")
 
-    def test_bootstrap_task_prompt_variant_names(self) -> None:
+    def test_bootstrap_prunes_catalog_shadow_prompts(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             database_url = f"sqlite:///{Path(tmp_dir) / 'workbench.sqlite'}"
             migrate_database(database_url)
+            ingest_catalog(PROJECT_ROOT / "benchmark" / "generated" / "catalog.json", database_url=database_url)
+            with session_scope(database_url) as session:
+                session.add(
+                    PromptVariantRecord(
+                        instance_id="map_reduce_spark_log_analytics__beginner",
+                        variant_name="canonical",
+                        skill_level="beginner",
+                        prompt_style="canonical",
+                        prompt_text="shadow",
+                    )
+                )
             run_bootstrap(database_url=database_url)
             with session_scope(database_url) as session:
                 rows = session.scalars(select(PromptVariantRecord)).all()
-            self.assertGreater(len(rows), 0)
             for row in rows:
-                self.assertEqual(row.variant_name, "canonical")
-                self.assertNotIn(f"{row.instance_id}__", row.variant_name)
+                self.assertNotEqual(row.variant_name, "canonical")
+                self.assertNotEqual(row.variant_name, row.instance_id)
 
     def test_prompt_services(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

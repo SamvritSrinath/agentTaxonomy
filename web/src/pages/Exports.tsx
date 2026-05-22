@@ -2,10 +2,26 @@ import { useState } from "react";
 import { exportTable } from "../api/client";
 
 const EXPORTS = [
-  { name: "runs", label: "Runs CSV" },
-  { name: "findings", label: "Findings CSV" },
-  { name: "evaluations", label: "Evaluations CSV" },
-  { name: "wide", label: "Analysis wide CSV" }
+  {
+    name: "runs",
+    label: "Runs CSV",
+    description: "One row per indexed run (slug, instance, model, status, paths)."
+  },
+  {
+    name: "findings",
+    label: "Findings CSV",
+    description: "Security and quality findings linked to runs and evaluations."
+  },
+  {
+    name: "evaluations",
+    label: "Evaluations CSV",
+    description: "Evaluation records (outcomes, evidence conditions, adjudication fields)."
+  },
+  {
+    name: "wide",
+    label: "Analysis wide CSV",
+    description: "Joined run + evaluation + score + instance columns for notebooks (written as analysis.csv)."
+  }
 ] as const;
 
 export function ExportsPage() {
@@ -26,8 +42,18 @@ export function ExportsPage() {
     <div className="page exports-page">
       <header className="page-header">
         <h2>Exports</h2>
-        <p>Generate analysis CSV files on the server.</p>
+        <p>
+          Four separate CSV exports (not a single zip). Each button writes a file under{" "}
+          <code>data_dir/exports/</code> on the server and returns the path below.
+        </p>
       </header>
+      <ul className="export-descriptions">
+        {EXPORTS.map((item) => (
+          <li key={item.name}>
+            <strong>{item.label}</strong> — {item.description}
+          </li>
+        ))}
+      </ul>
       <div className="toolbar-actions">
         {EXPORTS.map((item) => (
           <button key={item.name} type="button" onClick={() => void runExport(item.name)}>

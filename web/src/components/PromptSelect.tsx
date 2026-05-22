@@ -1,4 +1,8 @@
 import type { PromptVariant } from "../api/types";
+import { promptDisplayLabel, sortPromptVariants } from "../utils/promptLabels";
+
+const CATALOG_PROMPT_VALUE = "";
+import { Combobox } from "./Combobox";
 
 export interface PromptSelectProps {
   id?: string;
@@ -7,30 +11,45 @@ export interface PromptSelectProps {
   value: string;
   onChange: (promptId: string) => void;
   disabled?: boolean;
+  /** Skill level for catalog default label, e.g. "beginner (catalog)". */
+  catalogSkillLevel?: string | null;
 }
 
-function promptLabel(prompt: PromptVariant): string {
-  const variant = prompt.variant_name === "canonical" ? prompt.skill_level : prompt.variant_name;
-  return `${variant} (${prompt.id.slice(0, 8)}…)`;
-}
+export function PromptSelect({
+  id,
+  label,
+  prompts,
+  value,
+  onChange,
+  disabled = false,
+  catalogSkillLevel = null
+}: PromptSelectProps) {
+  const sorted = sortPromptVariants(prompts);
+  const catalogLabel = catalogSkillLevel ? `${catalogSkillLevel} (catalog)` : "Catalog prompt";
+  const options = [
+    { value: CATALOG_PROMPT_VALUE, label: catalogLabel },
+    ...sorted.map((prompt) => ({
+      value: prompt.id,
+      label: promptDisplayLabel(prompt)
+    }))
+  ];
 
-export function PromptSelect({ id, label, prompts, value, onChange, disabled = false }: PromptSelectProps) {
   return (
-    <label htmlFor={id}>
-      {label}
-      <select
-        id={id}
-        value={value}
-        disabled={disabled || prompts.length === 0}
-        onChange={(event) => onChange(event.target.value)}
-      >
-        {prompts.length === 0 ? <option value="">No prompts indexed — run bootstrap</option> : null}
-        {prompts.map((prompt) => (
-          <option key={prompt.id} value={prompt.id}>
-            {promptLabel(prompt)}
-          </option>
-        ))}
-      </select>
-    </label>
+    <Combobox
+      id={id}
+      label={label}
+      value={value}
+      options={options}
+      onChange={onChange}
+      disabled={disabled}
+      placeholder="Select prompt variant…"
+      emptyMessage="No prompts match"
+    />
   );
+}
+
+/** Resolve display label for a prompt id. */
+export function promptLabelForId(prompts: PromptVariant[], promptId: string): string | null {
+  const prompt = prompts.find((p) => p.id === promptId);
+  return prompt ? promptDisplayLabel(prompt) : null;
 }

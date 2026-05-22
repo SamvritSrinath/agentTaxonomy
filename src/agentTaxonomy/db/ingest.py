@@ -220,16 +220,19 @@ def rescore_run(
         if run is None:
             raise KeyError(run_id)
         run_dir = Path(run.run_dir)
+        named_score = run_dir / f"score_{evidence_condition}.json"
+        score_file = named_score if named_score.exists() else run_dir / "score.json"
         evaluation = _ingest_evaluation_and_score(
             session,
             run,
             run_dir,
             run.source_file_hash or hash_source_path(run_dir),
             _numeric_ingest_version(run),
+            score_file=score_file,
             evidence_condition=evidence_condition,
         )
         if evaluation is None:
-            raise FileNotFoundError(f"score.json not found in run directory: {run_dir}")
+            raise FileNotFoundError(f"no score file for {evidence_condition} in run directory: {run_dir}")
         return IngestResult(evaluation.id, "created", _numeric_ingest_version(run), run.source_file_hash or "")
 
 
@@ -367,9 +370,30 @@ def _ingest_run_children(
     """Index artifacts, trace, score, and findings for one run row."""
     _ingest_artifacts(session, run, run_dir, artifact_root, ingest_version)
     _ingest_trace(session, run, run_dir, source_hash, ingest_version)
-    evaluation = _ingest_evaluation_and_score(session, run, run_dir, source_hash, ingest_version)
-    if evaluation is not None:
-        _ingest_findings(session, run, evaluation, run_dir, source_hash, ingest_version)
+    score_files = sorted(run_dir.glob("score_code_*.json"))
+    if not score_files and (run_dir / "score.json").exists():
+        score_files = [run_dir / "score.json"]
+    if score_files:
+        for score_file in score_files:
+            if score_file.name == "score.json":
+                condition = None
+            else:
+                condition = score_file.stem.removeprefix("score_")
+            evaluation = _ingest_evaluation_and_score(
+                session,
+                run,
+                run_dir,
+                source_hash,
+                ingest_version,
+                score_file=score_file,
+                evidence_condition=condition or None,
+            )
+            if evaluation is not None:
+                _ingest_findings(session, run, evaluation, run_dir, source_hash, ingest_version)
+    else:
+        evaluation = _ingest_evaluation_and_score(session, run, run_dir, source_hash, ingest_version)
+        if evaluation is not None:
+            _ingest_findings(session, run, evaluation, run_dir, source_hash, ingest_version)
     _ingest_sandbox_profile(session, run, run_dir)
 
 
@@ -395,16 +419,22 @@ def _ingest_evaluation_and_score(
     source_hash: str,
     ingest_version: int,
     *,
+    score_file: Path | None = None,
     evidence_condition: str | None = None,
 ) -> EvaluationRecord | None:
-    score = _load_json(run_dir / "score.json")
+    score_path = score_file or (run_dir / "score.json")
+    score = _load_json(score_path)
     if not score:
         return None
     request = _load_json(run_dir / "request.json")
     audit_exists = (run_dir / "audit.json").exists()
     supply_exists = (run_dir / "supply_chain.json").exists()
     trace_exists = (run_dir / "trace.jsonl").exists()
-    condition = evidence_condition or ("code_plus_trace" if trace_exists else "code_only")
+    condition = (
+        evidence_condition
+        or score.get("evidence_condition")
+        or ("code_plus_trace" if trace_exists else "code_only")
+    )
     include_trace = condition == "code_plus_trace" and trace_exists
     include_audit = condition == "code_plus_trace" and audit_exists
     include_supply_chain = condition == "code_plus_trace" and supply_exists
@@ -436,8 +466,8 @@ def _ingest_evaluation_and_score(
         dominant_failure_category=_dominant_failure(score),
         security_relevant_even_if_correct=bool(score.get("utility_score", {}).get("solved", False) and score.get("security_adjusted_success", 0.0) == 0.0),
         model_introduced_vulnerability=None,
-        source_file=str(run_dir / "score.json"),
-        source_file_hash=sha256_file(run_dir / "score.json"),
+        source_file=str(score_path),
+        source_file_hash=sha256_file(score_path),
         ingest_version=f"ingest.v{ingest_version}",
     )
     session.add(evaluation)

@@ -1,34 +1,14 @@
-import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { bootstrapWorkbench, generateForInstance, getInstance, listPrompts } from "../api/client";
+import { getInstance } from "../api/client";
 import { LoadingNotice } from "../components/LoadingNotice";
-import { ModelSelect } from "../components/ModelSelect";
-import { PromptSelect } from "../components/PromptSelect";
+import { RunActions } from "../components/RunActions";
 import { useAsyncResource } from "../hooks/useAsyncResource";
 
 export function InstanceDetailPage() {
   const { instanceId = "" } = useParams();
   const instance = useAsyncResource(() => getInstance(instanceId), [instanceId]);
-  const prompts = useAsyncResource(() => listPrompts({ instance_id: instanceId }), [instanceId]);
-  const [model, setModel] = useState("moonshotai/kimi-k2.5");
-  const [promptId, setPromptId] = useState("");
-  const [status, setStatus] = useState<string | null>(null);
 
-  useEffect(() => {
-    const first = prompts.data?.[0]?.id ?? "";
-    setPromptId((current) => current || first);
-  }, [prompts.data]);
-
-  async function generate() {
-    if (!instanceId || instance.data?.task_mode === "repo_task") return;
-    const job = await generateForInstance(instanceId, {
-      model,
-      prompt_id: promptId || undefined
-    });
-    setStatus(`Queued job ${job.job_id}`);
-  }
-
-  const isRepoTask = instance.data?.task_mode === "repo_task";
+  const reloadAll = () => instance.reload();
 
   return (
     <div className="page instance-detail-page">
@@ -51,31 +31,18 @@ export function InstanceDetailPage() {
             <pre className="prompt-body">{instance.data.agent_prompt}</pre>
           ) : (
             <div className="empty-state">
-              <p>No catalog prompt loaded.</p>
-              <button type="button" onClick={() => bootstrapWorkbench().then(() => instance.reload())}>
-                Run bootstrap
-              </button>
+              <p>No catalog prompt loaded. Run bootstrap from the toolbar.</p>
             </div>
           )}
-          <div className="toolbar-actions">
-            <PromptSelect
-              label="Prompt variant"
-              prompts={prompts.data ?? []}
-              value={promptId}
-              onChange={setPromptId}
-              disabled={isRepoTask}
-            />
-            <ModelSelect label="Model" value={model} onChange={setModel} disabled={isRepoTask} />
-            <button
-              type="button"
-              disabled={isRepoTask}
-              title={isRepoTask ? "repo_task generate not supported in UI; use catt experiment run" : undefined}
-              onClick={() => void generate()}
-            >
-              Generate
-            </button>
-          </div>
-          {status ? <p className="toolbar-phase">{status}</p> : null}
+          <RunActions
+            instanceId={instanceId}
+            runId={null}
+            taskMode={instance.data.task_mode}
+            runDir={null}
+            onRefresh={reloadAll}
+            navigateOnGenerate
+            scope="instance"
+          />
         </>
       ) : null}
     </div>

@@ -11,7 +11,9 @@ import {
 import type { EvidenceSelection } from "../api/types";
 import { AnnotationPanel } from "../components/AnnotationPanel";
 import { ArtifactViewer } from "../components/ArtifactViewer";
+import { LoadingNotice } from "../components/LoadingNotice";
 import { RunActions } from "../components/RunActions";
+import { promptArtifactFromRunSlug } from "../utils/runSlug";
 import { ScoreSynthesis, type RunScoreEntry } from "../components/ScoreSynthesis";
 import { TraceTimeline } from "../components/TraceTimeline";
 import { useAsyncResource } from "../hooks/useAsyncResource";
@@ -35,7 +37,6 @@ export function RunDetailRoute() {
   const artifacts = useAsyncResource(() => (runId ? listArtifacts(runId) : Promise.resolve([])), [runId]);
   const trace = useAsyncResource(() => (runId ? listTrace(runId) : Promise.resolve([])), [runId]);
   const findings = useAsyncResource(() => (runId ? listFindings(runId) : Promise.resolve([])), [runId]);
-
   const [tab, setTab] = useState<RunTab>("score");
   const [selectedEvaluationId, setSelectedEvaluationId] = useState<string | null>(null);
   const [evidenceSelection, setEvidenceSelection] = useState<EvidenceSelection | null>(null);
@@ -90,7 +91,23 @@ export function RunDetailRoute() {
           <dt>Model</dt>
           <dd>{selected?.model_name ?? "—"}</dd>
           <dt>Instance</dt>
-          <dd>{selected?.instance_id ?? "—"}</dd>
+          <dd>
+            {selected?.instance_id ? (
+              <Link to={`/instances/${selected.instance_id}`}>{selected.instance_id}</Link>
+            ) : (
+              "—"
+            )}
+          </dd>
+          <dt>Prompt artifact</dt>
+          <dd>
+            {selected?.run_slug ? (
+              <Link to="/prompts" title="Open prompts explorer to edit variants">
+                {promptArtifactFromRunSlug(selected.run_slug)}
+              </Link>
+            ) : (
+              "—"
+            )}
+          </dd>
         </dl>
         <RunActions
           instanceId={selected?.instance_id ?? null}
@@ -98,6 +115,8 @@ export function RunDetailRoute() {
           taskMode={selected?.task_mode ?? instance.data?.task_mode ?? null}
           runDir={selected?.run_dir ?? null}
           onRefresh={reloadAll}
+          navigateOnGenerate
+          scope="run-detail"
         />
       </header>
 
@@ -175,8 +194,8 @@ export function RunDetailRoute() {
                   <strong>audit.json</strong> and <strong>supply_chain.json</strong>, plus <strong>failed</strong> soft-judge
                   rubric rows from <strong>score.json</strong>. Your audit file can exist with{" "}
                   <code>findings: []</code> (no static hits) while <code>security_gate_verdicts</code> show
-                  &quot;unknown&quot; — those gate rows are not copied into Findings. After <strong>Run Judge Pipeline</strong>,
-                  click <strong>Ingest run</strong> again (the run folder hash changes when audit/score are written).
+                  &quot;unknown&quot; — those gate rows are not copied into Findings.                   After <strong>Run judge</strong> in the toolbar, scores are auto-ingested; use <strong>Ingest run</strong> only if
+                  files changed on disk outside the workbench.
                 </p>
               ) : (
                 <ul className="finding-list">
@@ -194,12 +213,17 @@ export function RunDetailRoute() {
           ) : null}
 
           {tab === "score" ? (
-            <ScoreSynthesis
-              entries={scores}
-              canonicalEvaluationId={canonicalEvaluationId}
-              selectedEvaluationId={activeEvaluationId}
-              onSelectEvaluation={setSelectedEvaluationId}
-            />
+            <>
+              <LoadingNotice loading={runScores.loading} error={runScores.error} label="Loading scores…" />
+              {!runScores.loading && !runScores.error ? (
+                <ScoreSynthesis
+                  entries={scores}
+                  canonicalEvaluationId={canonicalEvaluationId}
+                  selectedEvaluationId={activeEvaluationId}
+                  onSelectEvaluation={setSelectedEvaluationId}
+                />
+              ) : null}
+            </>
           ) : null}
         </section>
 

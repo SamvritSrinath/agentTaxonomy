@@ -1,0 +1,22 @@
+{
+  "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/intermediate_catalog_moonshotai_kimi-k2.6/agent_output.md",
+  "output_dir": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/intermediate_catalog_moonshotai_kimi-k2.6/extracted",
+  "block_count": 2,
+  "extracted_files": [
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/intermediate_catalog_moonshotai_kimi-k2.6/agent_output.md",
+      "language": "cpp",
+      "relative_path": "block_1.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/intermediate_catalog_moonshotai_kimi-k2.6/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_2.sh"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/intermediate_catalog_moonshotai_kimi-k2.6/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

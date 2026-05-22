@@ -225,3 +225,37 @@ export function listJobs(params?: {
 export function exportTable(name: string): Promise<{ path: string }> {
   return fetchJson(`/api/exports/${name}`);
 }
+
+export interface CreateCatalogTaskRequest {
+  task_id: string;
+  subject_area: string;
+  problem_class: string;
+  beginner_prompt: string;
+  intermediate_prompt?: string;
+  expert_prompt?: string;
+  language?: string;
+  tags?: string[];
+  rebuild_catalog?: boolean;
+  ingest_catalog?: boolean;
+}
+
+export function createCatalogTask(
+  body: CreateCatalogTaskRequest
+): Promise<{
+  task_id: string;
+  task_dir: string;
+  instance_ids: string[];
+  catalog_path?: string;
+}> {
+  return fetchJson("/api/catalog/tasks", { method: "POST", body: JSON.stringify(body) });
+}
+
+export function updateCanonicalPrompt(
+  instanceId: string,
+  body: { prompt_text: string; rebuild_catalog?: boolean; ingest_catalog?: boolean }
+): Promise<{ instance_id: string; prompt_path: string; catalog_path?: string }> {
+  return fetchJson(`/api/instances/${encodeURIComponent(instanceId)}/canonical-prompt`, {
+    method: "PUT",
+    body: JSON.stringify(body)
+  });
+}

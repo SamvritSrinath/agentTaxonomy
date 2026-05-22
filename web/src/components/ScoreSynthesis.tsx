@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Evaluation, Score } from "../api/types";
 function formatScore(value: number | null | undefined): string {
   if (value == null) {
@@ -36,16 +36,23 @@ export function ScoreSynthesis({
   onSelectEvaluation
 }: ScoreSynthesisProps) {
   const [compareMode, setCompareMode] = useState(false);
+  const codeOnly = entries.find((row) => row.evaluation.evidence_condition === "code_only");
+  const codePlusTrace = entries.find((row) => row.evaluation.evidence_condition === "code_plus_trace");
+  const canCompare = Boolean(codeOnly?.score && codePlusTrace?.score);
+  const missingCompare = !canCompare && entries.length > 0;
+
+  useEffect(() => {
+    if (canCompare) {
+      setCompareMode(true);
+    }
+  }, [canCompare]);
+
   const selected =
     entries.find((row) => row.evaluation.id === selectedEvaluationId) ??
     entries.find((row) => row.evaluation.id === canonicalEvaluationId) ??
     entries.find((row) => row.canonical) ??
     entries[0] ??
     null;
-  const codeOnly = entries.find((row) => row.evaluation.evidence_condition === "code_only");
-  const codePlusTrace = entries.find((row) => row.evaluation.evidence_condition === "code_plus_trace");
-  const canCompare = Boolean(codeOnly?.score && codePlusTrace?.score);
-
   const scoreJson = (selected?.score?.score_json ?? {}) as Record<string, unknown>;
   const gates = useMemo(() => extractGates(scoreJson), [scoreJson]);
   const rubricItems = useMemo(() => extractRubricItems(scoreJson), [scoreJson]);
@@ -57,6 +64,12 @@ export function ScoreSynthesis({
 
   return (
     <section className="panel score-synthesis">
+      {missingCompare ? (
+        <p className="score-compare-banner">
+          Run <strong>Evaluate both</strong> in the toolbar to compare code-only (artifacts/output) vs code+trace
+          (full trace, audit, supply chain). Each mode re-runs scoring with different evidence inputs.
+        </p>
+      ) : null}
       <div className="panel-header-row">
         <h2>Score synthesis</h2>
         {canCompare ? (

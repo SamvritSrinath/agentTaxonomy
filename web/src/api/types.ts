@@ -74,6 +74,7 @@ export interface GenerateRequest {
 export interface JudgePipelineRequest {
   judge_model?: string;
   verification_tier?: string;
+  evidence_condition?: "code_only" | "code_plus_trace";
 }
 
 /**
@@ -125,6 +126,8 @@ export interface WorkbenchRun {
   source_file_hash: string | null;
   /** Ingest version marker for reproducibility. */
   ingest_version: string;
+  /** ISO timestamp when this run row was ingested. */
+  ingested_at?: string;
 }
 
 /**

@@ -46,6 +46,7 @@ from agentTaxonomy.db.services import (
     update_annotation_status,
     update_prompt,
 )
+from agentTaxonomy.catalog_authoring import create_catalog_task, update_canonical_prompt
 from agentTaxonomy.db.session import default_database_url, session_scope
 from agentTaxonomy.env import data_dir, load_local_env
 
@@ -145,6 +146,7 @@ class JudgePipelineRequest(BaseModel):
 
     judge_model: str | None = None
     verification_tier: str = "static"
+    evidence_condition: str = "code_plus_trace"
 
 
 class BootstrapRequest(BaseModel):
@@ -159,6 +161,29 @@ class CatalogIngestRequest(BaseModel):
     """Request body for catalog ingest."""
 
     catalog_path: str = "benchmark/generated/catalog.json"
+
+
+class CatalogTaskCreateRequest(BaseModel):
+    """Request body for authoring a new on-disk catalog task."""
+
+    task_id: str
+    subject_area: str
+    problem_class: str
+    beginner_prompt: str
+    intermediate_prompt: str | None = None
+    expert_prompt: str | None = None
+    language: str = "python"
+    tags: list[str] = Field(default_factory=list)
+    rebuild_catalog: bool = True
+    ingest_catalog: bool = True
+
+
+class CanonicalPromptUpdateRequest(BaseModel):
+    """Update the catalog .md file for one instance skill level."""
+
+    prompt_text: str
+    rebuild_catalog: bool = True
+    ingest_catalog: bool = True
 
 
 class PromptCreateRequest(BaseModel):
@@ -387,8 +412,19 @@ def _enqueue_generative_generate(
                 with session_scope() as err_session:
                     update_job(err_session, job_id, status="failed", error=str(exc))
                 return
+            from agentTaxonomy.db.ingest import IngestConflict
             from agentTaxonomy.db.jobs import update_job
 
+            run_path = Path(result["run_dir"])
+            try:
+                ingest_out = ingest_run(run_path, new_ingest_version=True)
+            except IngestConflict:
+                ingest_out = ingest_run(run_path, new_ingest_version=True)
+            result = {
+                **result,
+                "run_id": ingest_out.record_id,
+                "ingest_status": ingest_out.status,
+            }
             update_job(session, job_id, metadata={"result": result})
 
     background.add_task(run_job_in_background, job["id"], worker)
@@ -568,7 +604,12 @@ def judge_pipeline_endpoint(
         job = create_job(
             session,
             kind="judge",
-            metadata={"run_id": run_id, "instance_id": instance_id, "judge_model": request.judge_model},
+            metadata={
+                "run_id": run_id,
+                "instance_id": instance_id,
+                "judge_model": request.judge_model,
+                "evidence_condition": request.evidence_condition,
+            },
         )
 
     def worker(job_id: str) -> None:
@@ -579,9 +620,20 @@ def judge_pipeline_endpoint(
             instance_id=str(instance_id),
             judge_model=request.judge_model,
             verification_tier=request.verification_tier,
+            evidence_condition=request.evidence_condition,
             job_id=job_id,
         )
+        from agentTaxonomy.db.ingest import IngestConflict
         from agentTaxonomy.db.jobs import update_job
+
+        try:
+            ingest_out = ingest_run(run_dir, new_ingest_version=True)
+        except IngestConflict:
+            ingest_out = ingest_run(run_dir, new_ingest_version=True)
+        if isinstance(result, dict):
+            result = {**result, "run_id": run_id, "ingest_status": ingest_out.status}
+        else:
+            result = {"pipeline": result, "run_id": run_id, "ingest_status": ingest_out.status}
 
         with session_scope() as session:
             update_job(session, job_id, metadata={"result": result})
@@ -595,6 +647,44 @@ def ingest_catalog_endpoint(request: CatalogIngestRequest) -> dict[str, Any]:
     """Index the generated catalog (synchronous)."""
     result = ingest_catalog(Path(request.catalog_path))
     return result.__dict__
+
+
+@app.post("/api/catalog/tasks")
+def create_catalog_task_endpoint(request: CatalogTaskCreateRequest) -> dict[str, Any]:
+    """Create a new task under benchmark/task_catalog and optionally rebuild + ingest."""
+    try:
+        return create_catalog_task(
+            task_id=request.task_id,
+            subject_area=request.subject_area,
+            problem_class=request.problem_class,
+            beginner_prompt=request.beginner_prompt,
+            intermediate_prompt=request.intermediate_prompt,
+            expert_prompt=request.expert_prompt,
+            language=request.language,
+            tags=request.tags or None,
+            rebuild_catalog=request.rebuild_catalog,
+            ingest_catalog_db=request.ingest_catalog,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.put("/api/instances/{instance_id}/canonical-prompt")
+def update_canonical_prompt_endpoint(
+    instance_id: str, request: CanonicalPromptUpdateRequest
+) -> dict[str, Any]:
+    """Update the on-disk level prompt for a catalog instance."""
+    try:
+        return update_canonical_prompt(
+            instance_id,
+            request.prompt_text,
+            rebuild_catalog=request.rebuild_catalog,
+            ingest_catalog_db=request.ingest_catalog,
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @app.post("/api/bootstrap")

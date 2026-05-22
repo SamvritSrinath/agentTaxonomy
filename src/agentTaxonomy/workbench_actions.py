@@ -61,12 +61,20 @@ def generative_generate_for_instance(
     }
 
 
+def score_path_for_evidence(evidence_condition: str) -> str:
+    """Filename for a scored run under a given evidence condition."""
+    if evidence_condition == "code_only":
+        return "score_code_only.json"
+    return "score_code_plus_trace.json"
+
+
 def run_judge_pipeline(
     run_dir: Path,
     *,
     instance_id: str,
     judge_model: str | None = None,
     verification_tier: str = "static",
+    evidence_condition: str = "code_plus_trace",
     job_id: str | None = None,
     database_url: str | None = None,
 ) -> dict[str, Any]:
@@ -82,8 +90,9 @@ def run_judge_pipeline(
     extracted = run_dir / "extracted"
     audit_output = run_dir / "audit.json"
     supply_output = run_dir / "supply_chain.json"
-    score_output = run_dir / "score.json"
+    score_output = run_dir / score_path_for_evidence(evidence_condition)
     trace_path = run_dir / "trace.jsonl"
+    use_trace = evidence_condition == "code_plus_trace"
 
     def phase(name: str) -> None:
         if job_id:
@@ -96,17 +105,22 @@ def run_judge_pipeline(
     phase("static_audit")
     write_static_audit(instance, audit_output, artifact_dir=extracted)
 
-    phase("enrich_supply_chain")
-    source_text = agent_output.read_text(encoding="utf-8") if agent_output.exists() else None
-    write_supply_chain_report(
-        extracted,
-        supply_output,
-        source_text=source_text,
-        judge_model=judge_model,
-    )
+    if use_trace:
+        phase("enrich_supply_chain")
+        source_text = agent_output.read_text(encoding="utf-8") if agent_output.exists() else None
+        write_supply_chain_report(
+            extracted,
+            supply_output,
+            source_text=source_text,
+            judge_model=judge_model,
+        )
+    elif supply_output.exists():
+        supply_output.unlink()
 
     phase("score_run")
-    supply_report = json.loads(supply_output.read_text(encoding="utf-8")) if supply_output.exists() else {}
+    supply_report = (
+        json.loads(supply_output.read_text(encoding="utf-8")) if use_trace and supply_output.exists() else {}
+    )
     judge = None
     if judge_model:
         judge = harness.make_openrouter_judge(
@@ -114,21 +128,29 @@ def run_judge_pipeline(
             response_format="json_schema",
             supply_chain_report=supply_report,
         )
+    trace_events = None
+    if not use_trace:
+        trace_events = []
     score = harness.score_run(
         instance_id=instance_id,
-        trace_path=trace_path,
+        trace_path=trace_path if use_trace else None,
+        trace_events=trace_events,
         verification_tier=verification_tier,
         audit_report_path=audit_output,
-        supply_chain_report_path=supply_output,
+        supply_chain_report_path=supply_output if use_trace else None,
         judge=judge,
         full_execution_skipped=True,
-        skip_reason="workbench judge pipeline static tier",
+        skip_reason=f"workbench judge pipeline static tier ({evidence_condition})",
     )
-    score_output.write_text(json.dumps(score.to_dict(), indent=2) + "\n", encoding="utf-8")
+    payload = score.to_dict()
+    payload["evidence_condition"] = evidence_condition
+    score_output.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    (run_dir / "score.json").write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     return {
         "run_dir": str(run_dir),
         "instance_id": instance_id,
         "score_path": str(score_output),
+        "evidence_condition": evidence_condition,
         "verification_tier": verification_tier,
         "judge_model": judge_model,
     }

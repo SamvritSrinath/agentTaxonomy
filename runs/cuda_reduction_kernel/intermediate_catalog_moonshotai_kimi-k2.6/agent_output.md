@@ -1,0 +1,220 @@
+ Here is a complete, self-contained CUDA C++ program that implements a multi-pass shared-memory reduction. It handles arbitrary input sizes (non-power-of-two), checks all CUDA API calls, and includes the requested test cases.
+
+### `reduction.cu`
+
+```cpp
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <vector>
+#include <random>
+#include <algorithm>
+
+// ----------------------------------------------------------------------------
+// Error checking macro
+// ----------------------------------------------------------------------------
+#define CHECK_CUDA(call)                                                       \
+    do {                                                                       \
+        cudaError_t err = call;                                                \
+        if (err != cudaSuccess) {                                              \
+            fprintf(stderr, "CUDA error at %s:%d: %s\n", __FILE__, __LINE__,   \
+                    cudaGetErrorString(err));                                  \
+            exit(EXIT_FAILURE);                                                \
+        }                                                                      \
+    } while (0)
+
+// ----------------------------------------------------------------------------
+// Block-level reduction kernel using shared memory
+// ----------------------------------------------------------------------------
+// Each thread accumulates a subset of elements via a grid-stride loop,
+// then participates in a tree-based reduction in shared memory.
+// The block's final sum is written to g_odata[blockIdx.x].
+// ----------------------------------------------------------------------------
+__global__ void reduce_kernel(const float *g_idata, float *g_odata, int n)
+{
+    extern __shared__ float sdata[];
+
+    int tid = threadIdx.x;
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    int gridSize = blockDim.x * gridDim.x;
+
+    // Grid-stride loop: each thread sums multiple elements safely
+    float sum = 0.0f;
+    while (idx < n) {
+        sum += g_idata[idx];
+        idx += gridSize;
+    }
+
+    // Load partial sum into shared memory
+    sdata[tid] = sum;
+    __syncthreads();
+
+    // Tree-based reduction in shared memory.
+    // blockDim.x is chosen to be a power of two (256), so this is exact
+    // and free of shared-memory bank conflicts for float.
+    for (int s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (tid < s) {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();
+    }
+
+    // Write the block's partial sum to global memory
+    if (tid == 0) {
+        g_odata[blockIdx.x] = sdata[0];
+    }
+}
+
+// ----------------------------------------------------------------------------
+// Host-side GPU reduction launcher
+// ----------------------------------------------------------------------------
+// Performs a multi-pass reduction:
+//   Pass 1: reduce input array -> temporary array of partial sums
+//   Pass N: if >1 partial sum, reduce the temporary array recursively
+// Returns the final scalar sum.
+// ----------------------------------------------------------------------------
+float gpu_reduce(const float *d_in, int n)
+{
+    if (n <= 0) {
+        return 0.0f;
+    }
+
+    const int blockSize = 256;  // power of two; see explanation below
+    int numBlocks = (n + blockSize - 1) / blockSize;
+
+    // Allocate temporary storage for partial block sums
+    float *d_temp = nullptr;
+    CHECK_CUDA(cudaMalloc(&d_temp, numBlocks * sizeof(float)));
+
+    size_t sharedMemSize = blockSize * sizeof(float);
+
+    // First pass: reduce input array
+    reduce_kernel<<<numBlocks, blockSize, sharedMemSize>>>(d_in, d_temp, n);
+    CHECK_CUDA(cudaGetLastError());
+    CHECK_CUDA(cudaDeviceSynchronize());
+
+    // Multi-pass reduction of partial sums until only one value remains
+    int currentSize = numBlocks;
+    while (currentSize > 1) {
+        int nblocks = (currentSize + blockSize - 1) / blockSize;
+        reduce_kernel<<<nblocks, blockSize, sharedMemSize>>>(d_temp, d_temp, currentSize);
+        CHECK_CUDA(cudaGetLastError());
+        CHECK_CUDA(cudaDeviceSynchronize());
+        currentSize = nblocks;
+    }
+
+    float result = 0.0f;
+    CHECK_CUDA(cudaMemcpy(&result, d_temp, sizeof(float), cudaMemcpyDeviceToHost));
+    CHECK_CUDA(cudaFree(d_temp));
+    return result;
+}
+
+// ----------------------------------------------------------------------------
+// CPU reference implementation
+// ----------------------------------------------------------------------------
+// Uses double precision internally to minimize accumulation error,
+// providing a high-accuracy reference for the single-precision GPU result.
+// ----------------------------------------------------------------------------
+float cpu_reduce(const float *data, int n)
+{
+    double sum = 0.0;
+    for (int i = 0; i < n; ++i) {
+        sum += static_cast<double>(data[i]);
+    }
+    return static_cast<float>(sum);
+}
+
+// ----------------------------------------------------------------------------
+// Test harness
+// ----------------------------------------------------------------------------
+bool run_test(const char *name, int n, std::mt19937 &gen,
+              float minVal = -10.0f, float maxVal = 10.0f)
+{
+    printf("Test: %-25s (n=%10d)\n", name, n);
+
+    // Generate random test data
+    std::vector<float> h_data(n);
+    std::uniform_real_distribution<float> dist(minVal, maxVal);
+    for (int i = 0; i < n; ++i) {
+        h_data[i] = dist(gen);
+    }
+
+    // Allocate and copy to device
+    float *d_in = nullptr;
+    CHECK_CUDA(cudaMalloc(&d_in, n * sizeof(float)));
+    CHECK_CUDA(cudaMemcpy(d_in, h_data.data(), n * sizeof(float), cudaMemcpyHostToDevice));
+
+    // Compute GPU and CPU sums
+    float gpu_sum = gpu_reduce(d_in, n);
+    float cpu_sum = cpu_reduce(h_data.data(), n);
+
+    // Cleanup device memory
+    CHECK_CUDA(cudaFree(d_in));
+
+    // Compare with tolerance (relative + absolute)
+    float diff = std::fabs(gpu_sum - cpu_sum);
+    float tolerance = 1e-4f * std::fabs(cpu_sum) + 1e-3f;
+    bool pass = (diff <= tolerance);
+
+    printf("  CPU sum: % .6f\n", cpu_sum);
+    printf("  GPU sum: % .6f\n", gpu_sum);
+    printf("  Diff:    % .6f  (tol: %.6f)  [%s]\n\n",
+           diff, tolerance, pass ? "PASS" : "FAIL");
+
+    return pass;
+}
+
+// ----------------------------------------------------------------------------
+// Main
+// ----------------------------------------------------------------------------
+int main()
+{
+    std::mt19937 gen(42);  // fixed seed for reproducibility
+    bool all_pass = true;
+
+    all_pass &= run_test("Single element",          1,          gen);
+    all_pass &= run_test("Small array",             1000,       gen);
+    all_pass &= run_test("Non-power-of-two",        1000003,    gen);
+    all_pass &= run_test("Large array",             50000000,   gen);
+    all_pass &= run_test("Negative values",         12345,      gen, -50.0f, -1.0f);
+
+    printf("==================================================\n");
+    if (all_pass) {
+        printf("All tests PASSED.\n");
+        return EXIT_SUCCESS;
+    } else {
+        printf("Some tests FAILED.\n");
+        return EXIT_FAILURE;
+    }
+}
+```
+
+---
+
+### Compile Command
+
+```bash
+nvcc -o reduction reduction.cu -O3 -arch=sm_70
+```
+
+*Adjust `-arch=sm_70` to match your GPU compute capability (e.g., `sm_61` for Pascal, `sm_80` for Ampere, etc.). The code itself does not require a specific architecture.*
+
+---
+
+### Explanation of Grid and Block Size Choices
+
+- **Block size (256 threads):**  
+  256 is a power of two, which makes the shared-memory tree reduction simple and exact (no extra bounds logic inside the reduction loop). It is also a multiple of the warp size (32), so no warps are partially wasted. This size tends to yield good occupancy on most NVIDIA GPUs while providing enough threads to amortize kernel launch overhead.
+
+- **Grid size:**  
+  The grid is sized as `(N + blockSize - 1) / blockSize` so that every input element is covered. Inside the kernel, a **grid-stride loop** lets each thread iterate across the array in steps of `gridDim.x * blockDim.x`. This keeps memory accesses coalesced, works for any `N` (even smaller than the grid), and gracefully handles the last block when `N` is not divisible by the block size.
+
+---
+
+### Explanation of How Partial Block Results Are Combined
+
+1. **First pass:** Each block reduces its assigned elements to a single value using shared memory, then writes that partial sum to a unique slot in a temporary global array (`d_temp`).  
+2. **Subsequent passes:** If there is more than one partial sum, the temporary array becomes the new input. Another reduction kernel is launched to sum those partial sums. This process repeats until only one value remains.  
+3. **Final result:** The last remaining value in `d_temp` is copied back to the host.
+
+This multi-pass approach avoids atomic operations on global memory, keeps the shared-memory reduction fast and deterministic, and naturally supports arbitrary input sizes because each pass is itself bounds-checked.

@@ -1,12 +1,5 @@
-const GENERATION_MODELS = [
-  "moonshotai/kimi-k2.5",
-  "openai/gpt-4o",
-  "openai/gpt-5.5",
-  "anthropic/claude-sonnet-4",
-  "google/gemini-2.5-pro-preview"
-] as const;
-
-const JUDGE_MODELS = ["openai/gpt-4o", "openai/gpt-5.5", "moonshotai/kimi-k2.5"] as const;
+import { generationModelOptions, judgeModelOptions } from "../config/models";
+import { Combobox } from "./Combobox";
 
 export interface ModelSelectProps {
   id?: string;
@@ -25,27 +18,28 @@ export function ModelSelect({
   disabled = false,
   kind = "generation"
 }: ModelSelectProps) {
-  const listId = `${id ?? label.replace(/\s+/g, "-").toLowerCase()}-models`;
-  const suggestions = kind === "judge" ? JUDGE_MODELS : GENERATION_MODELS;
+  const options = kind === "judge" ? judgeModelOptions() : generationModelOptions();
+  const isJudge = kind === "judge";
+  const hint = isJudge
+    ? value.trim()
+      ? "OpenRouter LLM judge — any provider/model slug is sent as-is."
+      : "Heuristic judge — no OpenRouter API call for soft scoring."
+    : null;
 
   return (
-    <label htmlFor={id}>
-      {label}
-      <input
+    <div className="model-select-wrap">
+      <Combobox
         id={id}
-        type="text"
-        list={listId}
+        label={label}
         value={value}
+        options={options}
+        onChange={onChange}
         disabled={disabled}
-        placeholder={kind === "judge" ? "Heuristic (leave empty)" : "provider/model"}
-        onChange={(event) => onChange(event.target.value)}
+        allowCustomValue
+        placeholder={isJudge ? "Heuristic (leave empty)" : "provider/model"}
+        emptyMessage="No models match"
       />
-      <datalist id={listId}>
-        {kind === "judge" ? <option value="" label="Heuristic (no LLM judge)" /> : null}
-        {suggestions.map((option) => (
-          <option key={option} value={option} />
-        ))}
-      </datalist>
-    </label>
+      {hint ? <p className="field-hint">{hint}</p> : null}
+    </div>
   );
 }

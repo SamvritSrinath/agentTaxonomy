@@ -605,10 +605,32 @@ button:disabled {
 }
 
 .filters-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 12px;
+  align-items: end;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px 16px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  margin-bottom: 16px;
+  padding: 12px 16px;
+}
+
+.filters-row .combobox {
+  flex: none;
+  margin-left: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.filters-row .combobox-label {
+  flex: none;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 0;
+  text-transform: uppercase;
+  color: #64748b;
 }
 
 .run-detail-layout {
@@ -673,9 +695,84 @@ button:disabled {
   font-size: 12px;
 }
 
-.prompt-editor {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+.prompt-editor-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 400px;
+}
+
+.prompt-editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.prompt-editor-field input {
+  font-weight: 400;
+  max-width: 360px;
+}
+
+.prompt-editor-field-grow {
+  flex: 1;
+  min-height: 0;
+}
+
+.prompt-editor-textarea {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-sizing: border-box;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.55;
+  min-height: 280px;
+  padding: 12px 14px;
+  resize: vertical;
   width: 100%;
+}
+
+.prompt-editor-textarea:focus {
+  border-color: #2463eb;
+  outline: 2px solid #dbeafe;
+  outline-offset: 0;
+}
+
+.prompt-editor-footer {
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+  padding-top: 14px;
+}
+
+.prompt-editor-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prompt-editor-generate {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(220px, 1fr) auto;
+}
+
+.prompt-editor-generate .model-select-wrap {
+  min-width: 0;
+}
+
+@media (max-width: 720px) {
+  .prompt-editor-generate {
+    grid-template-columns: 1fr;
+  }
 }
 
 .save-status.saved {
@@ -729,9 +826,193 @@ button:disabled {
 }
 
 .toolbar-actions select,
-.toolbar-actions input[list] {
+.toolbar-actions input[list],
+.toolbar-actions .combobox {
   margin-left: 6px;
   min-width: 220px;
+}
+
+.combobox {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 200px;
+}
+
+.combobox-label {
+  font-size: 13px;
+}
+
+.combobox-input {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  min-width: 200px;
+}
+
+.combobox-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  margin: 2px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  max-height: 240px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+
+.combobox-option {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.combobox-option:hover,
+.combobox-option-active {
+  background: #eff6ff;
+}
+
+.combobox-empty {
+  color: #64748b;
+  cursor: default;
+}
+
+.master-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.master-list {
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+.prompt-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.prompt-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font: inherit;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.prompt-tree-row:hover {
+  background: #f1f5f9;
+}
+
+.prompt-tree-task-row {
+  font-weight: 600;
+}
+
+.prompt-tree-chevron {
+  width: 14px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.prompt-tree-meta {
+  margin-left: auto;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.prompt-tree-children {
+  padding-left: 12px;
+}
+
+.prompt-tree-skill-row {
+  justify-content: space-between;
+}
+
+.prompt-tree-skill-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  background: transparent;
+  border: none;
+  font: inherit;
+  padding: 4px 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.prompt-tree-add {
+  padding: 0 6px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.prompt-tree-variants {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 20px;
+}
+
+.prompt-tree-leaf {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.prompt-tree-leaf.active {
+  background: #dbeafe;
+  font-weight: 600;
+}
+
+.prompt-tree-muted {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.prompt-editor-header h3 {
+  margin: 0 0 4px;
+}
+
+.dashboard-bootstrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.export-descriptions {
+  margin: 0 0 16px;
+  padding-left: 20px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.export-descriptions li + li {
+  margin-top: 6px;
 }
 
 .score-hint {
@@ -769,8 +1050,585 @@ button:disabled {
 
 .create-prompt-panel select,
 .create-prompt-panel input,
-.create-prompt-panel textarea {
+.create-prompt-panel textarea,
+.create-prompt-panel .combobox-input {
   font: inherit;
+}
+
+.create-prompt-panel .combobox {
+  min-width: 0;
+}
+
+/* Combobox */
+.combobox-label {
+  position: relative;
+}
+
+.combobox {
+  position: relative;
+}
+
+.combobox input {
+  width: 100%;
+  min-width: 200px;
+}
+
+.combobox-list {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+  list-style: none;
+  margin: 4px 0 0;
+  max-height: 240px;
+  overflow: auto;
+  padding: 4px 0;
+  position: absolute;
+  width: 100%;
+  z-index: 50;
+}
+
+.combobox-option {
+  cursor: pointer;
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+.combobox-option:hover,
+.combobox-option-active {
+  background: #e8f1ff;
+}
+
+.combobox-empty {
+  color: #64748b;
+  cursor: default;
+}
+
+.toolbar-actions .combobox {
+  min-width: 200px;
+}
+
+.runs-page-header {
+  margin-bottom: 12px;
+}
+
+.runs-results-meta {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0 0 8px;
+}
+
+.runs-table-panel {
+  overflow-x: auto;
+}
+
+/* Master-detail + prompt tree */
+.master-detail-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  min-height: 480px;
+}
+
+.master-list {
+  max-height: calc(100vh - 200px);
+  overflow: auto;
+}
+
+.detail-pane {
+  min-width: 0;
+}
+
+.prompt-tree {
+  font-size: 13px;
+}
+
+.tree-row {
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  gap: 6px;
+  padding: 6px 8px;
+  text-align: left;
+  width: 100%;
+}
+
+.tree-task-row {
+  align-items: flex-start;
+  font-weight: 600;
+}
+
+.tree-task-row .tree-chevron {
+  margin-top: 4px;
+}
+
+.tree-skill-row {
+  display: flex;
+  padding-left: 12px;
+}
+
+.tree-skill-toggle {
+  align-items: center;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  padding: 4px 0;
+  text-align: left;
+}
+
+.tree-add-btn {
+  background: #e2e8f0;
+  color: #1d2430;
+  flex: 0 0 auto;
+  font-size: 14px;
+  line-height: 1;
+  min-width: 28px;
+  padding: 2px 8px;
+}
+
+.tree-children {
+  padding-left: 4px;
+}
+
+.tree-leaves {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 28px;
+}
+
+.tree-leaf {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: block;
+  font-size: 13px;
+  padding: 5px 8px;
+  text-align: left;
+  width: 100%;
+}
+
+.tree-leaf:hover,
+.tree-leaf-selected {
+  background: #e8f1ff;
+}
+
+.tree-leaf-placeholder {
+  color: #64748b;
+  font-style: italic;
+}
+
+.tree-chevron {
+  color: #64748b;
+  flex: 0 0 12px;
+  font-size: 10px;
+}
+
+.tree-meta {
+  color: #64748b;
+  font-size: 11px;
+}
+
+.tree-label {
+  flex: 1;
+}
+
+.tree-task-labels {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tree-subtitle {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-task-row .tree-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-leaf-catalog {
+  font-style: normal;
+}
+
+.prompts-page-header {
+  align-items: flex-start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.prompts-page-header h2 {
+  margin: 0 0 4px;
+}
+
+.prompts-subtitle {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+  max-width: 52rem;
+}
+
+.prompts-toolbar {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prompts-toolbar-active {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.prompts-layout {
+  margin-top: 0;
+}
+
+.prompts-layout .master-list {
+  max-height: calc(100vh - 160px);
+}
+
+.prompts-layout .detail-pane {
+  max-height: calc(100vh - 160px);
+  min-height: 420px;
+  overflow: auto;
+}
+
+.detail-pane-header {
+  margin-bottom: 16px;
+}
+
+.detail-pane-header h3 {
+  margin: 0 0 6px;
+}
+
+.detail-pane-desc {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.detail-pane-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.prompts-empty-state {
+  padding: 24px 8px;
+}
+
+.prompts-empty-state h3 {
+  margin: 0 0 8px;
+}
+
+.prompts-empty-state > p {
+  color: #475569;
+  margin: 0 0 16px;
+  max-width: 36rem;
+}
+
+.prompts-empty-hints {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 20px;
+  padding-left: 1.25rem;
+}
+
+.prompts-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.create-prompt-panel .checkbox-row {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.create-prompt-panel .checkbox-row input {
+  width: auto;
+}
+
+.prompt-editor-header h3 {
+  margin: 0 0 4px;
+}
+
+.prompt-editor-meta {
+  color: #64748b;
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.dashboard-bootstrap {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.text-button-inline {
+  background: transparent;
+  color: #2463eb;
+  padding: 0;
+}
+
+.export-descriptions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.export-description-item {
+  border-bottom: 1px solid #edf0f4;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+}
+
+.export-description-head {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.export-description-item p {
+  color: #64748b;
+  margin: 0;
+}
+
+/* Run / instance action toolbar */
+.action-toolbar {
+  margin-top: 12px;
+  position: relative;
+}
+
+.action-toolbar.is-busy .action-toolbar-grid {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.action-toolbar-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.action-group {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+}
+
+.action-group h4 {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.action-group-generate {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+.action-group-desc {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.action-group-fields {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.action-group-fields .combobox {
+  min-width: 0;
+}
+
+.action-group-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-ghost {
+  border-radius: 4px;
+  cursor: pointer;
+  font: inherit;
+  padding: 8px 12px;
+}
+
+.btn-primary {
+  background: #2463eb;
+  border: 0;
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #cbd5e1;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: #f8fafc;
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-ghost:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-badge {
+  background: #dbeafe;
+  border-radius: 999px;
+  color: #1e40af;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 6px;
+  padding: 2px 6px;
+}
+
+.job-overlay {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+  z-index: 5;
+}
+
+.spinner {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.spinner-ring {
+  animation: spinner-spin 0.8s linear infinite;
+  border: 2px solid #cbd5e1;
+  border-radius: 50%;
+  border-top-color: #2463eb;
+  display: inline-block;
+  height: 18px;
+  width: 18px;
+}
+
+.spinner-sm .spinner-ring {
+  height: 14px;
+  width: 14px;
+}
+
+.spinner-label {
+  color: #475569;
+  font-size: 13px;
+}
+
+@keyframes spinner-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.field-hint {
+  color: #64748b;
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+
+.toolbar-success {
+  color: #166534;
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+.score-compare-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+  color: #92400e;
+  font-size: 13px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+}
+
+.dashboard-setup-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.loading-notice {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.run-header-meta dd a {
+  color: #2463eb;
+}
+
+@media (max-width: 900px) {
+  .master-detail-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 1200px) {
