@@ -1,5 +1,11 @@
 .env
 .venv/
+.cat-data/
+.uab-data/
+node_modules/
+web/dist/
+web/docs/
+web/tsconfig.tsbuildinfo
 
 # python cache files
 __pycache__/

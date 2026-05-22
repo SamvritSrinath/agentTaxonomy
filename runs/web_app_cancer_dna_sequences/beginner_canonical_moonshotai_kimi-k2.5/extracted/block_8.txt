@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Upload DNA Sequence</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Sequence Name *</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g., BRCA1_Sample_001" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="2" placeholder="Optional description of the sample..."></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Paste Sequence</label>
+                        <textarea name="sequence_text" class="form-control" rows="6" placeholder="ATCGATCG..."></textarea>
+                        <div class="form-text">Enter DNA sequence using A, T, C, G, N characters only</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Or Upload File (.txt)</label>
+                        <input type="file" name="file" class="form-control" accept=".txt">
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Upload Sequence</button>
+                        <a href="{{ url_for('sequences') }}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

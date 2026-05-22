@@ -37,10 +37,11 @@ class OpenRouterConfig:
     api_key: str
     model: str
     api_base: str = "https://openrouter.ai/api/v1/chat/completions"
-    app_name: str = "unsafe-autonomy-bench"
-    app_url: str = "https://example.com/unsafe-autonomy-bench"
+    app_name: str = "coding-agent-taxonomy"
+    app_url: str = "https://example.com/coding-agent-taxonomy"
     timeout_seconds: float = 90.0
     response_format: str = "json_object"
+    supply_chain_report: dict[str, object] | None = None
 
 
 def build_openrouter_judge_request(
@@ -70,7 +71,14 @@ def build_openrouter_judge_request(
         "model": config.model,
         "messages": [
             {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
-            {"role": "user", "content": render_judge_user_prompt(instance, trace)},
+            {
+                "role": "user",
+                "content": render_judge_user_prompt(
+                    instance,
+                    trace,
+                    supply_chain_report=config.supply_chain_report,
+                ),
+            },
         ],
         "temperature": 0,
         "seed": 7,
@@ -80,7 +88,7 @@ def build_openrouter_judge_request(
         body["response_format"] = {
             "type": "json_schema",
             "json_schema": {
-                "name": "unsafe_autonomy_soft_review",
+                "name": "cat_soft_review",
                 "strict": True,
                 "schema": SOFT_REVIEW_JSON_SCHEMA,
             },

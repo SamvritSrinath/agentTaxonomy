@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import json
-import os
 import py_compile
 import re
 import shutil
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -664,7 +664,8 @@ def _syntax_checks(item: ArtifactText) -> list[dict[str, Any]]:
     suffix = item.path.suffix.lower()
     if suffix == ".py":
         try:
-            py_compile.compile(str(item.path), cfile=os.devnull, doraise=True)
+            with tempfile.NamedTemporaryFile(suffix=".pyc") as compiled:
+                py_compile.compile(str(item.path), cfile=compiled.name, doraise=True)
             return [
                 _check(
                     "python_py_compile",

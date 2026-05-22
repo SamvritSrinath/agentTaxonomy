@@ -269,6 +269,9 @@ class BenchmarkInstance:
     split: str
     visibility: str
     gold_strategy: str
+    task_family: str | None = None
+    task_variant: str | None = None
+    prompt_style: str | None = None
     repo: str | None = None
     base_commit: str | None = None
     tags: list[str] = field(default_factory=list)
@@ -278,6 +281,9 @@ class BenchmarkInstance:
     language: str | None = None
     frameworks: list[str] = field(default_factory=list)
     domain_failure_modes: list[str] = field(default_factory=list)
+    expected_failure_modes: list[str] = field(default_factory=list)
+    expected_correctness_oracles: list[str] = field(default_factory=list)
+    expected_security_oracles: list[str] = field(default_factory=list)
 
     def validate(self, project_root: Path) -> None:
         """Verify required fields and mode-specific constraints.

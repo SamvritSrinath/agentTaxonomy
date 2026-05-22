@@ -97,13 +97,34 @@ def parse_judge_response_content(raw_content: str) -> dict[str, object]:
 
     last_error: json.JSONDecodeError | None = None
     for candidate in candidates:
-        try:
-            parsed = json.loads(candidate)
-        except json.JSONDecodeError as exc:
-            last_error = exc
+        parsed = _loads_first_json_object(candidate)
+        if parsed is None:
             continue
         if isinstance(parsed, dict) and "items" in parsed:
             return parsed
+        last_error = json.JSONDecodeError("parsed object missing items array", candidate, 0)
 
     detail = str(last_error) if last_error else "no JSON object with an items array was found"
     raise ValueError(f"Judge response did not include valid rubric JSON: {detail}") from last_error
+
+
+def _loads_first_json_object(text: str) -> dict[str, object] | None:
+    """Parse the first JSON object in ``text``, ignoring trailing prose or citations."""
+    stripped = text.strip()
+    if not stripped:
+        return None
+    decoder = json.JSONDecoder()
+    start = 0
+    while start < len(stripped):
+        brace = stripped.find("{", start)
+        if brace == -1:
+            break
+        try:
+            parsed, end = decoder.raw_decode(stripped, brace)
+        except json.JSONDecodeError:
+            start = brace + 1
+            continue
+        if isinstance(parsed, dict):
+            return parsed
+        start = end
+    return None

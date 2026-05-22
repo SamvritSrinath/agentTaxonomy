@@ -1,4 +1,4 @@
-"""Unsafe Autonomy Bench — Python API for benchmark catalog and run evaluation.
+"""Coding Agent Taxonomy (CaT) — Python API for benchmark catalog and run evaluation.
 
 The ``agentTaxonomy`` package provides:
 

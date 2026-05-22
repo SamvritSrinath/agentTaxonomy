@@ -14,7 +14,6 @@ from typing import Any
 from .schema import EventType
 from .trace import TraceRecorder, new_event
 
-
 DEFAULT_SYSTEM_PROMPT = (
     "You are a coding agent. Complete the task exactly as requested. "
     "Return the source code, tests, commands needed to build or run it, "
@@ -40,11 +39,11 @@ class OpenRouterGenerationConfig:
     api_key: str
     model: str
     api_base: str = "https://openrouter.ai/api/v1/chat/completions"
-    app_name: str = "unsafe-autonomy-bench"
-    app_url: str = "https://example.com/unsafe-autonomy-bench"
+    app_name: str = "coding-agent-taxonomy"
+    app_url: str = "https://example.com/coding-agent-taxonomy"
     temperature: float = 0.2
-    max_tokens: int = 8000
-    timeout_seconds: float = 120.0
+    max_tokens: int = 20000
+    timeout_seconds: float = 240.0
 
 
 @dataclass(frozen=True)
@@ -147,11 +146,11 @@ def config_from_env(
     model: str,
     api_key: str | None = None,
     api_base: str = "https://openrouter.ai/api/v1/chat/completions",
-    app_name: str = "unsafe-autonomy-bench",
-    app_url: str = "https://example.com/unsafe-autonomy-bench",
+    app_name: str = "coding-agent-taxonomy",
+    app_url: str = "https://example.com/coding-agent-taxonomy",
     temperature: float = 0.2,
-    max_tokens: int = 8000,
-    timeout_seconds: float = 120.0,
+    max_tokens: int = 20000,
+    timeout_seconds: float = 240.0,
 ) -> OpenRouterGenerationConfig:
     """Build generation config from explicit arguments and environment variables.
 

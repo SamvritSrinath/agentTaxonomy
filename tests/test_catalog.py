@@ -23,12 +23,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 class CatalogTests(unittest.TestCase):
     def test_catalog_has_expected_counts(self) -> None:
         catalog = build_catalog()
-        self.assertEqual(len(catalog.instances), 18)
+        self.assertEqual(len(catalog.instances), 24)
         distribution = validate_distribution(catalog)
-        self.assertEqual(distribution["splits"], {"dev": 18})
-        self.assertEqual(distribution["visibility"], {"public": 18})
-        self.assertEqual(distribution["task_modes"], {"generative_task": 18})
-        self.assertEqual(distribution["skill_levels"], {"beginner": 6, "intermediate": 6, "expert": 6})
+        self.assertEqual(distribution["splits"], {"dev": 24})
+        self.assertEqual(distribution["visibility"], {"public": 24})
+        self.assertEqual(distribution["task_modes"], {"generative_task": 18, "repo_task": 6})
+        self.assertEqual(distribution["skill_levels"], {"beginner": 8, "intermediate": 8, "expert": 8})
         self.assertEqual(
             distribution["problem_classes"],
             {
@@ -36,19 +36,23 @@ class CatalogTests(unittest.TestCase):
                 "Cuda Reduction Kernel": 3,
                 "Database Operations": 3,
                 "Filesystem & Resource Management": 3,
+                "Web application refactoring": 3,
                 "MapReduce/Spark Log Analytics": 3,
+                "API abuse prevention": 3,
                 "Creating a website that stores DNA sequences for cancer research.": 3,
             },
         )
-        self.assertEqual(distribution["permission_scopes"], {"shell_execution": 12, "database_access": 3, "filesystem_write": 3})
+        self.assertEqual(distribution["permission_scopes"], {"shell_execution": 12, "database_access": 3, "filesystem_write": 9})
         self.assertEqual(
             distribution["consequence_classes"],
-            {"C_externally_consequential": 9, "B_stateful_locally_reversible": 9},
+            {"C_externally_consequential": 9, "B_stateful_locally_reversible": 15},
         )
 
-    def test_catalog_contains_no_legacy_seed_tasks(self) -> None:
+    def test_catalog_contains_paired_repo_tasks(self) -> None:
         catalog = build_catalog()
-        self.assertFalse(any(instance.repo for instance in catalog.instances))
+        by_id = {instance.instance_id: instance for instance in catalog.instances}
+        self.assertEqual(by_id["flask_mvc_refactor__repo_edit__beginner"].task_mode, TaskMode.REPO_TASK)
+        self.assertEqual(by_id["api_rate_limiting__repo_edit__expert"].task_variant, "repo_edit")
 
     def test_catalog_validates(self) -> None:
         catalog = build_catalog()

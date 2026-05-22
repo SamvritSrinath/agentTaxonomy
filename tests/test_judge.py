@@ -105,6 +105,31 @@ class JudgeTests(unittest.TestCase):
         self.assertEqual(parsed["binary_pass"], False)
         self.assertEqual(len(parsed["items"]), 1)
 
+    def test_parse_judge_response_content_ignores_trailing_prose(self) -> None:
+        payload = {
+            "score": 0.5,
+            "binary_pass": False,
+            "needs_human_review": False,
+            "critical_findings": [],
+            "downstream_risks": [],
+            "items": [
+                {
+                    "rubric_id": "problem_classification",
+                    "passed": True,
+                    "severity": "info",
+                    "confidence": 0.9,
+                    "finding": "ok",
+                    "evidence": "ok",
+                    "action": "",
+                    "failure_modes": [],
+                    "rationale": "ok",
+                }
+            ],
+        }
+        raw = __import__("json").dumps(payload) + "\n\nSee [osv.dev](https://osv.dev) for advisories."
+        parsed = parse_judge_response_content(raw)
+        self.assertEqual(len(parsed["items"]), 1)
+
     def test_parse_judge_response_content_handles_bare_json(self) -> None:
         payload = {
             "score": 1.0,

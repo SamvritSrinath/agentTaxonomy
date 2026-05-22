@@ -1,0 +1,20 @@
+name: pilot_fake_agent_v1
+agents:
+  - name: fake_safe
+    command: "python scripts/fake_agent.py --mode safe"
+  - name: fake_buggy
+    command: "python scripts/fake_agent.py --mode buggy"
+
+instances:
+  - flask_mvc_refactor__repo_edit__beginner
+  - flask_mvc_refactor__repo_edit__intermediate
+  - flask_mvc_refactor__repo_edit__expert
+  - api_rate_limiting__repo_edit__beginner
+  - api_rate_limiting__repo_edit__intermediate
+  - api_rate_limiting__repo_edit__expert
+
+evaluations:
+  - evidence_condition: code_only
+  - evidence_condition: code_plus_trace
+
+sandbox_profile: repo_task_default

@@ -96,7 +96,7 @@ def build_catalog(project_root: Path | None = None) -> BenchmarkCatalog:
     task_root = project_root / "benchmark" / "task_catalog" / "subject_areas"
     instances = build_generative_catalog(task_root)
     return BenchmarkCatalog(
-        benchmark_name="unsafe-autonomy-bench",
+        benchmark_name="coding-agent-taxonomy",
         version="0.2.0",
         summary="Taxonomy-first benchmark catalog for evaluating agent tasks across problem classes, subject areas, permission scopes, consequence classes, and rubrics.",
         instances=instances,
@@ -128,10 +128,14 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
             prompt_path = task_dir / level_path
             prompt_text = prompt_path.read_text(encoding="utf-8")
             relative_prompt_path = prompt_path.relative_to(task_root.parents[2])
+            task_mode = TaskMode(merged.get("task_mode", TaskMode.GENERATIVE_TASK.value))
+            instance_id = f"{raw_task['task_id']}__{skill_level.value}"
+            if task_mode == TaskMode.REPO_TASK:
+                instance_id = f"{raw_task['task_id']}__{merged.get('task_variant', 'repo_edit')}__{skill_level.value}"
             instances.append(
                 BenchmarkInstance(
-                    instance_id=f"{raw_task['task_id']}__{skill_level.value}",
-                    task_mode=TaskMode.GENERATIVE_TASK,
+                    instance_id=instance_id,
+                    task_mode=task_mode,
                     problem_class=raw_task["problem_class"],
                     subject_area=raw_task["subject_area"],
                     agent_prompt=prompt_text,
@@ -140,12 +144,21 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
                     permission_scope=PermissionScope(merged["permission_scope"]),
                     consequence_class=ConsequenceClass(merged["consequence_class"]),
                     expected_safe_outcome=SafeOutcome(merged["expected_safe_outcome"]),
-                    utility_oracles=UtilityOracleSpec(command="", fail_to_pass=[], pass_to_pass=[]),
+                    utility_oracles=UtilityOracleSpec(
+                        command=str(merged.get("utility_command", "")),
+                        fail_to_pass=[str(item) for item in merged.get("fail_to_pass", [])],
+                        pass_to_pass=[str(item) for item in merged.get("pass_to_pass", [])],
+                    ),
                     hard_safety_oracles=_default_hard_safety_oracles(),
                     soft_review_rubric=_soft_review_rubric(raw_task),
                     split=merged.get("split", "dev"),
                     visibility=merged.get("visibility", "public"),
                     gold_strategy=merged["gold_strategy"],
+                    task_family=raw_task.get("task_family", raw_task["task_id"]),
+                    task_variant=merged.get("task_variant"),
+                    prompt_style=merged.get("prompt_style"),
+                    repo=merged.get("repo"),
+                    base_commit=merged.get("base_commit"),
                     tags=list(raw_task.get("tags", [])),
                     runtime_profiles=_runtime_profiles(merged),
                     expected_artifacts=list(merged["expected_artifacts"]),
@@ -153,6 +166,9 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
                     language=merged["language"],
                     frameworks=list(merged["frameworks"]),
                     domain_failure_modes=list(merged["domain_failure_modes"]),
+                    expected_failure_modes=list(merged.get("expected_failure_modes", merged["domain_failure_modes"])),
+                    expected_correctness_oracles=list(merged.get("expected_correctness_oracles", [])),
+                    expected_security_oracles=list(merged.get("expected_security_oracles", [])),
                 )
             )
     return instances

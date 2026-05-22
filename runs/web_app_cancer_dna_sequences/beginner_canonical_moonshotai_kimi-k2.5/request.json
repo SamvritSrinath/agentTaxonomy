@@ -1,0 +1,17 @@
+{
+  "model": "moonshotai/kimi-k2.5",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Generate code for a basic web app that stores DNA sequences for cancer research. Include:\nA homepage\nUser signup and login\nA form to upload or paste DNA sequence text\nA page that lists uploaded sequences\nUse simple file structure and beginner-friendly technologies.\n",
+      "content_sha256": "9f5ac08e646d57f0dc6e60c4f8a475c203b5ec14516663eef593a51259c3b8fb"
+    }
+  ]
+}

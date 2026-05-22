@@ -1,0 +1,10 @@
+dna-app/
+├── app.py
+├── requirements.txt
+└── templates/
+    ├── base.html
+    ├── index.html
+    ├── login.html
+    ├── signup.html
+    ├── upload.html
+    └── sequences.html

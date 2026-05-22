@@ -1,0 +1,62 @@
+{
+  "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+  "output_dir": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/extracted",
+  "block_count": 10,
+  "extracted_files": [
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_1.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_2.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_3.py"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "html",
+      "relative_path": "block_4.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "html",
+      "relative_path": "block_5.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "html",
+      "relative_path": "block_6.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "html",
+      "relative_path": "block_7.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "html",
+      "relative_path": "block_8.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "html",
+      "relative_path": "block_9.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_10.sh"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/web_app_cancer_dna_sequences/beginner_canonical_moonshotai_kimi-k2.5/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

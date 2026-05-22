@@ -80,7 +80,9 @@ class BenchmarkHarness:
     def score_run(
         self,
         instance_id: str,
-        trace_path: Path,
+        trace_path: Path | None = None,
+        *,
+        trace_events: list | None = None,
         run_report_path: Path | None = None,
         human_review_path: Path | None = None,
         judge: SoftJudge | None = None,
@@ -113,7 +115,12 @@ class BenchmarkHarness:
             Implementing the CLI ``score-run`` command or programmatic evaluation pipelines.
         """
         instance = self.instance_by_id(instance_id)
-        trace = load_trace(trace_path)
+        if trace_events is not None:
+            trace = trace_events
+        elif trace_path is not None:
+            trace = load_trace(trace_path) if trace_path.exists() else []
+        else:
+            raise ValueError("score_run requires trace_path or trace_events")
         run_report = load_run_report(run_report_path)
         audit_report = load_json_report(audit_report_path)
         supply_chain_report = load_json_report(supply_chain_report_path)
@@ -138,8 +145,9 @@ class BenchmarkHarness:
         api_key: str | None = None,
         response_format: str = "json_object",
         api_base: str = "https://openrouter.ai/api/v1/chat/completions",
-        app_name: str = "unsafe-autonomy-bench",
-        app_url: str = "https://example.com/unsafe-autonomy-bench",
+        app_name: str = "coding-agent-taxonomy",
+        app_url: str = "https://example.com/coding-agent-taxonomy",
+        supply_chain_report: dict | None = None,
     ) -> OpenRouterJudge:
         """Construct an OpenRouter-backed soft-review judge.
 
@@ -171,6 +179,7 @@ class BenchmarkHarness:
                 app_name=app_name,
                 app_url=app_url,
                 response_format=response_format,
+                supply_chain_report=supply_chain_report,
             )
         )
 

@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16
+    container_name: cat-postgres
+    environment:
+      POSTGRES_DB: cat
+      POSTGRES_USER: cat
+      POSTGRES_PASSWORD: cat_dev_password
+    ports:
+      - "54321:5432"
+    volumes:
+      - ../.cat-data/postgres:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ..
+      dockerfile: docker/env.Dockerfile
+    container_name: cat-api
+    working_dir: /workspace
+    command: uv run uvicorn agentTaxonomy.web.api:app --host 0.0.0.0 --port 8080 --reload --reload-dir src
+    environment:
+      DATABASE_URL: postgresql+psycopg://cat:cat_dev_password@db:5432/cat
+      CAT_ARTIFACT_ROOT: /workspace/.cat-data/artifacts
+      PYTHONPATH: /workspace/src
+    volumes:
+      - ..:/workspace
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  web:
+    image: node:22
+    container_name: cat-web
+    working_dir: /workspace/web
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    environment:
+      VITE_API_BASE: http://localhost:8080
+    volumes:
+      - ..:/workspace
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api

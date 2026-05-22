@@ -1,0 +1,14 @@
+traffic {
+  inputPaths = [
+    "data/sample-input.jsonl"
+  ]
+
+  outputPath = "target/output/traffic"
+  quarantinePath = "target/output/traffic-quarantine"
+
+  processingDate = "2025-01-15"
+  applicationName = "daily-web-traffic-analytics-local"
+
+  # Optional. If omitted, Spark chooses partitioning based on upstream plan.
+  repartitionCount = 2
+}

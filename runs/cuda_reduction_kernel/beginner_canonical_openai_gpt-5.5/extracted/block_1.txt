@@ -1,0 +1,165 @@
+#include <cuda_runtime.h>
+
+#include <iostream>
+#include <vector>
+#include <iomanip>
+
+// Simple CUDA error-checking helper
+#define CUDA_CHECK(call)                                                   \
+    do {                                                                   \
+        cudaError_t err = call;                                             \
+        if (err != cudaSuccess) {                                           \
+            std::cerr << "CUDA error at " << __FILE__ << ":" << __LINE__   \
+                      << " - " << cudaGetErrorString(err) << std::endl;    \
+            return 1;                                                       \
+        }                                                                  \
+    } while (0)
+
+/*
+    Kernel: sumKernel
+
+    Each CUDA kernel is launched as a grid of blocks.
+    Each block contains multiple threads.
+
+    In this example:
+    - Each thread reads one float from the input array, if it is inside bounds.
+    - Threads in the same block cooperate to compute one partial sum.
+    - One thread per block adds that partial sum into the final result using atomicAdd.
+*/
+__global__ void sumKernel(const float* input, float* output, int n)
+{
+    // Shared memory is memory shared by all threads in the same block.
+    // We use it to reduce, or sum, values inside each block.
+    extern __shared__ float sharedData[];
+
+    // threadIdx.x is the thread's ID within its block.
+    unsigned int localThreadId = threadIdx.x;
+
+    // blockIdx.x is the block's ID within the grid.
+    // blockDim.x is the number of threads in each block.
+    unsigned int globalThreadId = blockIdx.x * blockDim.x + threadIdx.x;
+
+    // Make sure threads do not read beyond the end of the array.
+    float value = 0.0f;
+    if (globalThreadId < n) {
+        value = input[globalThreadId];
+    }
+
+    // Store each thread's value in shared memory.
+    sharedData[localThreadId] = value;
+
+    // Wait until all threads in this block have written to shared memory.
+    __syncthreads();
+
+    // Parallel reduction inside the block.
+    // This repeatedly halves the number of active threads.
+    for (unsigned int stride = blockDim.x / 2; stride > 0; stride >>= 1) {
+        if (localThreadId < stride) {
+            sharedData[localThreadId] += sharedData[localThreadId + stride];
+        }
+
+        // Wait before the next reduction step.
+        __syncthreads();
+    }
+
+    // After the reduction, sharedData[0] contains this block's partial sum.
+    // One thread per block adds the partial sum to the final output.
+    if (localThreadId == 0) {
+        atomicAdd(output, sharedData[0]);
+    }
+}
+
+int main()
+{
+    const int n = 1 << 20; // 1,048,576 floats
+
+    /*
+        Host memory:
+        This is regular CPU memory.
+        The std::vector below stores the input array on the CPU.
+    */
+    std::vector<float> hostInput(n);
+
+    // Fill the array with simple values.
+    for (int i = 0; i < n; ++i) {
+        hostInput[i] = 1.0f;
+    }
+
+    // CPU-side sum for comparison.
+    float cpuSum = 0.0f;
+    for (int i = 0; i < n; ++i) {
+        cpuSum += hostInput[i];
+    }
+
+    /*
+        Device memory:
+        This is GPU memory.
+        Device pointers usually start with "d_" by convention.
+    */
+    float* deviceInput = nullptr;
+    float* deviceSum = nullptr;
+
+    size_t inputSizeBytes = n * sizeof(float);
+
+    // Allocate GPU memory for the input array.
+    CUDA_CHECK(cudaMalloc(&deviceInput, inputSizeBytes));
+
+    // Allocate GPU memory for the final sum.
+    CUDA_CHECK(cudaMalloc(&deviceSum, sizeof(float)));
+
+    // Copy the input array from host memory to device memory.
+    CUDA_CHECK(cudaMemcpy(deviceInput,
+                          hostInput.data(),
+                          inputSizeBytes,
+                          cudaMemcpyHostToDevice));
+
+    // Initialize the GPU sum to zero before the kernel runs.
+    CUDA_CHECK(cudaMemset(deviceSum, 0, sizeof(float)));
+
+    /*
+        Blocks and threads:
+
+        A kernel launch uses:
+        - threadsPerBlock: number of threads in each block
+        - blocksPerGrid: number of blocks in the grid
+
+        Here, each thread handles one array element.
+        We round up blocksPerGrid so every element is covered.
+    */
+    const int threadsPerBlock = 256;
+    const int blocksPerGrid = (n + threadsPerBlock - 1) / threadsPerBlock;
+
+    // Shared memory size needed by each block.
+    size_t sharedMemoryBytes = threadsPerBlock * sizeof(float);
+
+    // Launch the kernel.
+    sumKernel<<<blocksPerGrid, threadsPerBlock, sharedMemoryBytes>>>(
+        deviceInput,
+        deviceSum,
+        n
+    );
+
+    // Check for kernel launch errors.
+    CUDA_CHECK(cudaGetLastError());
+
+    // Wait for the GPU to finish.
+    CUDA_CHECK(cudaDeviceSynchronize());
+
+    // Copy the final result from device memory back to host memory.
+    float gpuSum = 0.0f;
+    CUDA_CHECK(cudaMemcpy(&gpuSum,
+                          deviceSum,
+                          sizeof(float),
+                          cudaMemcpyDeviceToHost));
+
+    // Print results.
+    std::cout << std::fixed << std::setprecision(1);
+    std::cout << "CPU sum: " << cpuSum << std::endl;
+    std::cout << "GPU sum: " << gpuSum << std::endl;
+
+    // Clean up GPU memory.
+    CUDA_CHECK(cudaFree(deviceInput));
+    CUDA_CHECK(cudaFree(deviceSum));
+
+    return 0;
+}

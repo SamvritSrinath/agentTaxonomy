@@ -1,0 +1,32 @@
+{
+  "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/beginner_canonical_openai_gpt-5.5/agent_output.md",
+  "output_dir": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/beginner_canonical_openai_gpt-5.5/extracted",
+  "block_count": 4,
+  "extracted_files": [
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/beginner_canonical_openai_gpt-5.5/agent_output.md",
+      "language": "cpp",
+      "relative_path": "block_1.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/beginner_canonical_openai_gpt-5.5/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_2.sh"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/beginner_canonical_openai_gpt-5.5/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_3.sh"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/beginner_canonical_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_4.txt"
+    },
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/cuda_reduction_kernel/beginner_canonical_openai_gpt-5.5/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

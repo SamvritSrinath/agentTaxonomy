@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 from pathlib import Path
 from typing import Any
 
@@ -45,7 +46,7 @@ def extract_markdown_artifacts(markdown_path: Path, output_dir: Path) -> dict[st
         Manifest dict with ``extracted_files``, ``block_count``, and ``output_dir``.
     """
     text = markdown_path.read_text(encoding="utf-8", errors="replace")
-    output_dir.mkdir(parents=True, exist_ok=True)
+    _reset_extract_dir(output_dir)
     extracted_files: list[dict[str, str]] = []
     prose_path = output_dir / "explanation.md"
     prose_parts: list[str] = []
@@ -112,7 +113,18 @@ def write_extracted_artifacts(markdown_path: Path, output_dir: Path, manifest_pa
     return manifest
 
 
+def _reset_extract_dir(output_dir: Path) -> None:
+    """Remove prior extracted files so re-extract does not accumulate duplicates."""
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+
 def _filename_for_block(lang: str, body: str, block_index: int, ext: str) -> str:
+    if "libraryDependencies" in body and ("%%" in body or "libraryDependencies ++=" in body):
+        return "build.sbt"
+    if lang in {"scala", "sbt"} and body.strip().startswith("ThisBuild /"):
+        return "build.sbt"
     if lang == "scala":
         object_match = re.search(r"\bobject\s+([A-Za-z_][A-Za-z0-9_]*)", body)
         if object_match:

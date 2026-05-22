@@ -1,0 +1,22 @@
+web-traffic-analytics/
+├── build.sbt
+├── conf/
+│   └── local.conf
+├── data/
+│   └── sample-input.jsonl
+├── docs/
+│   └── expected-output.md
+├── README.md
+└── src/
+    ├── main/
+    │   └── scala/
+    │       └── com/example/traffic/
+    │           ├── Main.scala
+    │           ├── config/TrafficJobConfig.scala
+    │           ├── io/PathGuard.scala
+    │           ├── model/Schemas.scala
+    │           └── pipeline/TrafficPipeline.scala
+    └── test/
+        └── scala/
+            └── com/example/traffic/
+                └── TrafficPipelineSpec.scala

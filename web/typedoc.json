@@ -1,0 +1,8 @@
+{
+  "entryPoints": ["src/api/client.ts", "src/api/types.ts", "src/hooks/useAsyncResource.ts", "src/App.tsx"],
+  "out": "docs",
+  "readme": "none",
+  "excludePrivate": true,
+  "treatWarningsAsErrors": true,
+  "plugin": []
+}

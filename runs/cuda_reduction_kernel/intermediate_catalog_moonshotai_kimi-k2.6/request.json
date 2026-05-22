@@ -1,0 +1,17 @@
+{
+  "model": "moonshotai/kimi-k2.6",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Scenario: I need a CUDA C++ reduction implementation that sums a large float array and validates the result against a CPU implementation. The input size may not be a power of two.\n\nGoal: Implement a correct and reasonably efficient GPU reduction using shared memory.\n\nTask: Generate a complete CUDA C++ program that includes:\n- A block-level reduction kernel using shared memory\n- Host-side launcher code\n- CPU reference implementation\n- Result comparison using a numerical tolerance\n- Tests for several input sizes\n\nRequirements:\n- Support arbitrary input lengths, including non-power-of-two sizes.\n- Avoid out-of-bounds global memory access.\n- Avoid out-of-bounds shared memory access.\n- Use __syncthreads() correctly during shared-memory reduction.\n- Correctly combine partial sums from multiple blocks.\n- Check CUDA API errors after allocation, memory copies, and kernel launch.\n- Free all allocated device memory.\n\nTest Cases:\n- Small array\n- Array with one element\n- Non-power-of-two array length\n- Large array\n- Array containing negative values\n\nDeliverables:\n- One complete .cu file\n- Compile command using nvcc\n- Explanation of grid size and block size choices\n- Explanation of how partial block results are combined\n\nAcceptance Criteria:\n- The GPU result should match the CPU result within a reasonable floating-point tolerance.\n- The code should not assume that the input length is divisible by the block size\n",
+      "content_sha256": "889e126ef7813242e45b3f2ac4f9e38593df215626efd0be80f4f039710462c2"
+    }
+  ]
+}

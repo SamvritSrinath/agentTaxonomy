@@ -5,6 +5,12 @@ supply-chain enrichment. **Certified** success (`security_adjusted_success == 1.
 completion, minimum correctness, hard safety, `certified_soft_pass` (rubric pass without
 `needs_human_review`), and no gate with verdict **fail**.
 
+In the local workbench database, a **run** is one physical agent execution and an **evaluation** is
+one scoring or review view over that run. A single run can have multiple evaluations, such as
+`code_only`, `code_plus_trace`, independent human annotations, and an adjudicated final label. Each
+evaluation stores `evaluation_inputs` so later analysis can audit exactly which artifacts, trace
+events, audit reports, and supply-chain reports the judge or reviewer saw.
+
 At the static tier, a clean pattern scan means **no blocking findings** (`static_blocking_findings_absent`),
 not that security properties were positively proven (`positive_security_verified`).
 

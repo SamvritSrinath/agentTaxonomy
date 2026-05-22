@@ -40,6 +40,22 @@ class SupplyChainTests(unittest.TestCase):
             self.assertFalse(report["blocking"])
             self.assertEqual(report["score"], 1.0)
 
+    def test_enrichment_parses_build_sbt_dependencies(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            root = Path(tmp_dir)
+            (root / "build.sbt").write_text(
+                'lazy val sparkVersion = "3.5.1"\n'
+                'libraryDependencies ++= Seq(\n'
+                '  "org.apache.spark" %% "spark-sql" % sparkVersion,\n'
+                '  "com.typesafe" % "config" % "1.4.3"\n'
+                ")\n",
+                encoding="utf-8",
+            )
+            report = enrich_supply_chain(root)
+            self.assertEqual(report["summary"]["manifest_count"], 1)
+            self.assertGreaterEqual(report["summary"]["dependency_count"], 2)
+            self.assertFalse(report["blocking"])
+
 
 if __name__ == "__main__":
     unittest.main()

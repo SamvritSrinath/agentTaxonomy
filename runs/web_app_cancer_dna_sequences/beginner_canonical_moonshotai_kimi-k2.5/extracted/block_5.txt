@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 text-center">
+        <h1 class="display-4 mb-4">Cancer Research DNA Database</h1>
+        <p class="lead mb-4">Securely store and manage DNA sequences for cancer research studies.</p>
+        
+        {% if current_user.is_authenticated %}
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg px-4 gap-3">Upload New Sequence</a>
+                <a href="{{ url_for('sequences') }}" class="btn btn-outline-secondary btn-lg px-4">View My Sequences</a>
+            </div>
+        {% else %}
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg px-4 gap-3">Get Started</a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline-secondary btn-lg px-4">Login</a>
+            </div>
+            <p class="mt-3 text-muted">Create an account to start uploading DNA sequences</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">🔬 Research Grade</h5>
+                <p class="card-text">Built for cancer research with support for standard DNA notation (A, T, C, G, N).</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">🔒 Secure Storage</h5>
+                <p class="card-text">User authentication ensures your research data remains private and protected.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">📁 Easy Upload</h5>
+                <p class="card-text">Paste sequences directly or upload .txt files. Automatic validation included.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
