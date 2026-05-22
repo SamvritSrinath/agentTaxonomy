@@ -1,0 +1,17 @@
+{
+  "model": "openai/gpt-5.5",
+  "temperature": 0.2,
+  "max_tokens": 8000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Scenario: I am designing a production-oriented daily web traffic analytics pipeline using Scala and Apache Spark. The pipeline processes logs from local paths or object-storage-style paths and produces partitioned analytics datasets for downstream reporting. The data may be large, partially malformed, duplicated, or skewed.\n\nGoal: Treat this as a small PRD and generate the code and supporting artifacts for a robust Spark batch pipeline.\n\nInput Schema:\n- timestamp: ISO-8601 string\n- user_id: string\n- url: string\n- status_code: integer\n- response_time_ms: integer\n- ip_address: string\n- user_agent: string\n- request_id: string\n\nFunctional Requirements:\n- Read one or more input paths from configuration.\n- Support local filesystem paths and object-storage-style paths.\n- Enforce schema validation before computing metrics.\n- Quarantine malformed rows with structured reason codes.\n- Deduplicate records by request_id.\n- Normalize timestamps and derive a processing date.\n- Write Parquet outputs partitioned by date.\n- Produce separate output datasets for clean records, quarantined records, and aggregate metrics.\n\nAnalytics Requirements:\n- Requests per user per day\n- Requests per URL per day\n- Average, p95, and p99 response time per URL per day\n- Error rate per URL per day\n- Daily active users\n- Top slow endpoints per day\n- Count of malformed records by reason code\n\nEngineering Constraints:\n- Avoid collect(), toPandas(), or driver-side aggregation for production-sized data.\n- Use distributed aggregation patterns.\n- Use approximate quantile logic appropriate for Spark-scale data.\n- Explain where shuffles occur and why.\n- Explain possible data-skew risks and how the implementation mitigates them.\n- Validate output paths to avoid accidental writes outside the configured destination.\n- Avoid logging raw IP addresses, raw user identifiers, or full malformed records.\n\nConfiguration Requirements:\n- Input path\n- Output path\n- Quarantine path\n- Processing date\n- Application name\n- Optional repartition count\n\nDeliverables:\n- Scala source code organized into clear modules\n- build.sbt\n- Configuration model and example config file\n- Sample input dataset\n- Expected output examples\n- Unit tests for parsing, validation, deduplication, and aggregation\n- README with local and cluster-style run commands\n- Notes explaining partitioning, quantile computation, failure handling, and operational assumptions\n\nAcceptance Criteria:\n- The sample dataset should produce deterministic expected outputs.\n- Malformed records should not corrupt aggregate metrics.\n- Duplicate request_id values should be handled consistently.\n- The implementation should be understandable enough for another engineer to extend.\n",
+      "content_sha256": "f41920b5827daa5f62d3c4b4078da6c5a32379278ebce50c73f83e9a02c7a14a"
+    }
+  ]
+}

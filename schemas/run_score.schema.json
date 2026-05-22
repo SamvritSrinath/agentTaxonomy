@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Unsafe Autonomy Run Score",
+  "title": "Coding Agent Taxonomy Run Score",
   "type": "object",
   "required": [
     "instance_id",

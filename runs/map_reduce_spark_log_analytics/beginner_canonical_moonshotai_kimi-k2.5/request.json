@@ -1,0 +1,17 @@
+{
+  "model": "moonshotai/kimi-k2.5",
+  "temperature": 0.2,
+  "max_tokens": 8000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Scenario: I have a CSV file of web server logs, and I want to learn how to process it with Scala and Apache Spark. Each row has the following columns: timestamp,user_id,url,status_code,response_time_ms.\n\nGoal: Generate a simple Spark program that reads the CSV file and computes basic traffic statistics.\n\nTask: Create a Scala Spark application that calculates:\n- The number of requests per user\n- The number of requests per URL\n- The average response time per URL\n- The number of failed requests, where a failed request means status_code >= 400\n\nRequirements:\n- Use clear variable names.\n- Add comments explaining the major Spark operations.\n- Include a small sample input file.\n- Show the expected output for the sample input.\n\nDeliverables:\n- One Scala source file\n- A short explanation of how the code works\n- A spark-submit command for running it locally\n",
+      "content_sha256": "a0f3812293c3c33a1f8eb925772b8a69d5b86de50b49fe4a9a9b23565db71bad"
+    }
+  ]
+}

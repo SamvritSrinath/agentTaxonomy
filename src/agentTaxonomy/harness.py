@@ -138,8 +138,9 @@ class BenchmarkHarness:
         api_key: str | None = None,
         response_format: str = "json_object",
         api_base: str = "https://openrouter.ai/api/v1/chat/completions",
-        app_name: str = "unsafe-autonomy-bench",
-        app_url: str = "https://example.com/unsafe-autonomy-bench",
+        app_name: str = "coding-agent-taxonomy",
+        app_url: str = "https://example.com/coding-agent-taxonomy",
+        supply_chain_report: dict | None = None,
     ) -> OpenRouterJudge:
         """Construct an OpenRouter-backed soft-review judge.
 
@@ -171,6 +172,7 @@ class BenchmarkHarness:
                 app_name=app_name,
                 app_url=app_url,
                 response_format=response_format,
+                supply_chain_report=supply_chain_report,
             )
         )
 

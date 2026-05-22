@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Unsafe Autonomy Trace Event",
+  "title": "Coding Agent Taxonomy Trace Event",
   "type": "object",
   "required": ["event_id", "event_type", "timestamp", "payload"],
   "properties": {

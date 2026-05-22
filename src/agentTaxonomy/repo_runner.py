@@ -10,6 +10,8 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
+from .agents import AgentRunRequest, CommandAgentAdapter
+from .agents.sandbox import profile_by_name
 from .audit import static_audit
 from .schema import BenchmarkInstance, EventType, RuntimeProfileSpec, VerificationTier
 from .scoring import score_run
@@ -27,6 +29,8 @@ class RepoTaskRunResult:
         trace_path: Path to ``trace.jsonl`` recorded during the run.
         score_path: Path to ``score.json`` produced after scoring.
         diff_path: Path to ``final.diff`` of repository changes.
+        stdout_path: Path to captured stdout from the agent command.
+        stderr_path: Path to captured stderr from the agent command.
         commands_log_path: Path to combined stdout/stderr from the agent command.
         tests_path: Path to ``tests.json`` utility test report.
         network_log_path: Path to network activity log (placeholder when empty).
@@ -39,6 +43,8 @@ class RepoTaskRunResult:
     trace_path: str
     score_path: str
     diff_path: str
+    stdout_path: str
+    stderr_path: str
     commands_log_path: str
     tests_path: str
     network_log_path: str
@@ -53,6 +59,8 @@ def run_repo_task(
     agent_cmd: str,
     profile_name: str,
     output_dir: Path,
+    sandbox_profile_name: str | None = None,
+    docker_sandbox: bool = False,
 ) -> RepoTaskRunResult:
     """Run a repo-working agent command with snapshot-wrapper instrumentation.
 
@@ -79,6 +87,7 @@ def run_repo_task(
     if worktree.exists():
         raise FileExistsError(f"repo runner worktree already exists: {worktree}")
     shutil.copytree(repo, worktree, ignore=shutil.ignore_patterns("__pycache__", ".venv", "node_modules", "target"))
+    _ensure_git_repo(worktree)
 
     profile = _select_profile(instance, profile_name)
     timeout = profile.timeout_seconds or 180
@@ -88,46 +97,75 @@ def run_repo_task(
 
     before_hash = _repo_hash(worktree)
     (output_dir / "repo_before.sha256").write_text(before_hash + "\n", encoding="utf-8")
+    before_snapshot_path = output_dir / "fs_snapshot_before.json"
+    before_snapshot_path.write_text(json.dumps(_filesystem_snapshot(worktree), indent=2) + "\n", encoding="utf-8")
     recorder.append(
         new_event(
             EventType.REPO_SNAPSHOT,
-            {"phase": "before", "repo_sha256": before_hash, "worktree": str(worktree)},
+            {
+                "phase": "before",
+                "repo_sha256": before_hash,
+                "worktree": str(worktree),
+                "fs_snapshot_path": str(before_snapshot_path),
+            },
             actor="harness",
         )
     )
 
-    command_result = _run_shell(agent_cmd, worktree, timeout)
+    sandbox_profile = profile_by_name(sandbox_profile_name)
+    adapter = CommandAgentAdapter("command", agent_cmd, sandbox_profile=sandbox_profile)
+    command_result = adapter.run(
+        AgentRunRequest(
+            run_id=output_dir.name,
+            instance_id=instance.instance_id,
+            prompt=instance.agent_prompt,
+            worktree=worktree,
+            output_dir=output_dir,
+            timeout_seconds=timeout,
+            env={},
+            metadata={"profile_name": profile_name, "docker_sandbox": docker_sandbox},
+        )
+    )
+    stdout_text = command_result.stdout_path.read_text(encoding="utf-8", errors="replace")
+    stderr_text = command_result.stderr_path.read_text(encoding="utf-8", errors="replace")
     commands_log = output_dir / "commands.log"
     commands_log.write_text(
         "\n".join(
             [
                 f"$ {agent_cmd}",
-                f"returncode={command_result.returncode}",
+                f"returncode={command_result.exit_code}",
                 "",
                 "[stdout]",
-                command_result.stdout,
+                stdout_text,
                 "",
                 "[stderr]",
-                command_result.stderr,
+                stderr_text,
             ]
         )
         + "\n",
         encoding="utf-8",
     )
+    (output_dir / "agent_output.md").write_text(stdout_text or "(agent produced no stdout)\n", encoding="utf-8")
     recorder.append(
         new_event(
             EventType.COMMAND_EXECUTED,
             {
                 "command": agent_cmd,
-                "returncode": command_result.returncode,
-                "stdout_path": str(commands_log),
-                "stderr_path": str(commands_log),
+                "returncode": command_result.exit_code,
+                "stdout_path": str(command_result.stdout_path),
+                "stderr_path": str(command_result.stderr_path),
+                "commands_log_path": str(commands_log),
                 "timeout_seconds": timeout,
-                "timed_out": command_result.timed_out,
+                "timed_out": command_result.metadata.get("timed_out", False),
+                "started_at": command_result.started_at,
+                "completed_at": command_result.completed_at,
+                "sandbox_profile_name": command_result.metadata.get("sandbox_profile_name"),
+                "sandbox_profile_hash": command_result.metadata.get("sandbox_profile_hash"),
             },
             actor="harness",
         )
     )
+    _append_sandbox_events(recorder, output_dir / "sandbox_events.jsonl")
 
     test_report = _run_utility_tests(instance, profile, worktree)
     tests_path = output_dir / "tests.json"
@@ -136,16 +174,30 @@ def run_repo_task(
         recorder.append(new_event(EventType.TEST_RUN, test_report, actor="harness"))
 
     diff_text = _git_diff(worktree)
-    diff_path = output_dir / "final.diff"
+    diff_path = output_dir / "diff.patch"
     diff_path.write_text(diff_text, encoding="utf-8")
+    (output_dir / "final.diff").write_text(diff_text, encoding="utf-8")
+    status_text = _git_status(worktree)
+    (output_dir / "git_status.txt").write_text(status_text, encoding="utf-8")
+    untracked = _untracked_files(status_text)
+    (output_dir / "untracked_files.txt").write_text("\n".join(untracked) + ("\n" if untracked else ""), encoding="utf-8")
+    changed_files = _changed_files(status_text, diff_text)
+    (output_dir / "changed_files.json").write_text(json.dumps(changed_files, indent=2) + "\n", encoding="utf-8")
     recorder.append(new_event(EventType.FINAL_PATCH, {"diff_path": str(diff_path), "diff": diff_text}, actor="harness"))
 
     after_hash = _repo_hash(worktree)
     (output_dir / "repo_after.sha256").write_text(after_hash + "\n", encoding="utf-8")
+    after_snapshot_path = output_dir / "fs_snapshot_after.json"
+    after_snapshot_path.write_text(json.dumps(_filesystem_snapshot(worktree), indent=2) + "\n", encoding="utf-8")
     recorder.append(
         new_event(
             EventType.REPO_SNAPSHOT,
-            {"phase": "after", "repo_sha256": after_hash, "worktree": str(worktree)},
+            {
+                "phase": "after",
+                "repo_sha256": after_hash,
+                "worktree": str(worktree),
+                "fs_snapshot_path": str(after_snapshot_path),
+            },
             actor="harness",
         )
     )
@@ -173,7 +225,7 @@ def run_repo_task(
     recorder.append(
         new_event(
             EventType.FINAL_RESPONSE,
-            {"message": f"Repo task command exited with code {command_result.returncode}."},
+            {"message": f"Repo task command exited with code {command_result.exit_code}."},
             actor="harness",
         )
     )
@@ -199,6 +251,8 @@ def run_repo_task(
         trace_path=str(trace_path),
         score_path=str(score_path),
         diff_path=str(diff_path),
+        stdout_path=str(command_result.stdout_path),
+        stderr_path=str(command_result.stderr_path),
         commands_log_path=str(commands_log),
         tests_path=str(tests_path),
         network_log_path=str(network_path),
@@ -268,6 +322,22 @@ def _run_utility_tests(instance: BenchmarkInstance, profile: RuntimeProfileSpec,
     }
 
 
+def _ensure_git_repo(worktree: Path) -> None:
+    """Initialize a baseline git repository when a fixture is not already one."""
+    if (worktree / ".git").exists():
+        return
+    subprocess.run(["git", "init"], cwd=worktree, check=False, capture_output=True, text=True, timeout=30)
+    subprocess.run(["git", "add", "."], cwd=worktree, check=False, capture_output=True, text=True, timeout=30)
+    subprocess.run(
+        ["git", "-c", "user.name=CaT", "-c", "user.email=cat@example.invalid", "commit", "-m", "baseline"],
+        cwd=worktree,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+
 def _repo_hash(root: Path) -> str:
     digest = sha256()
     for path in sorted(root.rglob("*")):
@@ -281,7 +351,55 @@ def _repo_hash(root: Path) -> str:
     return digest.hexdigest()
 
 
+def _filesystem_snapshot(root: Path) -> list[dict[str, Any]]:
+    snapshot: list[dict[str, Any]] = []
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or ".git" in path.parts:
+            continue
+        snapshot.append(
+            {
+                "path": path.relative_to(root).as_posix(),
+                "sha256": sha256(path.read_bytes()).hexdigest(),
+                "size_bytes": path.stat().st_size,
+            }
+        )
+    return snapshot
+
+
+def _append_sandbox_events(recorder: TraceRecorder, log_path: Path) -> None:
+    if not log_path.exists():
+        return
+    for line in log_path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        event = json.loads(line)
+        recorder.append(
+            new_event(
+                EventType.COMMAND_EXECUTED,
+                {
+                    "command": " ".join(event.get("argv", [])),
+                    "argv": event.get("argv", []),
+                    "cwd": event.get("cwd"),
+                    "allowed": event.get("allowed"),
+                    "reason": event.get("reason"),
+                    "sandbox_profile": event.get("sandbox_profile"),
+                    "sandbox_profile_hash": event.get("sandbox_profile_hash"),
+                    "shim_timestamp": event.get("timestamp"),
+                },
+                actor="sandbox",
+            )
+        )
+
+
 def _git_diff(worktree: Path) -> str:
+    subprocess.run(
+        ["git", "add", "-N", "."],
+        cwd=worktree,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
     result = subprocess.run(
         ["git", "diff", "--", "."],
         cwd=worktree,
@@ -293,3 +411,42 @@ def _git_diff(worktree: Path) -> str:
     if result.returncode == 0:
         return result.stdout
     return ""
+
+
+def _git_status(worktree: Path) -> str:
+    """Return porcelain git status for changed-file analysis."""
+    result = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=worktree,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    return result.stdout if result.returncode == 0 else ""
+
+
+def _untracked_files(status_text: str) -> list[str]:
+    """Extract untracked file paths from porcelain status."""
+    return [line[3:] for line in status_text.splitlines() if line.startswith("?? ")]
+
+
+def _changed_files(status_text: str, diff_text: str) -> list[dict[str, Any]]:
+    """Summarize changed files from status and patch text."""
+    diff_paths = {
+        line.removeprefix("+++ b/")
+        for line in diff_text.splitlines()
+        if line.startswith("+++ b/") and line != "+++ /dev/null"
+    }
+    rows: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for line in status_text.splitlines():
+        if len(line) < 4:
+            continue
+        status = line[:2]
+        path = line[3:]
+        rows.append({"path": path, "status": status.strip() or "modified", "in_diff": path in diff_paths})
+        seen.add(path)
+    for path in sorted(diff_paths - seen):
+        rows.append({"path": path, "status": "modified", "in_diff": True})
+    return rows

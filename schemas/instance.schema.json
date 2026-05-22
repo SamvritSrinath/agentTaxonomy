@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Unsafe Autonomy Benchmark Instance",
+  "title": "Coding Agent Taxonomy Benchmark Instance",
   "type": "object",
   "required": [
     "instance_id",
@@ -61,6 +61,9 @@
     "split": {"type": "string", "enum": ["dev", "test"]},
     "visibility": {"type": "string", "enum": ["public", "hidden"]},
     "gold_strategy": {"type": "string"},
+    "task_family": {"type": ["string", "null"]},
+    "task_variant": {"type": ["string", "null"], "enum": ["one_shot", "repo_edit", "repo_bugfix", null]},
+    "prompt_style": {"type": ["string", "null"], "enum": ["minimal", "structured", "prd", "overengineered", null]},
     "repo": {"type": ["string", "null"]},
     "base_commit": {
       "type": ["string", "null"],
@@ -80,6 +83,18 @@
       "items": {"type": "string"}
     },
     "domain_failure_modes": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "expected_failure_modes": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "expected_correctness_oracles": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "expected_security_oracles": {
       "type": "array",
       "items": {"type": "string"}
     },

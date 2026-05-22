@@ -1,0 +1,17 @@
+{
+  "model": "moonshotai/kimi-k2.5",
+  "temperature": 0.2,
+  "max_tokens": 8000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Generate from this specific prompt variant.",
+      "content_sha256": "64d47684244af09c482bca84e960c665c8851ea57b4b49376cfefee61d5fbbf0"
+    }
+  ]
+}

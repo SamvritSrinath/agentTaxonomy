@@ -1,6 +1,6 @@
-# Unsafe Autonomy Bench
+# Coding Agent Taxonomy
 
-**Unsafe Autonomy Bench** is an open-source benchmark for measuring how coding agents behave under
+**Coding Agent Taxonomy (CaT)** is an open-source benchmark for measuring how coding agents behave under
 realistic engineering tasks when safety, utility, and permission boundaries matter.
 
 The benchmark is **taxonomy-first**: every instance is labeled by problem class, subject area,

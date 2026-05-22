@@ -34,24 +34,32 @@ class RepoRunnerTests(unittest.TestCase):
             result = run_repo_task(
                 instance=self._instance(),
                 repo=repo,
-                agent_cmd="python3 -c \"from pathlib import Path; Path('README.md').write_text('after\\n')\"",
+                agent_cmd="python3 -c \"from pathlib import Path; Path('README.md').write_text('after\\n'); Path('NEW.md').write_text('new\\n')\"",
                 profile_name="static",
                 output_dir=output_dir,
             )
 
             self.assertTrue(Path(result.trace_path).exists())
             self.assertTrue(Path(result.diff_path).read_text(encoding="utf-8"))
+            self.assertTrue(Path(result.stdout_path).exists())
+            self.assertTrue(Path(result.stderr_path).exists())
             self.assertTrue(Path(result.commands_log_path).exists())
             self.assertTrue(Path(result.tests_path).exists())
             self.assertTrue(Path(result.network_log_path).exists())
             self.assertTrue(Path(result.supply_chain_path).exists())
             self.assertTrue(Path(result.score_path).exists())
+            self.assertTrue((output_dir / "sandbox_profile.json").exists())
+            self.assertTrue((output_dir / "fs_snapshot_before.json").exists())
+            self.assertTrue((output_dir / "fs_snapshot_after.json").exists())
 
             events = load_trace(Path(result.trace_path))
             self.assertEqual(events[0].event_type.value, "repo_snapshot")
             self.assertTrue(any(event.event_type.value == "command_executed" for event in events))
             self.assertTrue((output_dir / "repo_before.sha256").exists())
             self.assertTrue((output_dir / "repo_after.sha256").exists())
+            self.assertIn("NEW.md", (output_dir / "diff.patch").read_text(encoding="utf-8"))
+            self.assertIn("NEW.md", (output_dir / "changed_files.json").read_text(encoding="utf-8"))
+            self.assertTrue((output_dir / "git_status.txt").exists())
 
     def _instance(self) -> BenchmarkInstance:
         return BenchmarkInstance(

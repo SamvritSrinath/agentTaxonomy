@@ -1,6 +1,6 @@
-# Unsafe Autonomy Bench
+# Coding Agent Taxonomy (CaT)
 
-`unsafe-autonomy-bench` is now a taxonomy-first benchmark scaffold for evaluating agent tasks across:
+**Coding Agent Taxonomy** is a taxonomy-first benchmark for evaluating coding agents across:
 
 - `problem_class`
 - `subject_area`
@@ -15,7 +15,7 @@ The active Python package is `agentTaxonomy` under `src/agentTaxonomy/`. The old
 ## Project Layout
 
 ```text
-unsafe-autonomy-bench/
+<repository-root>/
 ├── benchmark/
 │   ├── generated/
 │   ├── rubrics/
@@ -37,7 +37,7 @@ uv sync
 
 The CLI reads `OPENROUTER_API_KEY` from the environment. It does not auto-load `.env` files on its own, so source the file yourself or use `direnv`.
 
-An example file is included at [.env.example](/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/.env.example:1).
+An example file is included at [.env.example](.env.example).
 
 ```bash
 cp .env.example .env
@@ -60,13 +60,13 @@ Notes:
 
 ## Standard Workflow
 
-Use `uv run uab ...` from the repository root (or `uv run python -m agentTaxonomy.cli ...`).
+Use `uv run catt ...` from the repository root (or `uv run python -m agentTaxonomy.cli ...`). The `uab` alias still works but prints a deprecation warning.
 
 Build the generated catalog after any prompt or task metadata change:
 
 ```bash
-cd /<PATH_TO_PROJECT>/unsafe-autonomy-bench
-PYTHONPATH=src python -m agentTaxonomy.cli build-catalog
+cd <PATH_TO_PROJECT>
+uv run catt build-catalog
 ```
 
 Validate the catalog:
@@ -139,7 +139,7 @@ Prompt authoring rules:
 }
 ```
 
-Current required top-level fields, based on [catalog.py](/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/src/agentTaxonomy/catalog.py:69):
+Current required top-level fields, based on [catalog.py](src/agentTaxonomy/catalog.py):
 
 - `task_id`
 - `problem_class`
@@ -181,7 +181,7 @@ After adding a new prompt set:
 1. Create the three prompt files and `task.json`.
 2. Rebuild the catalog.
 3. Validate the catalog.
-4. Inspect [benchmark/generated/catalog.json](/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/generated/catalog.json:1) to confirm the three derived instance IDs are present.
+4. Inspect [benchmark/generated/catalog.json](benchmark/generated/catalog.json) to confirm the three derived instance IDs are present.
 
 ## Generating Runs
 
@@ -310,7 +310,7 @@ PYTHONPATH=src python -m agentTaxonomy.cli summarize-runs \
   runs/map_reduce_spark_log_analytics/beginner/score.json
 ```
 
-`score-run` output in [run_score.schema.json](/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/schemas/run_score.schema.json:1) includes layered scores plus honest security semantics:
+`score-run` output in [run_score.schema.json](schemas/run_score.schema.json) includes layered scores plus honest security semantics:
 
 | Field | Meaning |
 |-------|---------|

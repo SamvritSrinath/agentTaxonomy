@@ -1,13 +1,22 @@
 [project]
-name = "unsafe-autonomy-bench"
+name = "coding-agent-taxonomy"
 version = "0.1.0"
-description = "Taxonomy-first benchmark for evaluating unsafe autonomy in agent tasks"
+description = "Taxonomy-first benchmark for evaluating coding agents across safety and utility"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "alembic>=1.13.0",
+    "fastapi>=0.115.0",
+    "httpx>=0.28.0",
+    "psycopg[binary]>=3.2.0",
+    "pyyaml>=6.0.0",
+    "sqlalchemy>=2.0.0",
+    "uvicorn[standard]>=0.30.0",
+]
 
 [project.scripts]
-uab = "agentTaxonomy.cli:main"
+catt = "agentTaxonomy.cli:main"
+uab = "agentTaxonomy.cli:main_deprecated"
 
 [build-system]
 requires = ["setuptools>=68"]
@@ -24,6 +33,10 @@ docs = [
     "mkdocs>=1.6.0",
     "mkdocs-material>=9.5.0",
     "mkdocstrings[python]>=0.26.0",
+]
+analysis = [
+    "pandas>=2.2.0",
+    "pyarrow>=16.0.0",
 ]
 
 [tool.uv]

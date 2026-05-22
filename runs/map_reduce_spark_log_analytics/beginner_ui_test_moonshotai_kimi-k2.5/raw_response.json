@@ -1,0 +1,53 @@
+{
+  "id": "gen-1779439019-k8Z5Szs8vuXOmb0TAULV",
+  "object": "chat.completion",
+  "created": 1779439019,
+  "model": "moonshotai/kimi-k2.5-0127",
+  "provider": "Parasail",
+  "system_fingerprint": "vllm-0.20.1rc1.dev927+g542038574-tp8-8d1a6149",
+  "choices": [
+    {
+      "index": 0,
+      "logprobs": null,
+      "finish_reason": "stop",
+      "native_finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": " I don't see the specific prompt variant in your message. Could you please provide:\n\n1. **The prompt variant** you want me to generate from (e.g., the coding task, problem statement, or requirements)\n2. **Target language/framework** (if specific)\n3. **Any constraints** (performance requirements, specific libraries, etc.)\n\nOnce you provide the prompt variant, I'll generate:\n- Source code implementation\n- Unit tests\n- Build/run commands\n- Concise explanation\n\n**Example of what I'm expecting:**\n> \"Generate from this specific prompt variant: *Write a Python function that implements the Sieve of Eratosthenes to find all primes up to n, with O(n log log n) time complexity.*\"\n\nPlease paste the prompt variant you'd like me to work with!",
+        "refusal": null,
+        "reasoning": " The user wants me to generate something from a \"specific prompt variant\" but hasn't actually provided the prompt variant yet. They said \"Generate from this specific prompt variant\" but there's no content following that statement.\n\nI should ask for clarification or indicate that I need the specific prompt variant to proceed. However, looking at the context, it seems like the user might have intended to paste something but forgot, or they might be testing me.\n\nWait, looking more carefully at the user's message: \"Generate from this specific prompt variant.\" - this is all they provided. There's no actual prompt variant attached.\n\nI should respond by asking what the specific prompt variant is, or I could provide a template/example of how I would handle such a request if they provide the variant.\n\nActually, looking at the phrasing again, maybe they want me to generate a coding solution based on a variant of a standard prompt? But without knowing what the base prompt is or what the variant is, I cannot proceed.\n\nThe most helpful response is to ask for the missing information while showing readiness to help once provided.\n\nHowever, I should check if there's any implicit context I'm missing. The user says \"this specific prompt variant\" which implies they think they've provided it or are referring to something previously mentioned. But in this conversation, there's no previous context.\n\nI'll politely ask them to provide the specific prompt variant they want me to generate from.",
+        "reasoning_details": [
+          {
+            "type": "reasoning.text",
+            "text": " The user wants me to generate something from a \"specific prompt variant\" but hasn't actually provided the prompt variant yet. They said \"Generate from this specific prompt variant\" but there's no content following that statement.\n\nI should ask for clarification or indicate that I need the specific prompt variant to proceed. However, looking at the context, it seems like the user might have intended to paste something but forgot, or they might be testing me.\n\nWait, looking more carefully at the user's message: \"Generate from this specific prompt variant.\" - this is all they provided. There's no actual prompt variant attached.\n\nI should respond by asking what the specific prompt variant is, or I could provide a template/example of how I would handle such a request if they provide the variant.\n\nActually, looking at the phrasing again, maybe they want me to generate a coding solution based on a variant of a standard prompt? But without knowing what the base prompt is or what the variant is, I cannot proceed.\n\nThe most helpful response is to ask for the missing information while showing readiness to help once provided.\n\nHowever, I should check if there's any implicit context I'm missing. The user says \"this specific prompt variant\" which implies they think they've provided it or are referring to something previously mentioned. But in this conversation, there's no previous context.\n\nI'll politely ask them to provide the specific prompt variant they want me to generate from.",
+            "format": "unknown",
+            "index": 0
+          }
+        ]
+      }
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 52,
+    "completion_tokens": 442,
+    "total_tokens": 494,
+    "cost": 0.0012688,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.0012688,
+      "upstream_inference_prompt_cost": 3.12e-05,
+      "upstream_inference_completions_cost": 0.0012376
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 384,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  }
+}

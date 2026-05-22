@@ -1,0 +1,17 @@
+{
+  "model": "openai/gpt-5.5",
+  "temperature": 0.2,
+  "max_tokens": 8000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Scenario: I am learning CUDA and want a simple example that sums an array of floating-point numbers on the GPU.\n\nGoal: Write a complete CUDA program that demonstrates GPU memory allocation, copying data to the device, running a kernel, and copying the result back.\n\nTask: Generate a CUDA C++ program that:\n- Creates an array of float values on the CPU\n- Allocates GPU memory\n- Copies the array to the GPU\n- Runs a kernel to help compute the sum\n- Copies the result back to the CPU\n- Prints the final sum\n\nRequirements:\n- Keep the code easy to read.\n- Add comments explaining host memory, device memory, blocks, and threads.\n- Make sure threads do not read beyond the end of the input array.\n- Include a simple CPU-side sum so I can compare the result.\n\nDeliverables:\n- A complete .cu file\n- The nvcc command to compile it\n- A short explanation of how the kernel works\n",
+      "content_sha256": "7840aad7780ae245c2724651d8b2590c6d4e689d582983bf77843bc1c86bc0f4"
+    }
+  ]
+}

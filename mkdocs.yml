@@ -1,5 +1,5 @@
-site_name: Unsafe Autonomy Bench
-site_description: Taxonomy-first benchmark for evaluating autonomous agent safety, utility, and capability control.
+site_name: Coding Agent Taxonomy
+site_description: Taxonomy-first benchmark for evaluating coding agents across safety and utility.
 site_url: https://samvritsrinath.github.io/agentTaxonomy/
 repo_url: https://github.com/SamvritSrinath/agentTaxonomy
 edit_uri: edit/main/docs/
