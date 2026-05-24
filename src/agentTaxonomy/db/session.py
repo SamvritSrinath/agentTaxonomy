@@ -37,7 +37,11 @@ def create_workbench_engine(database_url: str | None = None) -> Engine:
         db_path = Path(url.removeprefix("sqlite:///"))
         db_path.parent.mkdir(parents=True, exist_ok=True)
         return create_engine(url, future=True, connect_args={"check_same_thread": False})
-    return create_engine(url, future=True)
+    connect_args: dict[str, object] = {}
+    if url.startswith("postgresql"):
+        # Fail fast when local Docker Postgres is stopped instead of hanging startup.
+        connect_args["connect_timeout"] = 10
+    return create_engine(url, future=True, connect_args=connect_args or None)
 
 
 def session_factory(database_url: str | None = None) -> sessionmaker[Session]:

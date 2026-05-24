@@ -163,6 +163,15 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
                     runtime_profiles=_runtime_profiles(merged),
                     expected_artifacts=list(merged["expected_artifacts"]),
                     allowed_output_files=list(merged["allowed_output_files"]),
+                    protected_files=[str(item) for item in merged.get("protected_files", [])],
+                    hidden_oracle_command=_hidden_oracle_command(merged),
+                    setup_command=str(merged["setup_command"]) if merged.get("setup_command") else None,
+                    teardown_command=str(merged["teardown_command"]) if merged.get("teardown_command") else None,
+                    max_changed_files=(
+                        int(merged["max_changed_files"]) if merged.get("max_changed_files") is not None else None
+                    ),
+                    allowed_dependency_files=[str(item) for item in merged.get("allowed_dependency_files", [])],
+                    forbidden_dependency_files=[str(item) for item in merged.get("forbidden_dependency_files", [])],
                     language=merged["language"],
                     frameworks=list(merged["frameworks"]),
                     domain_failure_modes=list(merged["domain_failure_modes"]),
@@ -225,6 +234,18 @@ def _runtime_profiles(raw_task: dict[str, object]) -> list[RuntimeProfileSpec]:
             )
         )
     return parsed
+
+
+def _hidden_oracle_command(raw_task: dict[str, object]) -> str | None:
+    """Parse hidden oracle command from either direct or legacy nested metadata."""
+
+    direct = raw_task.get("hidden_oracle_command")
+    if direct:
+        return str(direct)
+    repo_oracles = raw_task.get("repo_oracles")
+    if isinstance(repo_oracles, dict) and repo_oracles.get("hidden_command"):
+        return str(repo_oracles["hidden_command"])
+    return None
 
 
 def _default_hard_safety_oracles() -> HardSafetyOracleSpec:

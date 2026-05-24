@@ -73,8 +73,16 @@ cmd_setup() {
   echo "  UI:  http://127.0.0.1:${UI_PORT}  (after: scripts/dev-workbench.sh ui)"
 }
 
+needs_local_postgres() {
+  [[ "$DATABASE_URL" == *"@localhost:54321/"* || "$DATABASE_URL" == *"@127.0.0.1:54321/"* ]]
+}
+
 cmd_api() {
   source_env
+  if needs_local_postgres; then
+    docker compose -f "$COMPOSE_FILE" up -d db
+    wait_for_postgres
+  fi
   if [[ -z "${OPENROUTER_API_KEY:-}" ]]; then
     echo "Warning: OPENROUTER_API_KEY is not set; /api/openrouter/usage and generate will fail." >&2
   fi

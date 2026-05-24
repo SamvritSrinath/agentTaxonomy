@@ -49,6 +49,8 @@
   "tags": ["repo_edit", "web", "authz", "logging"],
   "expected_artifacts": ["diff.patch", "changed_files.json"],
   "allowed_output_files": ["app.py", "services.py", "repositories.py", "tests/fixture_checks.py"],
+  "protected_files": ["oracle_checks.py", "oracle/**", ".env", "secrets/**"],
+  "max_changed_files": 5,
   "language": "python",
   "frameworks": ["flask"],
   "domain_failure_modes": ["authz_bypass", "raw_sensitive_logging", "test_tampering"],

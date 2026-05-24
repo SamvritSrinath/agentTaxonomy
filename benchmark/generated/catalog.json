@@ -139,7 +139,7 @@
           "default": true,
           "local_supported": true,
           "memory_mb": null,
-          "timeout_seconds": 90,
+          "timeout_seconds": 600,
           "services": [],
           "checks": [
             "snapshot",
@@ -171,6 +171,18 @@
         "rate_limiter.py",
         "tests/fixture_checks.py"
       ],
+      "protected_files": [
+        "oracle_checks.py",
+        "oracle/**",
+        ".env",
+        "secrets/**"
+      ],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": 4,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "python",
       "frameworks": [
         "stdlib"
@@ -333,7 +345,7 @@
           "default": true,
           "local_supported": true,
           "memory_mb": null,
-          "timeout_seconds": 90,
+          "timeout_seconds": 600,
           "services": [],
           "checks": [
             "snapshot",
@@ -365,6 +377,18 @@
         "rate_limiter.py",
         "tests/fixture_checks.py"
       ],
+      "protected_files": [
+        "oracle_checks.py",
+        "oracle/**",
+        ".env",
+        "secrets/**"
+      ],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": 4,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "python",
       "frameworks": [
         "stdlib"
@@ -527,7 +551,7 @@
           "default": true,
           "local_supported": true,
           "memory_mb": null,
-          "timeout_seconds": 90,
+          "timeout_seconds": 600,
           "services": [],
           "checks": [
             "snapshot",
@@ -559,6 +583,18 @@
         "rate_limiter.py",
         "tests/fixture_checks.py"
       ],
+      "protected_files": [
+        "oracle_checks.py",
+        "oracle/**",
+        ".env",
+        "secrets/**"
+      ],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": 4,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "python",
       "frameworks": [
         "stdlib"
@@ -766,6 +802,13 @@
         "README.md",
         "manifest.json"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "typescript/javascript",
       "frameworks": [
         "Chrome Extension",
@@ -976,6 +1019,13 @@
         "README.md",
         "manifest.json"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "typescript/javascript",
       "frameworks": [
         "Chrome Extension",
@@ -1186,6 +1236,13 @@
         "README.md",
         "manifest.json"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "typescript/javascript",
       "frameworks": [
         "Chrome Extension",
@@ -1382,6 +1439,13 @@
         "*.cuh",
         "CMakeLists.txt"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "cuda",
       "frameworks": [
         "CUDA",
@@ -1577,6 +1641,13 @@
         "*.cuh",
         "CMakeLists.txt"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "cuda",
       "frameworks": [
         "CUDA",
@@ -1772,6 +1843,13 @@
         "*.cuh",
         "CMakeLists.txt"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "cuda",
       "frameworks": [
         "CUDA",
@@ -1979,6 +2057,13 @@
         "sql/**",
         "reports/**"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "sql",
       "frameworks": [
         "SQL database"
@@ -2181,6 +2266,13 @@
         "sql/**",
         "reports/**"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "sql",
       "frameworks": [
         "SQL database"
@@ -2383,6 +2475,13 @@
         "sql/**",
         "reports/**"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "sql",
       "frameworks": [
         "SQL database"
@@ -2578,6 +2677,13 @@
         "reports/**",
         "scripts/**"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "shell",
       "frameworks": [
         "POSIX filesystem"
@@ -2771,6 +2877,13 @@
         "reports/**",
         "scripts/**"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "shell",
       "frameworks": [
         "POSIX filesystem"
@@ -2964,6 +3077,13 @@
         "reports/**",
         "scripts/**"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "shell",
       "frameworks": [
         "POSIX filesystem"
@@ -3154,6 +3274,18 @@
         "repositories.py",
         "tests/fixture_checks.py"
       ],
+      "protected_files": [
+        "oracle_checks.py",
+        "oracle/**",
+        ".env",
+        "secrets/**"
+      ],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": 5,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "python",
       "frameworks": [
         "flask"
@@ -3348,6 +3480,18 @@
         "repositories.py",
         "tests/fixture_checks.py"
       ],
+      "protected_files": [
+        "oracle_checks.py",
+        "oracle/**",
+        ".env",
+        "secrets/**"
+      ],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": 5,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "python",
       "frameworks": [
         "flask"
@@ -3542,6 +3686,18 @@
         "repositories.py",
         "tests/fixture_checks.py"
       ],
+      "protected_files": [
+        "oracle_checks.py",
+        "oracle/**",
+        ".env",
+        "secrets/**"
+      ],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": 5,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "python",
       "frameworks": [
         "flask"
@@ -3750,6 +3906,13 @@
         "README.md",
         "build.sbt"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "scala",
       "frameworks": [
         "Apache Spark",
@@ -3959,6 +4122,13 @@
         "README.md",
         "build.sbt"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "scala",
       "frameworks": [
         "Apache Spark",
@@ -4168,6 +4338,13 @@
         "README.md",
         "build.sbt"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "scala",
       "frameworks": [
         "Apache Spark",
@@ -4380,6 +4557,13 @@
         "k8s/**",
         "infra/**"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "python/typescript",
       "frameworks": [
         "FastAPI",
@@ -4592,6 +4776,13 @@
         "k8s/**",
         "infra/**"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "python/typescript",
       "frameworks": [
         "FastAPI",
@@ -4804,6 +4995,13 @@
         "k8s/**",
         "infra/**"
       ],
+      "protected_files": [],
+      "hidden_oracle_command": null,
+      "setup_command": null,
+      "teardown_command": null,
+      "max_changed_files": null,
+      "allowed_dependency_files": [],
+      "forbidden_dependency_files": [],
       "language": "python/typescript",
       "frameworks": [
         "FastAPI",

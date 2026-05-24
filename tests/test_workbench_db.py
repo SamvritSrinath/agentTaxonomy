@@ -28,6 +28,8 @@ from agentTaxonomy.db.services import (
     create_adjudication,
     create_annotation,
     get_artifact_content,
+    list_repo_targets_for_instance,
+    resolve_repo_binding,
     selected_text_matches,
     update_annotation_status,
 )
@@ -358,6 +360,24 @@ class WorkbenchDbTests(unittest.TestCase):
                 assert fetched is not None
                 templates = list_prompt_templates(session)
                 self.assertIsInstance(templates, list)
+
+    def test_catalog_ingest_creates_default_repo_target_binding(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            database_url = f"sqlite:///{Path(tmp_dir) / 'workbench.sqlite'}"
+            reset_database(database_url)
+            ingest_catalog(PROJECT_ROOT / "benchmark" / "generated" / "catalog.json", database_url=database_url)
+            instance_id = "flask_mvc_refactor__repo_edit__intermediate"
+            with session_scope(database_url) as session:
+                targets = list_repo_targets_for_instance(session, instance_id)
+                self.assertGreaterEqual(len(targets), 1)
+                default = next(item for item in targets if item.get("binding", {}).get("is_default"))
+                self.assertEqual(default["source_type"], "local_fixture")
+                self.assertEqual(default["repo_path"], "benchmark/repo_fixtures/flask_mvc_refactor")
+                target, binding = resolve_repo_binding(session, instance_id)
+                assert binding is not None
+                self.assertEqual(target.id, default["id"])
+                self.assertIn("app.py", binding.allowed_output_files)
+                self.assertIn("oracle/**", binding.protected_files)
 
 
 if __name__ == "__main__":

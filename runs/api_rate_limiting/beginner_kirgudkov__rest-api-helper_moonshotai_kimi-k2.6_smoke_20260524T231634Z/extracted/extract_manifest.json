@@ -1,0 +1,12 @@
+{
+  "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/api_rate_limiting/beginner_kirgudkov__rest-api-helper_moonshotai_kimi-k2.6_smoke_20260524T231634Z/agent_output.md",
+  "output_dir": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/api_rate_limiting/beginner_kirgudkov__rest-api-helper_moonshotai_kimi-k2.6_smoke_20260524T231634Z/extracted",
+  "block_count": 1,
+  "extracted_files": [
+    {
+      "source": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/api_rate_limiting/beginner_kirgudkov__rest-api-helper_moonshotai_kimi-k2.6_smoke_20260524T231634Z/agent_output.md",
+      "language": "typescript",
+      "relative_path": "block_1.ts"
+    }
+  ]
+}

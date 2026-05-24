@@ -1471,6 +1471,26 @@ button:disabled {
   margin: 0;
 }
 
+.repo-run-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.repo-run-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  color: #334155;
+}
+
+.repo-run-section-desc {
+  margin: 0 0 4px;
+}
+
 .action-group-fields {
   display: grid;
   gap: 10px;
@@ -1479,6 +1499,10 @@ button:disabled {
 
 .action-group-fields .combobox {
   min-width: 0;
+}
+
+.action-group-fields .wide-field {
+  grid-column: 1 / -1;
 }
 
 .action-group-buttons {
@@ -1590,6 +1614,96 @@ button:disabled {
   color: #64748b;
   font-size: 12px;
   margin: 4px 0 0;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.form-field-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.form-field-label label {
+  cursor: pointer;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  font: inherit;
+  max-width: 100%;
+  width: 100%;
+}
+
+.form-field textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.prompt-select-field .combobox {
+  width: 100%;
+}
+
+.checkbox-inline {
+  align-items: center;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 400;
+  gap: 8px;
+}
+
+.run-method-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.run-method-btn {
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  color: #334155;
+  cursor: pointer;
+  flex: 1 1 160px;
+  font: inherit;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.run-method-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.run-method-btn.is-active {
+  background: #dbeafe;
+  border-color: #2463eb;
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.run-method-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.repo-run-subsection {
+  border-top: 1px solid #e2e8f0;
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.repo-run-subheading {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin: 0 0 6px;
+  text-transform: uppercase;
 }
 
 .toolbar-success {

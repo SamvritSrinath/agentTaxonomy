@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getOpenRouterUsage } from "../api/client";
 import type { OpenRouterUsage } from "../api/types";
 
-const POLL_MS = 60_000;
+const POLL_MS = 20_000;
 
 export function OpenRouterSpendWidget() {
   const [usage, setUsage] = useState<OpenRouterUsage | null>(null);
@@ -36,7 +36,13 @@ export function OpenRouterSpendWidget() {
   const monthly = asNumber(keyData?.usage_monthly);
 
   return (
-    <div className="spend-widget" title={error ?? undefined}>
+    <div
+      className="spend-widget"
+      title={
+        error ??
+        "Daily/monthly spend from OpenRouter key API. Updates after each completed request (not while a call is in flight)."
+      }
+    >
       <span className="spend-label">OpenRouter</span>
       {error ? (
         <span className="spend-error">unavailable</span>

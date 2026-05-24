@@ -5,13 +5,30 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any, Callable
 
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .models import JobRecord, new_uuid
 from .session import session_scope
 
-JOB_KINDS = {"generate", "judge", "bootstrap", "ingest", "rescore"}
+JOB_KINDS = {"generate", "repo_run", "judge", "bootstrap", "ingest", "rescore"}
 JOB_STATUSES = {"queued", "running", "succeeded", "failed"}
+
+# Max wall time before a queued/running job is marked failed (API reload can orphan workers).
+STALE_JOB_MAX_AGE_SECONDS: dict[str, int] = {
+    "generate": 300,
+    "repo_run": 300,
+    "judge": 900,
+    "ingest": 180,
+    "bootstrap": 900,
+    "rescore": 180,
+}
+DEFAULT_STALE_JOB_MAX_AGE_SECONDS = 300
+
+STALE_JOB_ERROR = (
+    "Job exceeded the workbench time limit or the API restarted while it was running. "
+    "OpenRouter usage may not appear until a request completes; re-run the task if needed."
+)
 
 
 def create_job(
@@ -32,6 +49,46 @@ def create_job(
     session.add(row)
     session.flush()
     return _job_dict(row)
+
+
+def set_job_phase(
+    job_id: str,
+    phase: str,
+    *,
+    database_url: str | None = None,
+) -> None:
+    """Update only the phase field (for long-running steps like OpenRouter)."""
+    with session_scope(database_url) as session:
+        update_job(session, job_id, phase=phase)
+
+
+def reconcile_stale_jobs(
+    session: Session,
+    *,
+    now: datetime | None = None,
+) -> list[str]:
+    """Mark queued/running jobs older than their per-kind limit as failed."""
+    now = now or datetime.now(UTC)
+    reconciled: list[str] = []
+    rows = session.scalars(
+        select(JobRecord).where(JobRecord.status.in_(("queued", "running")))
+    ).all()
+    for row in rows:
+        started = row.started_at or row.created_at
+        if started.tzinfo is None:
+            started = started.replace(tzinfo=UTC)
+        age_seconds = (now - started).total_seconds()
+        limit = STALE_JOB_MAX_AGE_SECONDS.get(row.kind, DEFAULT_STALE_JOB_MAX_AGE_SECONDS)
+        if age_seconds <= limit:
+            continue
+        update_job(
+            session,
+            row.id,
+            status="failed",
+            error=f"{STALE_JOB_ERROR} (age={int(age_seconds)}s, limit={limit}s, phase={row.phase!r})",
+        )
+        reconciled.append(row.id)
+    return reconciled
 
 
 def get_job(session: Session, job_id: str) -> dict[str, Any] | None:

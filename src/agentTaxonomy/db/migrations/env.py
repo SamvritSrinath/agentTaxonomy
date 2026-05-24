@@ -35,9 +35,9 @@ def run_migrations_offline() -> None:
 
 def run_migrations_online() -> None:
     """Run migrations against a live Engine connection."""
-    from sqlalchemy import create_engine
+    from agentTaxonomy.db.session import create_workbench_engine
 
-    connectable = create_engine(_database_url(), future=True)
+    connectable = create_workbench_engine(_database_url())
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():

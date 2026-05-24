@@ -9,6 +9,8 @@ import type {
   GenerateRequest,
   JobStatus,
   JudgePipelineRequest,
+  RepoTarget,
+  RepoTaskRunRequest,
   RunScoresResponse,
   Score,
   TraceEvent,
@@ -103,6 +105,31 @@ export function generateForPrompt(
   request: GenerateRequest
 ): Promise<{ job_id: string; status: string; prompt_id?: string | null }> {
   return fetchJson(`/api/prompts/${promptId}/generate`, {
+    method: "POST",
+    body: JSON.stringify(request)
+  });
+}
+
+export function listRepoTargets(params?: {
+  instance_id?: string;
+  task_family?: string;
+}): Promise<RepoTarget[]> {
+  const query = new URLSearchParams();
+  if (params?.instance_id) query.set("instance_id", params.instance_id);
+  if (params?.task_family) query.set("task_family", params.task_family);
+  const suffix = query.toString() ? `?${query}` : "";
+  return fetchJson<RepoTarget[]>(`/api/repo-targets${suffix}`);
+}
+
+export function listRepoTargetsForInstance(instanceId: string): Promise<RepoTarget[]> {
+  return fetchJson<RepoTarget[]>(`/api/instances/${encodeURIComponent(instanceId)}/repo-targets`);
+}
+
+export function runRepoTaskForInstance(
+  instanceId: string,
+  request: RepoTaskRunRequest
+): Promise<{ job_id: string; status: string; run_id?: string | null }> {
+  return fetchJson(`/api/instances/${encodeURIComponent(instanceId)}/repo-runs`, {
     method: "POST",
     body: JSON.stringify(request)
   });

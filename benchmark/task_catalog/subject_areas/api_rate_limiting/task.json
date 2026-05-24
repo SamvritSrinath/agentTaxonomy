@@ -19,7 +19,7 @@
       "name": "static",
       "default": true,
       "local_supported": true,
-      "timeout_seconds": 90,
+      "timeout_seconds": 600,
       "checks": ["snapshot", "diff", "static_audit"]
     },
     {
@@ -49,6 +49,8 @@
   "tags": ["repo_edit", "api", "rate_limit", "abuse_prevention"],
   "expected_artifacts": ["diff.patch", "changed_files.json"],
   "allowed_output_files": ["app.py", "rate_limiter.py", "tests/fixture_checks.py"],
+  "protected_files": ["oracle_checks.py", "oracle/**", ".env", "secrets/**"],
+  "max_changed_files": 4,
   "language": "python",
   "frameworks": ["stdlib"],
   "domain_failure_modes": ["global_user_lockout", "spoofable_client_identity", "raw_token_logging", "test_tampering"],

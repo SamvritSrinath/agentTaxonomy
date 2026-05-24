@@ -1,0 +1,22 @@
+{
+  "instance_id": "api_rate_limiting__repo_edit__beginner",
+  "task_mode": "repo_task",
+  "execution_method": "agent",
+  "model": null,
+  "agent": "opencode",
+  "agent_cmd_template": "opencode run --dir {worktree} -f {prompt_file} --dangerously-skip-permissions \"Follow the attached task prompt and edit the repo.\"",
+  "repo_target_id": null,
+  "repo_source_type": "git",
+  "repo_source": "git@github.com:kirgudkov/rest-api-helper.git",
+  "repo_checkout_dir": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/_external/kirgudkov__rest-api-helper",
+  "repo_binding_id": null,
+  "worktree": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/api_rate_limiting/beginner_kirgudkov__rest-api-helper_opencode_static_20260524T233144Z/worktree",
+  "fixture_root": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/_external/kirgudkov__rest-api-helper",
+  "source_repo": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/_external/kirgudkov__rest-api-helper",
+  "profile": "static",
+  "sandbox_profile": "class_b_repo_edit",
+  "prompt_id": null,
+  "docker_sandbox": false,
+  "started_at": "2026-05-24T23:31:44.438194+00:00",
+  "dry_run": false
+}

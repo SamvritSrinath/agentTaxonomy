@@ -19,9 +19,12 @@ from .models import (
     BenchmarkInstanceRecord,
     EvaluationRecord,
     FindingRecord,
+    PromptVariantRecord,
+    RepoTargetRecord,
     RunRecord,
     SandboxProfileRecord,
     ScoreRecord,
+    TaskRepoBindingRecord,
     TraceEventRecord,
 )
 from .session import init_database, project_root, session_scope
@@ -29,6 +32,7 @@ from .session import init_database, project_root, session_scope
 SKIP_DIRS = {".git", "__pycache__", ".venv", "node_modules", "target", "dist", "build"}
 RUN_ARTIFACT_NAMES = {
     "agent_output.md",
+    "prompt.md",
     "request.json",
     "raw_response.json",
     "trace.jsonl",
@@ -37,17 +41,41 @@ RUN_ARTIFACT_NAMES = {
     "supply_chain.json",
     "commands.log",
     "stdout.log",
+    "stdout.txt",
     "stderr.log",
+    "stderr.txt",
     "final.diff",
     "diff.patch",
     "git_status.txt",
     "untracked_files.txt",
     "changed_files.json",
+    "scope_report.json",
     "tests.json",
+    "oracle_results.json",
+    "oracle.stdout.txt",
+    "oracle.stderr.txt",
     "network.log",
+    "network_events.jsonl",
     "sandbox_events.jsonl",
+    "sandbox_profile.json",
     "fs_snapshot_before.json",
     "fs_snapshot_after.json",
+    "repo_before.sha256",
+    "repo_after.sha256",
+}
+
+REPO_ARTIFACT_TYPES = {
+    "diff.patch": "repo_diff",
+    "final.diff": "repo_diff",
+    "changed_files.json": "repo_changed_files",
+    "scope_report.json": "repo_scope",
+    "tests.json": "repo_tests",
+    "oracle_results.json": "repo_oracles",
+    "sandbox_events.jsonl": "sandbox_events",
+    "commands.log": "commands",
+    "stdout.txt": "agent_stdout",
+    "stderr.txt": "agent_stderr",
+    "sandbox_profile.json": "sandbox_profile",
 }
 
 
@@ -111,6 +139,7 @@ def ingest_catalog(catalog_path: Path, *, database_url: str | None = None) -> In
     with session_scope(database_url) as session:
         for raw in instances:
             _upsert_instance(session, raw, catalog_path, source_hash)
+            _upsert_default_repo_binding(session, raw, catalog_path, source_hash)
         return IngestResult(
             record_id=str(catalog_path),
             status="updated",
@@ -249,6 +278,13 @@ def _upsert_instance(session: Session, raw: dict[str, Any], catalog_path: Path, 
         "soft_review_rubric": raw.get("soft_review_rubric", {}),
         "expected_artifacts": raw.get("expected_artifacts", []),
         "allowed_output_files": raw.get("allowed_output_files", []),
+        "protected_files": raw.get("protected_files", []),
+        "hidden_oracle_command": raw.get("hidden_oracle_command"),
+        "setup_command": raw.get("setup_command"),
+        "teardown_command": raw.get("teardown_command"),
+        "max_changed_files": raw.get("max_changed_files"),
+        "allowed_dependency_files": raw.get("allowed_dependency_files", []),
+        "forbidden_dependency_files": raw.get("forbidden_dependency_files", []),
         "domain_failure_modes": raw.get("domain_failure_modes", []),
     }
     values = {
@@ -277,6 +313,80 @@ def _upsert_instance(session: Session, raw: dict[str, Any], catalog_path: Path, 
         return
     for key, value in values.items():
         setattr(record, key, value)
+
+
+def _upsert_default_repo_binding(session: Session, raw: dict[str, Any], catalog_path: Path, source_hash: str) -> None:
+    """Create/update the default local-fixture repo target for catalog repo tasks."""
+
+    if raw.get("task_mode") != "repo_task" or not raw.get("repo"):
+        return
+    instance_id = str(raw["instance_id"])
+    repo_path = str(raw["repo"])
+    task_family = str(raw.get("task_family") or raw.get("task_id") or instance_id.split("__")[0])
+    target = session.scalar(
+        select(RepoTargetRecord).where(
+            RepoTargetRecord.source_type == "local_fixture",
+            RepoTargetRecord.repo_path == repo_path,
+        )
+    )
+    target_values = {
+        "name": f"{task_family} fixture",
+        "source_type": "local_fixture",
+        "repo_path": repo_path,
+        "git_url": None,
+        "git_ref": raw.get("base_commit"),
+        "task_family": task_family,
+        "tags": list(raw.get("tags", [])),
+        "metadata_json": {
+            "source": "catalog_default",
+            "base_commit": raw.get("base_commit"),
+            "task_id": raw.get("task_id"),
+        },
+        "source_file": str(catalog_path),
+        "source_file_hash": source_hash,
+    }
+    if target is None:
+        target = RepoTargetRecord(**target_values)
+        session.add(target)
+        session.flush()
+    else:
+        for key, value in target_values.items():
+            setattr(target, key, value)
+
+    binding = session.scalar(
+        select(TaskRepoBindingRecord).where(
+            TaskRepoBindingRecord.instance_id == instance_id,
+            TaskRepoBindingRecord.repo_target_id == target.id,
+        )
+    )
+    binding_values = {
+        "is_default": True,
+        "allowed_output_files": list(raw.get("allowed_output_files", [])),
+        "protected_files": list(raw.get("protected_files", [])),
+        "utility_command": raw.get("utility_oracles", {}).get("command") if isinstance(raw.get("utility_oracles"), dict) else None,
+        "hidden_oracle_command": raw.get("hidden_oracle_command"),
+        "runtime_profiles": list(raw.get("runtime_profiles", [])),
+        "metadata_json": {
+            "source": "catalog_default",
+            "repo": repo_path,
+            "max_changed_files": raw.get("max_changed_files"),
+            "allowed_dependency_files": raw.get("allowed_dependency_files", []),
+            "forbidden_dependency_files": raw.get("forbidden_dependency_files", []),
+        },
+        "source_file": str(catalog_path),
+        "source_file_hash": source_hash,
+    }
+    if binding is None:
+        session.add(
+            TaskRepoBindingRecord(
+                instance_id=instance_id,
+                repo_target_id=target.id,
+                **binding_values,
+            )
+        )
+        return
+    for key, value in binding_values.items():
+        setattr(binding, key, value)
 
 
 def _resolve_task_mode(
@@ -334,8 +444,22 @@ def _populate_run_record(
     run.exit_code = _infer_exit_code(run_dir)
     run.sandbox_profile_name = _sandbox_profile_name(run_dir)
     run.sandbox_profile_hash = _sandbox_profile_hash(run_dir)
+    prompt_id = request.get("prompt_id") or None
+    run.prompt_variant_id = prompt_id if prompt_id and session.get(PromptVariantRecord, str(prompt_id)) else None
+    agent_config = {
+        "agent": request.get("agent"),
+        "agent_cmd_template": request.get("agent_cmd_template"),
+        "sandbox_profile": request.get("sandbox_profile"),
+    }
     run.metadata_json = {
         "request": request,
+        "repo_target_id": request.get("repo_target_id"),
+        "repo_source_type": request.get("repo_source_type"),
+        "repo_path": request.get("repo_source"),
+        "git_url": request.get("repo_source") if request.get("repo_source_type") == "git" else None,
+        "git_checkout_dir": request.get("repo_checkout_dir"),
+        "runtime_profile": request.get("profile"),
+        "agent_config": {key: value for key, value in agent_config.items() if value is not None},
         "relative_run_dir": _safe_relative(run_dir),
         "source_files": [path.relative_to(run_dir).as_posix() for path in _iter_source_files(run_dir)],
     }
@@ -838,6 +962,8 @@ def _infer_instance_id(score: dict[str, Any], trace: list[dict[str, Any]]) -> st
 
 
 def _infer_agent_name(request: dict[str, Any], run_dir: Path) -> str:
+    if request.get("agent"):
+        return str(request["agent"])
     if request.get("model"):
         return "openrouter"
     if (run_dir / "commands.log").exists() or (run_dir / "stdout.log").exists():
@@ -952,6 +1078,8 @@ def _confidence_label(value: Any) -> str:
 
 
 def _artifact_type(path: Path, relative: str) -> str:
+    if path.name in REPO_ARTIFACT_TYPES:
+        return REPO_ARTIFACT_TYPES[path.name]
     if path.name == "trace.jsonl":
         return "trace"
     if path.name == "score.json":

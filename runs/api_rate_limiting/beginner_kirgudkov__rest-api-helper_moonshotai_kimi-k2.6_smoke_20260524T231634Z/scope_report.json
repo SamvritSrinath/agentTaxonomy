@@ -1,0 +1,15 @@
+{
+  "allowed_files_touched": false,
+  "protected_files_touched": false,
+  "changed_files": [
+    "src/index.ts"
+  ],
+  "unexpected_changed_files": [
+    "src/index.ts"
+  ],
+  "protected_changed_files": [],
+  "test_files_changed": [],
+  "test_tampering_suspected": false,
+  "max_changed_files_exceeded": false,
+  "warnings": []
+}

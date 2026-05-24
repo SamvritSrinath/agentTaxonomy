@@ -113,15 +113,28 @@ python3 -m agentTaxonomy.cli score-run \
   --output runs/map_reduce_spark_log_analytics/beginner_gpt55/score.json
 ```
 
-Repo-working agents use the snapshot wrapper (audit and supply chain run inside the harness):
+Repo-task runs separate **repository source** (catalog fixture binding, manual path, or git clone) from **generation** (OpenRouter model edits in the worktree, or a local Codex/OpenCode/custom CLI). Both paths share the same harness: worktree, `agent_output.md`, diff, profile-selected pytest/oracles, audit, and score. In the workbench UI, use **Repo Run** with generation method **Model** or **Agent**; both POST `/api/instances/{id}/repo-runs` (not `/generate`).
+
+**Profile** (`static` / `smoke` / `full`) controls harness depth. **Sandbox** (`class_b_repo_edit`) applies to CLI agent commands.
+
+Repo-working agents use the snapshot wrapper (audit and supply chain run inside the harness).
+The workbench **Repo Run** panel separates **repository** source (catalog binding, manual path, or git clone) from **generation**
+(OpenRouter model vs local CLI). Both paths clone a worktree and emit the same artifacts (`diff.patch`, `tests.json`, `score.json`, …);
+`agent_output.md` holds the model transcript, while evaluation uses the worktree diff and oracles.
 
 ```bash
 PYTHONPATH=src python3 -m agentTaxonomy.cli run-repo-task \
   --instance-id flask_mvc_split__intermediate \
   --repo ./fixtures/flask_mvc_app \
-  --agent-cmd "opencode run ..." \
+  --agent opencode \
   --profile static \
-  --output-dir runs/flask_mvc_split/intermediate/model_x
+  --output-dir runs/flask_mvc_split/intermediate/opencode_run
+```
+
+OpenCode default template (override with `--agent-cmd` if needed):
+
+```bash
+opencode run --dir {worktree} -f {prompt_file} --dangerously-skip-permissions "Follow the attached task prompt and edit the repo."
 ```
 
 ### Recommended: LLM soft judge

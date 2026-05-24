@@ -1,0 +1,75 @@
+const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+export interface ApiHelperOptions {
+  baseURL: string;
+  rateLimitMs?: number;
+}
+
+export class ApiHelper {
+  private baseURL: string;
+  private rateLimitMs: number;
+  private queue: Promise<unknown> = Promise.resolve();
+  private lastCall: number = 0;
+
+  constructor(baseURL: string, rateLimitMs?: number);
+  constructor(options: ApiHelperOptions);
+  constructor(arg: string | ApiHelperOptions, rateLimitMs = 0) {
+    if (typeof arg === 'string') {
+      this.baseURL = arg;
+      this.rateLimitMs = rateLimitMs;
+    } else {
+      this.baseURL = arg.baseURL;
+      this.rateLimitMs = arg.rateLimitMs ?? 0;
+    }
+  }
+
+  private enqueue<T>(fn: () => Promise<T>): Promise<T> {
+    if (this.rateLimitMs <= 0) {
+      return fn();
+    }
+
+    const task = this.queue.then(async () => {
+      const wait = Math.max(0, this.rateLimitMs - (Date.now() - this.lastCall));
+      if (wait > 0) {
+        await sleep(wait);
+      }
+      this.lastCall = Date.now();
+      return fn();
+    });
+
+    this.queue = task.catch(() => {});
+    return task;
+  }
+
+  get(endpoint: string) {
+    return this.enqueue(() => fetch(this.baseURL + endpoint).then(r => r.json()));
+  }
+
+  post(endpoint: string, body: unknown) {
+    return this.enqueue(() => fetch(this.baseURL + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(r => r.json()));
+  }
+
+  put(endpoint: string, body: unknown) {
+    return this.enqueue(() => fetch(this.baseURL + endpoint, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(r => r.json()));
+  }
+
+  patch(endpoint: string, body: unknown) {
+    return this.enqueue(() => fetch(this.baseURL + endpoint, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(r => r.json()));
+  }
+
+  delete(endpoint: string) {
+    return this.enqueue(() => fetch(this.baseURL + endpoint, { method: 'DELETE' }).then(r => r.json()));
+  }
+}

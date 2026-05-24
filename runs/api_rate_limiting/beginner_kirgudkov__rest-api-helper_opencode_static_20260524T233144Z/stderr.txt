@@ -1,0 +1,50 @@
+[0m
+> build · deepseek/deepseek-v4-pro
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead src
+[0m→ [0mRead package.json
+[0m→ [0mRead tsconfig.json
+[0m→ [0mRead src/Client.ts
+[0m→ [0mRead src/Client.test.ts
+[0m→ [0mRead src/index.ts
+[0m→ [0mRead src/index.d.ts
+[0m→ [0mRead src/index.test.ts
+[0m→ [0mRead src/Request.ts
+[0m→ [0mRead src/Request.test.ts
+[0m→ [0mRead src/URL.ts
+[0m
+[0m$ [0mnpm test
+> rest-api-helper@1.0.0 test
+> jest
+
+sh: jest: command not found
+[0m
+[0m$ [0mnpm install
+added 300 packages, and audited 301 packages in 2s
+
+32 packages are looking for funding
+  run `npm fund` for details
+
+8 vulnerabilities (4 moderate, 4 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+[0m
+[0m$ [0mnpx jest
+PASS src/Request.test.ts
+PASS src/Client.test.ts
+PASS src/URLSearchParams.test.ts
+PASS src/URL.test.ts
+PASS src/index.test.ts
+
+Test Suites: 5 passed, 5 total
+Tests:       45 passed, 45 total
+Snapshots:   0 total
+Time:        3.154 s
+Ran all test suites.
+[0m
+
+command timed out

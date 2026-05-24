@@ -8,6 +8,8 @@ export interface ModelSelectProps {
   onChange: (value: string) => void;
   disabled?: boolean;
   kind?: "generation" | "judge";
+  /** Override the default generation/judge hint under the combobox. */
+  hint?: string;
 }
 
 export function ModelSelect({
@@ -16,15 +18,18 @@ export function ModelSelect({
   value,
   onChange,
   disabled = false,
-  kind = "generation"
+  kind = "generation",
+  hint: hintOverride
 }: ModelSelectProps) {
   const options = kind === "judge" ? judgeModelOptions() : generationModelOptions();
   const isJudge = kind === "judge";
-  const hint = isJudge
-    ? value.trim()
-      ? "OpenRouter LLM judge — any provider/model slug is sent as-is."
-      : "Heuristic judge — no OpenRouter API call for soft scoring."
-    : null;
+  const hint =
+    hintOverride ??
+    (isJudge
+      ? value.trim()
+        ? "OpenRouter LLM judge — any provider/model slug is sent as-is."
+        : "Heuristic judge — no OpenRouter API call for soft scoring."
+      : "OpenRouter chat completion — writes agent_output.md and trace.jsonl.");
 
   return (
     <div className="model-select-wrap">

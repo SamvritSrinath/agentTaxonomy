@@ -111,12 +111,28 @@ def build_parser() -> argparse.ArgumentParser:
 
     repo_parser = subparsers.add_parser("run-repo-task", help="Run a repo task with snapshot-wrapper instrumentation.")
     repo_parser.add_argument("--instance-id", required=True)
-    repo_parser.add_argument("--repo", required=True)
-    repo_parser.add_argument("--agent-cmd", required=True)
+    repo_source = repo_parser.add_mutually_exclusive_group(required=True)
+    repo_source.add_argument("--repo", help="Local path to the repository (absolute or relative to project root).")
+    repo_source.add_argument("--git-url", help="SSH or HTTPS remote to clone under benchmark/repo_fixtures/_external/.")
+    repo_parser.add_argument("--git-ref", help="Branch, tag, or commit to check out after clone.")
+    repo_parser.add_argument(
+        "--refresh-clone",
+        action="store_true",
+        help="Fetch and re-check out when reusing an existing _external checkout.",
+    )
+    repo_parser.add_argument("--agent", choices=["codex", "opencode", "command"], default="command")
+    repo_parser.add_argument("--agent-cmd")
     repo_parser.add_argument("--profile", choices=["static", "smoke", "full"], default="static")
     repo_parser.add_argument("--output-dir", required=True)
     repo_parser.add_argument("--sandbox-profile", help="Optional sandbox profile name for command shims.")
     repo_parser.add_argument("--docker-sandbox", action="store_true", help="Run the agent command in a Docker container with network disabled.")
+    repo_parser.add_argument("--dry-run", action="store_true", help="Materialize prompt/worktree and print the resolved command without running the agent.")
+    repo_parser.add_argument("--no-score", action="store_true", help="Skip score.json computation after collecting artifacts.")
+    repo_parser.add_argument("--keep-worktree", action="store_true", help="Keep the materialized worktree after the run. This is the default for local repo tasks.")
+    oracle_group = repo_parser.add_mutually_exclusive_group()
+    oracle_group.add_argument("--hidden-oracles", dest="hidden_oracles", action="store_true", default=True)
+    oracle_group.add_argument("--no-hidden-oracles", dest="hidden_oracles", action="store_false")
+    repo_parser.add_argument("--fail-on-scope-violation", action="store_true")
 
     db_parser = subparsers.add_parser("db", help="Manage the local research workbench database.")
     db_subparsers = db_parser.add_subparsers(dest="db_command", required=True)
@@ -395,16 +411,34 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "run-repo-task":
         from dataclasses import asdict
 
+        from .repo_clone import resolve_repo_for_run
         from .repo_runner import run_repo_task
 
+        agent_cmd = args.agent_cmd or _default_repo_agent_cmd(args.agent)
+        if not agent_cmd:
+            parser.error("--agent-cmd is required when --agent command is selected")
+        resolved = resolve_repo_for_run(
+            repo_path=Path(args.repo) if args.repo else None,
+            git_url=args.git_url,
+            git_ref=args.git_ref,
+            refresh_clone=args.refresh_clone,
+        )
         result = run_repo_task(
             instance=harness.instance_by_id(args.instance_id),
-            repo=Path(args.repo),
-            agent_cmd=args.agent_cmd,
+            repo=resolved.path,
+            agent_cmd=agent_cmd,
             profile_name=args.profile,
             output_dir=Path(args.output_dir),
             sandbox_profile_name=args.sandbox_profile,
             docker_sandbox=args.docker_sandbox,
+            agent_name=args.agent,
+            dry_run=args.dry_run,
+            score=not args.no_score,
+            hidden_oracles=args.hidden_oracles,
+            fail_on_scope_violation=args.fail_on_scope_violation,
+            repo_source_type=resolved.source_type,
+            repo_source=resolved.source_label,
+            repo_checkout_dir=str(resolved.checkout_dir) if resolved.checkout_dir else None,
         )
         print(json.dumps(asdict(result), indent=2))
         return 0
@@ -642,6 +676,19 @@ def _default_generation_output_dir(prompt_file: Path, model: str) -> Path:
     prompt_stem = prompt_file.stem or "prompt"
     model_slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", model).strip("_") or "model"
     return Path("runs") / prompt_stem / model_slug
+
+
+def _default_repo_agent_cmd(agent: str) -> str | None:
+    """Return the built-in command template for common repo-task agents."""
+
+    if agent == "codex":
+        return 'codex exec --full-auto --cd {worktree} "$(cat {prompt_file})"'
+    if agent == "opencode":
+        return (
+            'opencode run --dir {worktree} -f {prompt_file} --dangerously-skip-permissions '
+            '"Follow the attached task prompt and edit the repo."'
+        )
+    return None
 
 
 if __name__ == "__main__":

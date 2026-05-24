@@ -77,6 +77,22 @@
       "type": "array",
       "items": {"type": "string"}
     },
+    "protected_files": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "hidden_oracle_command": {"type": ["string", "null"]},
+    "setup_command": {"type": ["string", "null"]},
+    "teardown_command": {"type": ["string", "null"]},
+    "max_changed_files": {"type": ["integer", "null"], "minimum": 1},
+    "allowed_dependency_files": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "forbidden_dependency_files": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
     "language": {"type": ["string", "null"]},
     "frameworks": {
       "type": "array",
