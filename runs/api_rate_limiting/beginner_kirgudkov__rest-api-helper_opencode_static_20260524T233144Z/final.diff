@@ -1,0 +1,19 @@
+diff --git a/package-lock.json b/package-lock.json
+index 3fd686b..2103b88 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "rest-api-helper",
+-  "version": "2.0.0-alpha.16",
++  "version": "1.0.0",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "rest-api-helper",
+-      "version": "2.0.0-alpha.16",
++      "version": "1.0.0",
+       "license": "MIT",
+       "devDependencies": {
+         "@types/jest": "29.5.12",

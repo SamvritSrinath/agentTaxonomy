@@ -1,0 +1,4 @@
+$ openrouter model=moonshotai/kimi-k2.6
+applied_files=['src/index.ts']
+skipped=[]
+errors=[]

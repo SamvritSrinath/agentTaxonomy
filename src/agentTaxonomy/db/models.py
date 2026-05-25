@@ -111,6 +111,59 @@ class SandboxProfileRecord(ProvenanceMixin, Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
 
 
+class RepoTargetRecord(ProvenanceMixin, Base):
+    """Repository target that a repo-task instance can run against."""
+
+    __tablename__ = "repo_targets"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    source_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    repo_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    git_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    git_ref: Mapped[str | None] = mapped_column(Text, nullable=True)
+    task_family: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tags: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    bindings: Mapped[list["TaskRepoBindingRecord"]] = relationship(
+        back_populates="repo_target",
+        cascade="all, delete-orphan",
+    )
+
+    __table_args__ = (
+        Index("ix_repo_targets_task_family", "task_family"),
+        Index("ix_repo_targets_source_type", "source_type"),
+    )
+
+
+class TaskRepoBindingRecord(ProvenanceMixin, Base):
+    """Binding between a task instance and a repository target."""
+
+    __tablename__ = "task_repo_bindings"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    instance_id: Mapped[str] = mapped_column(ForeignKey("benchmark_instances.instance_id"), nullable=False)
+    repo_target_id: Mapped[str] = mapped_column(ForeignKey("repo_targets.id", ondelete="CASCADE"), nullable=False)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    allowed_output_files: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    protected_files: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
+    utility_command: Mapped[str | None] = mapped_column(Text, nullable=True)
+    hidden_oracle_command: Mapped[str | None] = mapped_column(Text, nullable=True)
+    runtime_profiles: Mapped[list[dict[str, Any]]] = mapped_column(JSON, default=list, nullable=False)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    repo_target: Mapped[RepoTargetRecord] = relationship(back_populates="bindings")
+
+    __table_args__ = (
+        UniqueConstraint("instance_id", "repo_target_id", name="uq_task_repo_binding_instance_target"),
+        Index("ix_task_repo_bindings_instance", "instance_id"),
+        Index("ix_task_repo_bindings_target", "repo_target_id"),
+    )
+
+
 class RunRecord(ProvenanceMixin, Base):
     """One physical agent execution over one benchmark instance."""
 
@@ -339,7 +392,7 @@ class AnnotationRecord(ProvenanceMixin, Base):
 
 
 class JobRecord(Base):
-    """Durable async work item for generate, judge, bootstrap, and ingest operations."""
+    """Durable async work item for generate, repo_run, judge, bootstrap, ingest, and rescore."""
 
     __tablename__ = "jobs"
 

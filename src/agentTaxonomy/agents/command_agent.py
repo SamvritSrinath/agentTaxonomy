@@ -6,6 +6,7 @@ import os
 import shlex
 import subprocess
 from datetime import UTC, datetime
+from pathlib import Path
 
 from .base import AgentRunRequest, AgentRunResult
 from .sandbox import SandboxProfile, install_command_shims
@@ -23,10 +24,11 @@ class CommandAgentAdapter:
     def run(self, request: AgentRunRequest) -> AgentRunResult:
         """Execute the configured command and capture stdout/stderr separately."""
         request.output_dir.mkdir(parents=True, exist_ok=True)
-        prompt_path = request.worktree / "TASK.md"
-        prompt_path.write_text(request.prompt, encoding="utf-8")
-        stdout_path = request.output_dir / "stdout.log"
-        stderr_path = request.output_dir / "stderr.log"
+        prompt_path = Path(str(request.metadata.get("prompt_file") or request.output_dir / "prompt.md"))
+        if not prompt_path.exists():
+            prompt_path.write_text(request.prompt, encoding="utf-8")
+        stdout_path = request.output_dir / "stdout.txt"
+        stderr_path = request.output_dir / "stderr.txt"
         self.sandbox_profile.write_metadata(request.output_dir)
 
         env = dict(os.environ)
@@ -76,6 +78,7 @@ class CommandAgentAdapter:
             self.command_template.replace("{prompt_file}", str(prompt_path))
             .replace("{worktree}", str(request.worktree))
             .replace("{output_dir}", str(request.output_dir))
+            .replace("{instance_id}", request.instance_id)
         )
 
     def _docker_command(self, command: str, request: AgentRunRequest) -> str:

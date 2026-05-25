@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
+  getArtifactContent,
   getInstance,
   getRun,
   listArtifacts,
@@ -8,7 +9,7 @@ import {
   listRunScores,
   listTrace
 } from "../api/client";
-import type { EvidenceSelection } from "../api/types";
+import type { Artifact, ArtifactContent, EvidenceSelection } from "../api/types";
 import { AnnotationPanel } from "../components/AnnotationPanel";
 import { ArtifactViewer } from "../components/ArtifactViewer";
 import { LoadingNotice } from "../components/LoadingNotice";
@@ -18,7 +19,19 @@ import { ScoreSynthesis, type RunScoreEntry } from "../components/ScoreSynthesis
 import { TraceTimeline } from "../components/TraceTimeline";
 import { useAsyncResource } from "../hooks/useAsyncResource";
 
-type RunTab = "prompt" | "artifacts" | "trace" | "findings" | "score";
+type RunTab =
+  | "score"
+  | "prompt"
+  | "repo-diff"
+  | "changed-files"
+  | "tests"
+  | "oracles"
+  | "scope"
+  | "commands"
+  | "sandbox"
+  | "artifacts"
+  | "trace"
+  | "findings";
 
 export function RunDetailRoute() {
   const { runId = "" } = useParams();
@@ -53,6 +66,10 @@ export function RunDetailRoute() {
     const gates = (score?.score_json as { security_gate_verdicts?: unknown[] } | undefined)?.security_gate_verdicts;
     return Array.isArray(gates) ? gates.length : 0;
   }, [scores, activeEvaluationId]);
+  const artifactByPath = useMemo(
+    () => new Map((artifacts.data ?? []).map((artifact) => [artifact.logical_path, artifact])),
+    [artifacts.data]
+  );
 
   const reloadAll = () => {
     run.reload();
@@ -78,6 +95,32 @@ export function RunDetailRoute() {
   }
 
   const selected = run.data;
+  const isRepoTask = selected?.task_mode === "repo_task" || instance.data?.task_mode === "repo_task";
+  const tabItems: Array<{ id: RunTab; label: string }> = [
+    { id: "score", label: "Score" },
+    { id: "prompt", label: "Prompt" },
+    ...(isRepoTask
+      ? [
+          { id: "repo-diff" as const, label: "Diff" },
+          { id: "changed-files" as const, label: "Changed Files" },
+          { id: "tests" as const, label: "Tests" },
+          { id: "oracles" as const, label: "Oracle Checks" },
+          { id: "scope" as const, label: "Scope" },
+          { id: "commands" as const, label: "Commands" },
+          { id: "sandbox" as const, label: "Sandbox" }
+        ]
+      : []),
+    { id: "artifacts", label: "Artifacts" },
+    { id: "trace", label: "Trace" },
+    { id: "findings", label: "Findings" }
+  ];
+  const artifactFor = (...paths: string[]): Artifact | null => {
+    for (const path of paths) {
+      const artifact = artifactByPath.get(path);
+      if (artifact) return artifact;
+    }
+    return null;
+  };
 
   return (
     <div className="page run-detail-page">
@@ -137,6 +180,19 @@ export function RunDetailRoute() {
             <button type="button" onClick={() => setTab("score")}>
               Score
             </button>
+            {isRepoTask ? (
+              <>
+                <button type="button" onClick={() => setTab("repo-diff")}>
+                  Diff
+                </button>
+                <button type="button" onClick={() => setTab("tests")}>
+                  Tests
+                </button>
+                <button type="button" onClick={() => setTab("oracles")}>
+                  Oracles
+                </button>
+              </>
+            ) : null}
             <button type="button" onClick={() => setTab("findings")}>
               Findings
             </button>
@@ -148,14 +204,14 @@ export function RunDetailRoute() {
 
         <section className="run-tab-workspace">
           <div className="evaluation-tabs">
-            {(["prompt", "artifacts", "trace", "findings", "score"] as RunTab[]).map((name) => (
+            {tabItems.map((item) => (
               <button
-                key={name}
+                key={item.id}
                 type="button"
-                className={tab === name ? "tab active" : "tab"}
-                onClick={() => setTab(name)}
+                className={tab === item.id ? "tab active" : "tab"}
+                onClick={() => setTab(item.id)}
               >
-                {name.charAt(0).toUpperCase() + name.slice(1)}
+                {item.label}
               </button>
             ))}
           </div>
@@ -168,6 +224,28 @@ export function RunDetailRoute() {
                 <p className="empty-state">No catalog prompt loaded for this instance.</p>
               )}
             </section>
+          ) : null}
+
+          {tab === "repo-diff" ? (
+            <RepoArtifactPanel title="Diff" artifact={artifactFor("diff.patch", "final.diff")} />
+          ) : null}
+
+          {tab === "changed-files" ? (
+            <RepoArtifactPanel title="Changed Files" artifact={artifactFor("changed_files.json")} />
+          ) : null}
+
+          {tab === "tests" ? <RepoArtifactPanel title="Tests" artifact={artifactFor("tests.json")} /> : null}
+
+          {tab === "oracles" ? (
+            <RepoArtifactPanel title="Oracle Checks" artifact={artifactFor("oracle_results.json")} />
+          ) : null}
+
+          {tab === "scope" ? <RepoArtifactPanel title="Scope" artifact={artifactFor("scope_report.json")} /> : null}
+
+          {tab === "commands" ? <RepoArtifactPanel title="Commands" artifact={artifactFor("commands.log")} /> : null}
+
+          {tab === "sandbox" ? (
+            <RepoArtifactPanel title="Sandbox Events" artifact={artifactFor("sandbox_events.jsonl")} />
           ) : null}
 
           {tab === "artifacts" ? (
@@ -239,5 +317,37 @@ export function RunDetailRoute() {
         </aside>
       </div>
     </div>
+  );
+}
+
+function RepoArtifactPanel({ title, artifact }: { title: string; artifact: Artifact | null }) {
+  const content = useAsyncResource<ArtifactContent | null>(
+    () => (artifact ? getArtifactContent(artifact.id) : Promise.resolve(null)),
+    [artifact?.id]
+  );
+  const display = useMemo(() => {
+    if (!content.data) return "";
+    if (content.data.encoding !== "utf-8" || !content.data.logical_path.endsWith(".json")) {
+      return content.data.content;
+    }
+    try {
+      return JSON.stringify(JSON.parse(content.data.content), null, 2);
+    } catch {
+      return content.data.content;
+    }
+  }, [content.data]);
+
+  return (
+    <section className="panel prompt-panel">
+      <h2>{title}</h2>
+      {!artifact ? <p className="empty-state">Artifact not found for this run.</p> : null}
+      {content.error ? <div className="error-inline">{content.error}</div> : null}
+      {content.data?.truncated ? (
+        <div className="warning-inline">
+          Content truncated ({content.data.size_bytes} bytes, showing {content.data.max_bytes} max).
+        </div>
+      ) : null}
+      {content.data ? <pre className="prompt-body">{display}</pre> : null}
+    </section>
   );
 }

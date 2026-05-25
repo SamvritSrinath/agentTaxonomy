@@ -1,3 +1,5 @@
+import type { RepoExecutionMethod } from "../config/repoRun";
+
 /**
  * Canonical identifier string returned by the workbench API.
  */
@@ -69,6 +71,53 @@ export interface GenerateRequest {
 }
 
 /**
+ * Repository target available for repo-task runs.
+ */
+export interface RepoTarget {
+  id: EntityId;
+  name: string;
+  source_type: "local_fixture" | "local_path" | "git" | "uploaded_archive";
+  repo_path?: string | null;
+  git_url?: string | null;
+  git_ref?: string | null;
+  task_family?: string | null;
+  tags: string[];
+  metadata_json: Record<string, unknown>;
+  binding?: {
+    id: EntityId;
+    instance_id: string;
+    repo_target_id: EntityId;
+    is_default: boolean;
+    allowed_output_files: string[];
+    protected_files: string[];
+    utility_command?: string | null;
+    hidden_oracle_command?: string | null;
+    runtime_profiles: Array<Record<string, unknown>>;
+    metadata_json: Record<string, unknown>;
+  };
+}
+
+/**
+ * Request body for running a repo-task instance.
+ */
+export interface RepoTaskRunRequest {
+  repo_target_id?: string;
+  repo_path?: string;
+  git_url?: string;
+  git_ref?: string;
+  refresh_clone?: boolean;
+  execution_method?: RepoExecutionMethod;
+  model?: string;
+  agent?: "codex" | "opencode" | "command";
+  agent_cmd?: string;
+  profile?: "static" | "smoke" | "full";
+  sandbox_profile?: string | null;
+  output_dir?: string;
+  prompt_id?: string;
+  keep_worktree?: boolean;
+}
+
+/**
  * Request body for judge pipeline execution.
  */
 export interface JudgePipelineRequest {
@@ -126,6 +175,8 @@ export interface WorkbenchRun {
   source_file_hash: string | null;
   /** Ingest version marker for reproducibility. */
   ingest_version: string;
+  /** Raw run metadata indexed from request.json and ingest. */
+  metadata_json?: Record<string, unknown>;
   /** ISO timestamp when this run row was ingested. */
   ingested_at?: string;
 }

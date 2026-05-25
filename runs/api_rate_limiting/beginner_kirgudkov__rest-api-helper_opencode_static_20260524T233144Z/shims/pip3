@@ -1,0 +1,2 @@
+#!/bin/sh
+exec "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/.venv/bin/python3" "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/api_rate_limiting/beginner_kirgudkov__rest-api-helper_opencode_static_20260524T233144Z/shims/uab_shim.py" "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/runs/api_rate_limiting/beginner_kirgudkov__rest-api-helper_opencode_static_20260524T233144Z/shims/shim_config.json" "pip3" "$@"

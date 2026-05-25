@@ -4,6 +4,7 @@ import { bootstrapWorkbench, ingestCatalog, listJobs, listRuns } from "../api/cl
 import { LoadingNotice } from "../components/LoadingNotice";
 import { Spinner } from "../components/Spinner";
 import { useAsyncResource } from "../hooks/useAsyncResource";
+import { isLlmWorkbenchJob, isRunningJob } from "../config/jobs";
 import { useJobRunner } from "../hooks/useJobRunner";
 
 export function DashboardPage() {
@@ -13,11 +14,7 @@ export function DashboardPage() {
   const [catalogMessage, setCatalogMessage] = useState<string | null>(null);
   const [catalogBusy, setCatalogBusy] = useState(false);
   const recent = (runs.data ?? []).slice(0, 5);
-  const runningJobs = (jobs.data ?? []).filter(
-    (job) =>
-      (job.kind === "generate" || job.kind === "judge") &&
-      (job.status === "running" || job.status === "queued")
-  );
+  const runningJobs = (jobs.data ?? []).filter((job) => isLlmWorkbenchJob(job) && isRunningJob(job));
   const failedRuns = (runs.data ?? []).filter((run) => run.status === "failed").slice(0, 5);
 
   async function ingestCatalogAction() {
@@ -38,7 +35,10 @@ export function DashboardPage() {
     <div className="page dashboard-page">
       <header className="page-header">
         <h2>Dashboard</h2>
-        <p>Workbench overview. Index the catalog here, then generate and judge from Run or Instance pages.</p>
+        <p>
+          Workbench overview. Index the catalog here, then run generative or repo tasks and judge from Run or Instance
+          pages.
+        </p>
       </header>
       <div className="dashboard-cards">
         <article className="stat-card">

@@ -19,3 +19,6 @@ __pycache__/
 
 # MkDocs build output (regenerate with scripts/build_docs.py)
 /site/
+
+# SSH/HTTPS clones for repo-task runs (see agentTaxonomy.repo_clone)
+benchmark/repo_fixtures/_external/

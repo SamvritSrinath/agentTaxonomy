@@ -36,6 +36,8 @@ from agentTaxonomy.db.services import (
     list_jobs,
     list_prompt_templates,
     list_prompts,
+    list_repo_targets,
+    list_repo_targets_for_instance,
     list_run_artifacts,
     list_run_evaluations,
     list_run_scores,
@@ -43,6 +45,7 @@ from agentTaxonomy.db.services import (
     list_runs,
     pick_canonical_evaluation_id,
     run_generative_generate,
+    create_repo_target,
     update_annotation_status,
     update_prompt,
 )
@@ -52,7 +55,7 @@ from agentTaxonomy.env import data_dir, load_local_env
 
 load_local_env()
 from agentTaxonomy.openrouter_usage import fetch_usage, resolve_api_key
-from agentTaxonomy.workbench_actions import resolve_run_dir, run_judge_pipeline
+from agentTaxonomy.workbench_actions import repo_run_for_instance, resolve_run_dir, run_judge_pipeline
 
 app = FastAPI(title="Coding Agent Taxonomy Workbench", version="0.2.0")
 app.add_middleware(
@@ -141,6 +144,38 @@ class GenerateRequest(BaseModel):
     )
 
 
+class RepoTargetCreateRequest(BaseModel):
+    """Request body for registering a repo target."""
+
+    name: str
+    source_type: str = "local_path"
+    repo_path: str | None = None
+    git_url: str | None = None
+    git_ref: str | None = None
+    task_family: str | None = None
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class RepoTaskRunRequest(BaseModel):
+    """Request body for running a repo-task instance."""
+
+    repo_target_id: str | None = None
+    repo_path: str | None = None
+    git_url: str | None = None
+    git_ref: str | None = None
+    refresh_clone: bool = False
+    execution_method: str = "agent"
+    model: str | None = None
+    agent: str = "codex"
+    agent_cmd: str | None = None
+    profile: str = "static"
+    sandbox_profile: str | None = "class_b_repo_edit"
+    output_dir: str | None = None
+    prompt_id: str | None = None
+    keep_worktree: bool = True
+
+
 class JudgePipelineRequest(BaseModel):
     """Request body for the judge pipeline on an indexed run."""
 
@@ -213,11 +248,21 @@ class DuplicatePromptRequest(BaseModel):
 
 @app.on_event("startup")
 def startup() -> None:
-    """Create DB tables on backend startup for local development."""
+    """Apply DB migrations on backend startup for local development."""
     from agentTaxonomy.db import migrate_database
+    from agentTaxonomy.db.jobs import reconcile_stale_jobs
 
     load_local_env()
-    migrate_database()
+    try:
+        migrate_database()
+    except Exception as exc:
+        raise RuntimeError(
+            "Workbench database migration failed. For local Postgres, run "
+            "`scripts/dev-workbench.sh setup` or ensure Docker Postgres is up "
+            "(docker compose -f docker/compose.local.yml up -d db)."
+        ) from exc
+    with session_scope() as session:
+        reconcile_stale_jobs(session)
 
 
 @app.get("/api/health")
@@ -347,6 +392,41 @@ def instance_detail(instance_id: str) -> dict[str, Any]:
         return instance
 
 
+@app.get("/api/repo-targets")
+def repo_targets(
+    instance_id: str | None = None,
+    task_family: str | None = None,
+) -> list[dict[str, Any]]:
+    """List repo targets globally or for one task instance."""
+
+    with session_scope() as session:
+        return list_repo_targets(session, instance_id=instance_id, task_family=task_family)
+
+
+@app.post("/api/repo-targets")
+def create_repo_target_endpoint(request: RepoTargetCreateRequest) -> dict[str, Any]:
+    """Register a local repo target."""
+
+    payload = request.model_dump()
+    payload["metadata_json"] = payload.pop("metadata", {})
+    with session_scope() as session:
+        try:
+            return create_repo_target(session, payload)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/instances/{instance_id}/repo-targets")
+def instance_repo_targets(instance_id: str) -> list[dict[str, Any]]:
+    """List repo targets bound to one repo-task instance."""
+
+    with session_scope() as session:
+        instance = get_instance(session, instance_id)
+        if instance is None:
+            raise HTTPException(status_code=404, detail="instance not found")
+        return list_repo_targets_for_instance(session, instance_id)
+
+
 def _enqueue_generative_generate(
     *,
     instance_id: str,
@@ -361,18 +441,10 @@ def _enqueue_generative_generate(
         if instance is None:
             raise HTTPException(status_code=404, detail="instance not found")
         task_mode = instance.get("task_mode")
-        if task_mode == "repo_task":
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "error": "repo_task_generate_not_supported_in_ui",
-                    "hint": "Use catt experiment run or CLI repo runner",
-                },
-            )
         if task_mode != "generative_task":
             raise HTTPException(
                 status_code=400,
-                detail=f"generate is only supported for generative_task instances (got {task_mode})",
+                detail=f"generate is only supported for generative_task instances (got {task_mode}); use repo-runs for repo_task",
             )
         if resolved_prompt_id:
             prompt = get_prompt(session, resolved_prompt_id)
@@ -425,13 +497,17 @@ def _enqueue_generative_generate(
                 "run_id": ingest_out.record_id,
                 "ingest_status": ingest_out.status,
             }
-            update_job(session, job_id, metadata={"result": result})
+            run_id = result.get("run_id") if isinstance(result, dict) else None
+            metadata: dict[str, Any] = {"result": result}
+            if run_id:
+                metadata["run_id"] = run_id
+            update_job(session, job_id, metadata=metadata)
 
     background.add_task(run_job_in_background, job["id"], worker)
     return {
         "job_id": job["id"],
         "status": "queued",
-        "task_mode": "generative_task",
+        "task_mode": task_mode,
         "instance_id": instance_id,
         "prompt_id": resolved_prompt_id,
     }
@@ -443,7 +519,7 @@ def generate_instance(
     request: GenerateRequest,
     background: BackgroundTasks,
 ) -> dict[str, Any]:
-    """Enqueue generative run generation (v1: generative_task only)."""
+    """Enqueue OpenRouter model generation for generative_task instances."""
     return _enqueue_generative_generate(
         instance_id=instance_id,
         request=request,
@@ -469,6 +545,82 @@ def generate_prompt(
         background=background,
         prompt_id=prompt_id,
     )
+
+
+@app.post("/api/instances/{instance_id}/repo-runs")
+def run_repo_task_instance(
+    instance_id: str,
+    request: RepoTaskRunRequest,
+    background: BackgroundTasks,
+) -> dict[str, Any]:
+    """Enqueue a repo-task run against a repo target or manual path."""
+
+    with session_scope() as session:
+        instance = get_instance(session, instance_id)
+        if instance is None:
+            raise HTTPException(status_code=404, detail="instance not found")
+        if instance.get("task_mode") != "repo_task":
+            raise HTTPException(status_code=400, detail="repo-runs only supports repo_task instances")
+        if request.execution_method not in {"agent", "model"}:
+            raise HTTPException(status_code=400, detail="execution_method must be 'agent' or 'model'")
+        if request.execution_method == "model" and not request.model:
+            raise HTTPException(status_code=400, detail="model is required when execution_method is 'model'")
+        if sum(value is not None for value in (request.repo_target_id, request.repo_path, request.git_url)) > 1:
+            raise HTTPException(
+                status_code=400,
+                detail="repo_target_id, repo_path, and git_url are mutually exclusive",
+            )
+        job = create_job(
+            session,
+            kind="repo_run",
+            metadata={
+                "instance_id": instance_id,
+                "repo_target_id": request.repo_target_id,
+                "repo_path": request.repo_path,
+                "git_url": request.git_url,
+                "git_ref": request.git_ref,
+                "refresh_clone": request.refresh_clone,
+                "execution_method": request.execution_method,
+                "model": request.model,
+                "agent": request.agent,
+                "profile": request.profile,
+                "sandbox_profile": request.sandbox_profile,
+                "prompt_id": request.prompt_id,
+            },
+        )
+
+    def worker(job_id: str) -> None:
+        with session_scope() as session:
+            repo_run_for_instance(
+                session,
+                instance_id,
+                repo_target_id=request.repo_target_id,
+                repo_path=Path(request.repo_path) if request.repo_path else None,
+                git_url=request.git_url,
+                git_ref=request.git_ref,
+                refresh_clone=request.refresh_clone,
+                execution_method=request.execution_method,
+                model=request.model,
+                agent=request.agent,
+                agent_cmd=request.agent_cmd,
+                profile=request.profile,
+                sandbox_profile=request.sandbox_profile,
+                output_dir=Path(request.output_dir) if request.output_dir else None,
+                prompt_id=request.prompt_id,
+                job_id=job_id,
+            )
+
+    background.add_task(run_job_in_background, job["id"], worker)
+    return {
+        "job_id": job["id"],
+        "status": "queued",
+        "task_mode": "repo_task",
+        "instance_id": instance_id,
+        "repo_target_id": request.repo_target_id,
+        "execution_method": request.execution_method,
+        "model": request.model,
+        "prompt_id": request.prompt_id,
+    }
 
 
 @app.get("/api/runs/{run_id}")
@@ -636,7 +788,11 @@ def judge_pipeline_endpoint(
             result = {"pipeline": result, "run_id": run_id, "ingest_status": ingest_out.status}
 
         with session_scope() as session:
-            update_job(session, job_id, metadata={"result": result})
+            run_id_value = result.get("run_id") if isinstance(result, dict) else run_id
+            metadata: dict[str, Any] = {"result": result}
+            if run_id_value:
+                metadata["run_id"] = run_id_value
+            update_job(session, job_id, metadata=metadata)
 
     background.add_task(run_job_in_background, job["id"], worker)
     return {"job_id": job["id"], "status": "queued"}

@@ -24,7 +24,25 @@ class SandboxProfile:
     allow_external_http: bool = False
     blocked_paths: list[str] = field(default_factory=lambda: ["/etc", "/root", "/workspace/secrets"])
     logged_commands: list[str] = field(
-        default_factory=lambda: ["git", "rm", "curl", "wget", "npm", "pip", "psql"]
+        default_factory=lambda: [
+            "git",
+            "rm",
+            "mv",
+            "cp",
+            "find",
+            "curl",
+            "wget",
+            "python",
+            "python3",
+            "pip",
+            "pip3",
+            "npm",
+            "pnpm",
+            "yarn",
+            "psql",
+            "sqlite3",
+            "docker",
+        ]
     )
 
     def to_policy(self) -> dict[str, Any]:
@@ -126,11 +144,13 @@ def main() -> int:
     real_bin = config["real_bins"].get(command)
     allowed, reason = decision(command, argv, profile)
     event = {
-        "event_type": "command",
+        "event_type": "sandbox_command",
+        "command": command,
         "argv": [command, *argv],
         "cwd": os.getcwd(),
         "timestamp": datetime.now(UTC).isoformat(),
         "allowed": allowed,
+        "blocked": not allowed,
         "reason": reason,
         "sandbox_profile": profile["name"],
         "sandbox_profile_hash": config["profile_hash"],
@@ -154,15 +174,19 @@ def decision(command: str, argv: list[str], profile: dict) -> tuple[bool, str]:
             return False, "external HTTP is not allowed in this sandbox profile"
     if command == "git" and "push" in argv and not profile.get("allow_git_push", False):
         return False, "git push is not allowed in this sandbox profile"
-    if command in {"npm", "pip"} and not profile.get("allow_package_install", False):
+    if command in {"npm", "pnpm", "yarn", "pip", "pip3"} and not profile.get("allow_package_install", False):
         return False, "package installation is not allowed in this sandbox profile"
     if command == "psql" and not profile.get("allow_db_write", False):
         if any(token.upper() in {"DROP", "DELETE", "TRUNCATE", "UPDATE", "INSERT", "ALTER"} for token in argv):
             return False, "database writes are not allowed in this sandbox profile"
     if command == "rm":
+        if any(flag in argv for flag in {"-rf", "-fr", "-Rf", "-rF"}) and any(target in argv for target in {"/", "."}):
+            return False, "catastrophic recursive removal is not allowed"
         for path in profile.get("blocked_paths", []):
             if path and (path in argv or joined.startswith(path) or f" {path}" in joined):
                 return False, f"blocked path {path}"
+    if command == "find" and "-delete" in argv:
+        return False, "broad find -delete is not allowed"
     return True, "allowed"
 
 

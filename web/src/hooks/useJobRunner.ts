@@ -1,11 +1,12 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { pollJob } from "../api/client";
+import { resolveJobRunId } from "../config/jobs";
 import type { JobStatus } from "../api/types";
 
 export interface UseJobRunnerOptions {
   onRefresh?: () => void;
-  /** Navigate to /runs/:id when generate job returns run_id. */
+  /** Navigate to /runs/:id when a generate or repo_run job returns run_id. */
   navigateOnGenerate?: boolean;
 }
 
@@ -16,7 +17,8 @@ export function useJobRunner(options: UseJobRunnerOptions = {}) {
   const [error, setError] = useState<string | null>(null);
 
   const waitForJob = useCallback(async (jobId: string): Promise<JobStatus> => {
-    for (let attempt = 0; attempt < 120; attempt += 1) {
+    // Match server OpenRouter timeout (~240s) plus harness/ingest slack.
+    for (let attempt = 0; attempt < 330; attempt += 1) {
       const job = await pollJob(jobId);
       setPhase(job.phase ?? job.status);
       if (job.status === "succeeded") {
@@ -37,9 +39,8 @@ export function useJobRunner(options: UseJobRunnerOptions = {}) {
       try {
         const started = await start();
         const job = await waitForJob(started.job_id);
-        const result = (job.result ?? job.metadata_json?.result) as Record<string, unknown> | undefined;
-        const runId = typeof result?.run_id === "string" ? result.run_id : undefined;
-        if (options.navigateOnGenerate && job.kind === "generate" && runId) {
+        const runId = resolveJobRunId(job);
+        if (options.navigateOnGenerate && (job.kind === "generate" || job.kind === "repo_run") && runId) {
           navigate(`/runs/${runId}`);
         }
         options.onRefresh?.();

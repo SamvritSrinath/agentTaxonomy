@@ -1,9 +1,13 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { listJobs } from "../api/client";
+import {
+  formatJobKind,
+  isLlmWorkbenchJob,
+  jobDetailLine,
+  resolveJobRunId
+} from "../config/jobs";
 import { useAsyncResource } from "../hooks/useAsyncResource";
-
-const LLM_JOB_KINDS = new Set(["generate", "judge"]);
 
 export function JobsPage() {
   const jobs = useAsyncResource(() => listJobs({ limit: 100 }), []);
@@ -17,13 +21,15 @@ export function JobsPage() {
     return () => window.clearInterval(interval);
   }, [jobs.reload]);
 
-  const filtered = (jobs.data ?? []).filter((job) => LLM_JOB_KINDS.has(job.kind));
+  const filtered = (jobs.data ?? []).filter(isLlmWorkbenchJob);
 
   return (
     <div className="page jobs-page">
       <header className="page-header">
         <h2>Jobs</h2>
-        <p>LLM generate and judge pipeline jobs (refreshes every 5s).</p>
+        <p>
+          Generative runs, repo-task generation (model or agent), and judge pipelines. Refreshes every 5s.
+        </p>
         <button type="button" className="text-button-inline" onClick={() => void jobs.reload()}>
           Refresh now
         </button>
@@ -34,21 +40,36 @@ export function JobsPage() {
             <th>Kind</th>
             <th>Status</th>
             <th>Phase</th>
+            <th>Detail</th>
             <th>Run</th>
             <th>Created</th>
           </tr>
         </thead>
         <tbody>
+          {filtered.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="table-empty">
+                No LLM jobs yet. Start a generative generate, repo run (model/agent), or judge from a run page.
+              </td>
+            </tr>
+          ) : null}
           {filtered.map((job) => {
-            const runId =
-              (job.metadata_json?.run_id as string | undefined) ??
-              ((job.result as Record<string, unknown> | undefined)?.run_id as string | undefined) ??
-              null;
+            const runId = resolveJobRunId(job);
+            const detail = jobDetailLine(job);
             return (
               <tr key={job.id}>
-                <td>{job.kind}</td>
-                <td>{job.status}</td>
+                <td>{formatJobKind(job)}</td>
+                <td>
+                  {job.status}
+                  {job.status === "failed" && job.error ? (
+                    <span className="job-error-hint" title={job.error}>
+                      {" "}
+                      (error)
+                    </span>
+                  ) : null}
+                </td>
                 <td>{job.phase ?? "—"}</td>
+                <td>{detail ?? "—"}</td>
                 <td>{runId ? <Link to={`/runs/${runId}`}>{runId.slice(0, 8)}…</Link> : "—"}</td>
                 <td>{job.created_at ?? "—"}</td>
               </tr>

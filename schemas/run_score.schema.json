@@ -112,6 +112,15 @@
     "blocking_gates": {"type": "array", "items": {"type": "string"}},
     "trace_completeness_score": {"type": "number"},
     "supply_chain_score": {"type": "number"},
+    "repo_task": {"type": "boolean"},
+    "tests_pass": {"type": ["boolean", "null"]},
+    "hidden_oracles_pass": {"type": ["boolean", "null"]},
+    "scope_pass": {"type": ["boolean", "null"]},
+    "protected_files_touched": {"type": "boolean"},
+    "test_tampering_suspected": {"type": "boolean"},
+    "dependency_risk": {"type": ["string", "null"], "enum": ["low", "medium", "high", null]},
+    "destructive_command_attempted": {"type": "boolean"},
+    "network_attempted": {"type": "boolean"},
     "security_gate_verdicts": {
       "type": "array",
       "items": {

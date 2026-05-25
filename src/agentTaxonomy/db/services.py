@@ -22,8 +22,10 @@ from .models import (
     JobRecord,
     PromptTemplateRecord,
     PromptVariantRecord,
+    RepoTargetRecord,
     RunRecord,
     ScoreRecord,
+    TaskRepoBindingRecord,
     TraceEventRecord,
 )
 from .session import project_root
@@ -286,7 +288,10 @@ def run_generative_generate(
     if instance is None:
         raise KeyError(f"instance not found: {instance_id}")
     if instance.task_mode != "generative_task":
-        raise ValueError(f"instance {instance_id} is {instance.task_mode}; generative generate only supports generative_task")
+        raise ValueError(
+            f"instance {instance_id} is {instance.task_mode}; "
+            "generative generate only supports generative_task"
+        )
 
     prompt_path, variant = _resolve_generative_prompt_path(
         session,
@@ -316,6 +321,128 @@ def run_generative_generate(
         "agent_output_path": result.agent_output_path,
         "trace_path": result.trace_path,
     }
+
+
+def list_repo_targets(
+    session: Session,
+    *,
+    instance_id: str | None = None,
+    task_family: str | None = None,
+) -> list[dict[str, Any]]:
+    """Return repo targets, optionally constrained by task family or instance binding."""
+
+    if instance_id:
+        rows = session.execute(
+            select(RepoTargetRecord, TaskRepoBindingRecord)
+            .join(TaskRepoBindingRecord, TaskRepoBindingRecord.repo_target_id == RepoTargetRecord.id)
+            .where(TaskRepoBindingRecord.instance_id == instance_id)
+            .order_by(TaskRepoBindingRecord.is_default.desc(), RepoTargetRecord.name)
+        ).all()
+        return [_repo_target_dict(target, binding) for target, binding in rows]
+
+    stmt = select(RepoTargetRecord).order_by(RepoTargetRecord.name)
+    if task_family:
+        stmt = stmt.where(RepoTargetRecord.task_family == task_family)
+    return [_repo_target_dict(row, None) for row in session.scalars(stmt).all()]
+
+
+def create_repo_target(session: Session, payload: dict[str, Any]) -> dict[str, Any]:
+    """Create a local repository target."""
+
+    source_type = str(payload.get("source_type") or "local_path")
+    if source_type not in {"local_fixture", "local_path", "git", "uploaded_archive"}:
+        raise ValueError(f"unsupported repo target source_type: {source_type}")
+    if source_type in {"local_fixture", "local_path"} and not payload.get("repo_path"):
+        raise ValueError("repo_path is required for local repo targets")
+    if source_type == "git" and not payload.get("git_url"):
+        raise ValueError("git_url is required for git repo targets")
+    row = RepoTargetRecord(
+        name=str(payload["name"]),
+        source_type=source_type,
+        repo_path=payload.get("repo_path"),
+        git_url=payload.get("git_url"),
+        git_ref=payload.get("git_ref"),
+        task_family=payload.get("task_family"),
+        tags=list(payload.get("tags", [])),
+        metadata_json=dict(payload.get("metadata_json", payload.get("metadata", {}))),
+    )
+    session.add(row)
+    session.flush()
+    return _repo_target_dict(row, None)
+
+
+def list_repo_targets_for_instance(session: Session, instance_id: str) -> list[dict[str, Any]]:
+    """Return repo targets bound to an instance."""
+
+    return list_repo_targets(session, instance_id=instance_id)
+
+
+def resolve_repo_binding(
+    session: Session,
+    instance_id: str,
+    repo_target_id: str | None = None,
+) -> tuple[RepoTargetRecord, TaskRepoBindingRecord | None]:
+    """Resolve the selected or default repo target/binding for an instance."""
+
+    if repo_target_id:
+        target = session.get(RepoTargetRecord, repo_target_id)
+        if target is None:
+            raise KeyError(f"repo target not found: {repo_target_id}")
+        binding = session.scalar(
+            select(TaskRepoBindingRecord).where(
+                TaskRepoBindingRecord.instance_id == instance_id,
+                TaskRepoBindingRecord.repo_target_id == repo_target_id,
+            )
+        )
+        return target, binding
+
+    bindings = session.scalars(
+        select(TaskRepoBindingRecord)
+        .where(TaskRepoBindingRecord.instance_id == instance_id)
+        .order_by(TaskRepoBindingRecord.is_default.desc(), TaskRepoBindingRecord.created_at)
+    ).all()
+    if not bindings:
+        raise ValueError(f"instance {instance_id} has no default repo binding")
+    defaults = [item for item in bindings if item.is_default]
+    if len(defaults) > 1:
+        raise ValueError(f"instance {instance_id} has multiple default repo bindings")
+    binding = defaults[0] if defaults else bindings[0]
+    target = session.get(RepoTargetRecord, binding.repo_target_id)
+    if target is None:
+        raise KeyError(f"repo target not found: {binding.repo_target_id}")
+    return target, binding
+
+
+def _repo_target_dict(
+    target: RepoTargetRecord,
+    binding: TaskRepoBindingRecord | None,
+) -> dict[str, Any]:
+    item = {
+        "id": target.id,
+        "name": target.name,
+        "source_type": target.source_type,
+        "repo_path": target.repo_path,
+        "git_url": target.git_url,
+        "git_ref": target.git_ref,
+        "task_family": target.task_family,
+        "tags": list(target.tags or []),
+        "metadata_json": dict(target.metadata_json or {}),
+        "created_at": target.created_at.isoformat() if target.created_at else None,
+    }
+    if binding is not None:
+        item["binding"] = {
+            "id": binding.id,
+            "instance_id": binding.instance_id,
+            "repo_target_id": binding.repo_target_id,
+            "is_default": binding.is_default,
+            "allowed_output_files": list(binding.allowed_output_files or []),
+            "protected_files": list(binding.protected_files or []),
+            "utility_command": binding.utility_command,
+            "hidden_oracle_command": binding.hidden_oracle_command,
+            "runtime_profiles": list(binding.runtime_profiles or []),
+            "metadata_json": dict(binding.metadata_json or {}),
+        }
+    return item
 
 
 def list_run_trace(session: Session, run_id: str) -> list[dict[str, Any]]:
@@ -710,22 +837,30 @@ def list_jobs(
     limit: int = 100,
     status: str | None = None,
     kind: str | None = None,
+    reconcile_stale: bool = True,
 ) -> list[dict[str, Any]]:
     """Return async jobs for the workbench queue."""
+    from .jobs import _job_dict, reconcile_stale_jobs
+
+    if reconcile_stale:
+        reconcile_stale_jobs(session)
     stmt = select(JobRecord).order_by(JobRecord.created_at.desc()).limit(limit)
     if status:
         stmt = stmt.where(JobRecord.status == status)
     if kind:
         stmt = stmt.where(JobRecord.kind == kind)
     rows = session.scalars(stmt).all()
-    return [_record_dict(row) for row in rows]
+    return [_job_dict(row) for row in rows]
 
 
 def _record_dict(record: Any) -> dict[str, Any]:
     data: dict[str, Any] = {}
     for attr in sqlalchemy_inspect(record).mapper.column_attrs:
         column = attr.columns[0]
-        data[column.name] = getattr(record, attr.key)
+        value = getattr(record, attr.key)
+        data[column.name] = value
+        if attr.key != column.name:
+            data[attr.key] = value
     for key, value in list(data.items()):
         if isinstance(value, datetime):
             data[key] = value.isoformat()

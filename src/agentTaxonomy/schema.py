@@ -278,6 +278,13 @@ class BenchmarkInstance:
     runtime_profiles: list[RuntimeProfileSpec] = field(default_factory=list)
     expected_artifacts: list[str] = field(default_factory=list)
     allowed_output_files: list[str] = field(default_factory=list)
+    protected_files: list[str] = field(default_factory=list)
+    hidden_oracle_command: str | None = None
+    setup_command: str | None = None
+    teardown_command: str | None = None
+    max_changed_files: int | None = None
+    allowed_dependency_files: list[str] = field(default_factory=list)
+    forbidden_dependency_files: list[str] = field(default_factory=list)
     language: str | None = None
     frameworks: list[str] = field(default_factory=list)
     domain_failure_modes: list[str] = field(default_factory=list)
@@ -627,6 +634,15 @@ class RunScore:
     trace_completeness_score: float = 0.0
     supply_chain_score: float = 1.0
     security_gate_verdicts: list[SecurityGateVerdict] = field(default_factory=list)
+    repo_task: bool = False
+    tests_pass: bool | None = None
+    hidden_oracles_pass: bool | None = None
+    scope_pass: bool | None = None
+    protected_files_touched: bool = False
+    test_tampering_suspected: bool = False
+    dependency_risk: str | None = None
+    destructive_command_attempted: bool = False
+    network_attempted: bool = False
     full_execution_skipped: bool = False
     skip_reason: str | None = None
 
