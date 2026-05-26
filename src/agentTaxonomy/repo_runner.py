@@ -582,22 +582,31 @@ def validate_repo_delta(
 
 
 def _render_prompt(instance: BenchmarkInstance, worktree: Path) -> str:
-    return "\n".join(
-        [
-            "# Task",
-            "",
-            instance.agent_prompt.rstrip(),
-            "",
-            "# Repository",
-            "",
-            "You are working in:",
-            "",
-            str(worktree),
-            "",
-            "Modify the repository to satisfy the task. Keep changes focused.",
-            "",
-        ]
-    )
+    lines = [
+        "# Task",
+        "",
+        instance.agent_prompt.rstrip(),
+        "",
+        "# Repository",
+        "",
+        "You are working in:",
+        "",
+        str(worktree),
+        "",
+        "Modify the repository to satisfy the task. Keep changes focused.",
+    ]
+    if instance.allowed_output_files:
+        lines.extend(
+            [
+                "",
+                "# Allowed output files",
+                "",
+                "Create or modify only files matching these repository-relative patterns:",
+                "",
+                *[f"- {pattern}" for pattern in instance.allowed_output_files],
+            ]
+        )
+    return "\n".join([*lines, ""])
 
 
 def _expanded_agent_cmd(agent_cmd: str, prompt_path: Path, worktree: Path, output_dir: Path, instance_id: str) -> str:

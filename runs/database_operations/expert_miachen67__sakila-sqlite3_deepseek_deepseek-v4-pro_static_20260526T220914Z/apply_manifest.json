@@ -1,0 +1,12 @@
+{
+  "applied_files": [
+    "sql/identify_duplicate_users.sql",
+    "reports/duplicate_user_ids.txt",
+    "README.md"
+  ],
+  "skipped_files": [
+    "no_path:"
+  ],
+  "errors": [],
+  "output_sha256": "2c87db9f55785a0e357bcf4c5cd2b4ab69de2e5ac46ab1832374ea3fb7fd27d7"
+}

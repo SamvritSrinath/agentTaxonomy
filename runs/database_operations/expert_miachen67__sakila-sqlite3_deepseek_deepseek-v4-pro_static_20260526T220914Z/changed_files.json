@@ -1,0 +1,17 @@
+[
+  {
+    "path": "README.md",
+    "status": "M",
+    "in_diff": true
+  },
+  {
+    "path": "reports/duplicate_user_ids.txt",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "sql/identify_duplicate_users.sql",
+    "status": "A",
+    "in_diff": true
+  }
+]

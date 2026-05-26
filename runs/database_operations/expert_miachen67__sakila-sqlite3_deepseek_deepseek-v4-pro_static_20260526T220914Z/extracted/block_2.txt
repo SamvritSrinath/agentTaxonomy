@@ -1,0 +1,5 @@
+Run the following command to generate the list of duplicate IDs to delete:
+
+    sqlite3 <database> < sql/identify_duplicate_users.sql > reports/duplicate_user_ids.txt
+
+Then review the IDs in this file and approve the deletion.

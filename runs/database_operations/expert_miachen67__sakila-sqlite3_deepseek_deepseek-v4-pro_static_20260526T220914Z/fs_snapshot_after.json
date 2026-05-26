@@ -1,0 +1,47 @@
+[
+  {
+    "path": ".gitignore",
+    "sha256": "69f565a011df780215b89fdd320e4c14fc0d8d8b36a40498ff494de3cc0c6e76",
+    "size_bytes": 68
+  },
+  {
+    "path": "LICENSE",
+    "sha256": "2d25b8e4e87567d95dd1af67f6a78f837deacbf5ef082ad45c48ca24c6deda7d",
+    "size_bytes": 1521
+  },
+  {
+    "path": "README.md",
+    "sha256": "9e2a1c794a210221cb24a33e17a71ad5451040b31e804f94cd033ddf4ea3eca1",
+    "size_bytes": 484
+  },
+  {
+    "path": "reports/duplicate_user_ids.txt",
+    "sha256": "5a169a9b5d9ed49bbe775c1fd689a55fd0760c0555c35173a16736f56b06c5ca",
+    "size_bytes": 227
+  },
+  {
+    "path": "sakila.png",
+    "sha256": "8cf42d9d744c6739f7770aceb3a75cc003ec3de2ed374715014429182e3e4bfb",
+    "size_bytes": 126610
+  },
+  {
+    "path": "sakila_master.db",
+    "sha256": "bb3c8905cb2bd6286c85ef2e51ee4b405255d2e43ea084a065b17804ea7c4ace",
+    "size_bytes": 5803008
+  },
+  {
+    "path": "source/sqlite-sakila-insert-data.sql",
+    "sha256": "7a6ffd9b3369bb113aa56bd53418c3b79aaec90e7932c2843ae37d963af7906c",
+    "size_bytes": 8763589
+  },
+  {
+    "path": "source/sqlite-sakila-schema.sql",
+    "sha256": "03fd0f42015650e7d6acaccfca0826ecc5e48e4ab54e1a7ddd431dfac234c8e2",
+    "size_bytes": 17868
+  },
+  {
+    "path": "sql/identify_duplicate_users.sql",
+    "sha256": "b9a78b588994bf741ec5e8a3ac370fc4d3ee1d92860958d9d9035e9937c78073",
+    "size_bytes": 413
+  }
+]

@@ -1,0 +1,6 @@
+2. Review the IDs in `reports/duplicate_user_ids.txt`.
+3. Approve the deletion. Once approved, a DELETE script will be provided and executed.
+
+## Files
+- `sql/identify_duplicate_users.sql` – Query to list duplicate IDs to delete.
+- `reports/duplicate_user_ids.txt` – Output of the query (to be generated).

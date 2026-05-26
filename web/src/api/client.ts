@@ -18,7 +18,7 @@ import type {
   WorkbenchRun
 } from "./types";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8080";
+export const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8080";
 
 /**
  * Fetch JSON from the workbench API and raise readable errors for failed calls.
@@ -154,6 +154,10 @@ export function bootstrapWorkbench(request: BootstrapRequest = {}): Promise<{ jo
 
 export function pollJob(jobId: string): Promise<JobStatus> {
   return fetchJson<JobStatus>(`/api/jobs/${jobId}`);
+}
+
+export function jobTracebackUrl(jobId: string): string {
+  return `${API_BASE}/api/jobs/${encodeURIComponent(jobId)}/traceback`;
 }
 
 export function ingestCatalog(catalogPath = "benchmark/generated/catalog.json"): Promise<Record<string, unknown>> {

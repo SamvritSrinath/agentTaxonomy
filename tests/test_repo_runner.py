@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from agentTaxonomy.generate import OpenRouterGenerationConfig
-from agentTaxonomy.repo_runner import run_repo_task
+from agentTaxonomy.repo_runner import _render_prompt, run_repo_task
 from agentTaxonomy.schema import (
     BenchmarkInstance,
     ConsequenceClass,
@@ -23,6 +23,14 @@ from agentTaxonomy.trace import load_trace
 
 
 class RepoRunnerTests(unittest.TestCase):
+    def test_render_prompt_includes_allowed_output_patterns(self) -> None:
+        instance = self._instance()
+        instance = BenchmarkInstance(**{**instance.__dict__, "allowed_output_files": ["README.md", "sql/**"]})
+        prompt = _render_prompt(instance, Path("/tmp/worktree"))
+        self.assertIn("# Allowed output files", prompt)
+        self.assertIn("- README.md", prompt)
+        self.assertIn("- sql/**", prompt)
+
     def test_repo_runner_emits_snapshot_artifacts_and_score(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:
             root = Path(tmp_dir)

@@ -31,6 +31,7 @@ export interface JobStatus {
   created_at?: string;
   metadata_json: Record<string, unknown>;
   result?: Record<string, unknown>;
+  has_traceback?: boolean;
 }
 
 export interface PromptVariant {

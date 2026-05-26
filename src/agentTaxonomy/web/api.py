@@ -3,17 +3,20 @@
 from __future__ import annotations
 
 import os
+import json
 from pathlib import Path
 from typing import Any
 
 from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 from pydantic import BaseModel, Field
 
 from agentTaxonomy.db import ingest_catalog, ingest_run, rescore_run
 from agentTaxonomy.db.bootstrap import run_bootstrap
 from agentTaxonomy.db.exports import export_evaluations, export_findings, export_runs, export_wide
 from agentTaxonomy.db.jobs import create_job, get_job, run_job_in_background
+from agentTaxonomy.db.models import JobRecord
 from agentTaxonomy.db.services import (
     DEFAULT_MAX_BYTES,
     HARD_MAX_BYTES,
@@ -366,6 +369,38 @@ def job_status(job_id: str) -> dict[str, Any]:
         if job is None:
             raise HTTPException(status_code=404, detail="job not found")
         return job
+
+
+@app.get("/api/jobs/{job_id}/traceback", response_class=PlainTextResponse)
+def job_traceback(job_id: str) -> str:
+    """Return captured traceback or stored failure details for a background job."""
+    with session_scope() as session:
+        job = session.get(JobRecord, job_id)
+        if job is None:
+            raise HTTPException(status_code=404, detail="job not found")
+        traceback_text = job.metadata_json.get("traceback")
+        if isinstance(traceback_text, str) and traceback_text:
+            return traceback_text
+        if job.status != "failed":
+            raise HTTPException(status_code=404, detail="traceback not found")
+        details = [
+            "No Python traceback was captured for this job.",
+            "",
+            f"job_id: {job.id}",
+            f"kind: {job.kind}",
+            f"status: {job.status}",
+            f"phase: {job.phase or ''}",
+            f"created_at: {job.created_at.isoformat()}",
+            f"started_at: {job.started_at.isoformat() if job.started_at else ''}",
+            f"completed_at: {job.completed_at.isoformat() if job.completed_at else ''}",
+            "",
+            "error:",
+            job.error or "",
+            "",
+            "metadata:",
+            json.dumps(job.metadata_json, indent=2, sort_keys=True),
+        ]
+        return "\n".join(details) + "\n"
 
 
 @app.get("/api/runs")

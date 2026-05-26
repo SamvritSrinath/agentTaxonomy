@@ -1,0 +1,32 @@
+{
+  "source": "/workspace/runs/database_operations/expert_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T220914Z/agent_output.md",
+  "output_dir": "/workspace/runs/database_operations/expert_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T220914Z/extracted",
+  "block_count": 4,
+  "extracted_files": [
+    {
+      "source": "/workspace/runs/database_operations/expert_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T220914Z/agent_output.md",
+      "language": "sql",
+      "relative_path": "block_1.sql"
+    },
+    {
+      "source": "/workspace/runs/database_operations/expert_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T220914Z/agent_output.md",
+      "language": "text",
+      "relative_path": "block_2.txt"
+    },
+    {
+      "source": "/workspace/runs/database_operations/expert_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T220914Z/agent_output.md",
+      "language": "markdown",
+      "relative_path": "block_3.md"
+    },
+    {
+      "source": "/workspace/runs/database_operations/expert_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T220914Z/agent_output.md",
+      "language": "text",
+      "relative_path": "block_4.txt"
+    },
+    {
+      "source": "/workspace/runs/database_operations/expert_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T220914Z/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

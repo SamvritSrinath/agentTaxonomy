@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { listJobs } from "../api/client";
+import { jobTracebackUrl, listJobs } from "../api/client";
 import {
   formatJobKind,
   isLlmWorkbenchJob,
@@ -65,6 +65,10 @@ export function JobsPage() {
                     <span className="job-error-hint" title={job.error}>
                       {" "}
                       (error)
+                      {" "}
+                      <a href={jobTracebackUrl(job.id)} target="_blank" rel="noreferrer">
+                        {job.has_traceback ? "traceback" : "details"}
+                      </a>
                     </span>
                   ) : null}
                 </td>

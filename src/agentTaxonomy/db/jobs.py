@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import traceback
 from datetime import UTC, datetime
 from typing import Any, Callable
 
@@ -144,11 +145,20 @@ def run_job_in_background(
         with session_scope(database_url) as session:
             update_job(session, job_id, status="succeeded")
     except Exception as exc:
+        formatted_traceback = traceback.format_exc()
         with session_scope(database_url) as session:
-            update_job(session, job_id, status="failed", error=str(exc))
+            update_job(
+                session,
+                job_id,
+                status="failed",
+                error=str(exc),
+                metadata={"traceback": formatted_traceback},
+            )
 
 
 def _job_dict(row: JobRecord) -> dict[str, Any]:
+    metadata = dict(row.metadata_json)
+    has_traceback = bool(metadata.pop("traceback", None))
     return {
         "id": row.id,
         "kind": row.kind,
@@ -158,6 +168,7 @@ def _job_dict(row: JobRecord) -> dict[str, Any]:
         "created_at": row.created_at.isoformat(),
         "started_at": row.started_at.isoformat() if row.started_at else None,
         "completed_at": row.completed_at.isoformat() if row.completed_at else None,
-        "metadata_json": row.metadata_json,
-        "result": row.metadata_json.get("result"),
+        "metadata_json": metadata,
+        "result": metadata.get("result"),
+        "has_traceback": has_traceback,
     }

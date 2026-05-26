@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import fnmatch
 import re
 from dataclasses import dataclass
 from hashlib import sha256
@@ -113,7 +114,7 @@ def apply_agent_output_to_worktree(
         except ValueError:
             errors.append(f"escapes_worktree:{rel_path}")
             continue
-        if allowed and rel_path not in allowed:
+        if allowed and not _matches_allowed_path(rel_path, allowed):
             # Allow edits outside the fixture allow-list when the path already exists in the worktree
             # (e.g. git remote tasks on TypeScript repos vs catalog Python fixtures).
             if not target.exists():
@@ -234,6 +235,11 @@ def _looks_like_repo_path(value: str) -> bool:
     if "/" in value or "." in value:
         return True
     return value.endswith((".py", ".md", ".txt", ".json", ".yml", ".yaml", ".sh", ".js", ".ts"))
+
+
+def _matches_allowed_path(path: str, patterns: list[str]) -> bool:
+    normalized = path.strip().replace("\\", "/").lstrip("./")
+    return any(fnmatch.fnmatch(normalized, pattern) for pattern in patterns)
 
 
 def _strip_file_header(body: str) -> str:

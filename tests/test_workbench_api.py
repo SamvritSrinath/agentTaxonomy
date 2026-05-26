@@ -6,6 +6,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
+from agentTaxonomy.db.jobs import create_job, run_job_in_background
 from agentTaxonomy.db.ingest import ingest_catalog, ingest_run
 from agentTaxonomy.db.models import ArtifactRecord, BenchmarkInstanceRecord
 from agentTaxonomy.db.session import migrate_database, reset_database, session_scope
@@ -115,6 +116,48 @@ class WorkbenchApiTests(unittest.TestCase):
             job = client.get(f"/api/jobs/{job_id}")
             self.assertEqual(job.status_code, 200)
             self.assertIn(job.json()["status"], {"queued", "running", "succeeded", "failed"})
+
+    def test_failed_job_exposes_traceback_endpoint(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            database_url = f"sqlite:///{Path(tmp_dir) / 'workbench.sqlite'}"
+            os.environ["DATABASE_URL"] = database_url
+            migrate_database(database_url)
+            with session_scope(database_url) as session:
+                job_id = create_job(session, kind="ingest", metadata={"run_dir": "missing"})["id"]
+
+            def worker(_job_id: str) -> None:
+                raise RuntimeError("boom")
+
+            run_job_in_background(job_id, worker, database_url=database_url)
+            client = TestClient(app)
+            job = client.get(f"/api/jobs/{job_id}")
+            self.assertEqual(job.status_code, 200)
+            self.assertEqual(job.json()["status"], "failed")
+            self.assertTrue(job.json()["has_traceback"])
+            self.assertNotIn("traceback", job.json()["metadata_json"])
+            traceback_response = client.get(f"/api/jobs/{job_id}/traceback")
+            self.assertEqual(traceback_response.status_code, 200)
+            self.assertIn("RuntimeError: boom", traceback_response.text)
+
+    def test_failed_job_traceback_endpoint_falls_back_to_error_details(self) -> None:
+        from agentTaxonomy.db.jobs import update_job
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            database_url = f"sqlite:///{Path(tmp_dir) / 'workbench.sqlite'}"
+            os.environ["DATABASE_URL"] = database_url
+            migrate_database(database_url)
+            with session_scope(database_url) as session:
+                job_id = create_job(session, kind="repo_run", metadata={"instance_id": "database_operations__expert"})[
+                    "id"
+                ]
+                update_job(session, job_id, status="failed", phase="openrouter", error="not_allowed:cleanup.py")
+
+            client = TestClient(app)
+            response = client.get(f"/api/jobs/{job_id}/traceback")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn("No Python traceback was captured", response.text)
+            self.assertIn("not_allowed:cleanup.py", response.text)
+            self.assertIn("database_operations__expert", response.text)
 
     def test_generate_rejects_repo_task(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

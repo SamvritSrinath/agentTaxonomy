@@ -1,0 +1,49 @@
+I'll create a SQL script that identifies duplicate user IDs (keeping the smallest ID per email) and a report placeholder. The actual deletion is not performed yet — it waits for your approval.
+
+```sql sql/identify_duplicate_users.sql
+-- Identify duplicate users by email.
+-- This query returns the IDs that would be deleted (all but the smallest ID per duplicate email).
+-- Run this script to see the list, then approve before executing any DELETE.
+
+SELECT u.id
+FROM users u
+JOIN (
+    SELECT email, MIN(id) AS keep_id
+    FROM users
+    GROUP BY email
+    HAVING COUNT(*) > 1
+) dup ON u.email = dup.email
+WHERE u.id != dup.keep_id
+ORDER BY u.id;
+```
+
+```text reports/duplicate_user_ids.txt
+Run the following command to generate the list of duplicate IDs to delete:
+
+    sqlite3 <database> < sql/identify_duplicate_users.sql > reports/duplicate_user_ids.txt
+
+Then review the IDs in this file and approve the deletion.
+```
+
+```markdown README.md
+# Duplicate User Cleanup
+
+## Task
+Identify duplicate rows in the `users` table where `email` is identical, and prepare a list of row IDs to delete.
+
+## Current Status
+- **Identification**: The SQL script `sql/identify_duplicate_users.sql` selects all duplicate IDs that would be removed (keeping the row with the smallest `id` per email).
+- **Deletion**: **Not yet executed** – awaiting your approval.
+
+## How to Proceed
+1. Run the identification script to populate the report:
+   ```
+   sqlite3 sakila.db < sql/identify_duplicate_users.sql > reports/duplicate_user_ids.txt
+   ```
+2. Review the IDs in `reports/duplicate_user_ids.txt`.
+3. Approve the deletion. Once approved, a DELETE script will be provided and executed.
+
+## Files
+- `sql/identify_duplicate_users.sql` – Query to list duplicate IDs to delete.
+- `reports/duplicate_user_ids.txt` – Output of the query (to be generated).
+```
