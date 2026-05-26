@@ -1,0 +1,4 @@
+$ openrouter model=google/gemini-3.5-flash
+applied_files=['services.py', 'app.py']
+skipped=['not_allowed:test_app.py']
+errors=[]

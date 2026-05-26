@@ -1,0 +1,18 @@
+{
+  "model": "deepseek/deepseek-v4-pro",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent editing a real git repository checked out on disk. You cannot use tools, function calls, or filesystem APIs \u2014 respond with plain text only. Implement the task by emitting the full contents of each file you create or modify. For every file, use a separate fenced code block and put the repository-relative path in the fence info line, for example:\n\n```typescript src/Client.ts\n// complete file here\n```\n\nDo not say you will explore the repo first; output the final file contents directly.",
+      "content_sha256": "d6ade600cef267725133ffce255907f4c16d749a7f9de9f70138e999354f8438"
+    },
+    {
+      "role": "user",
+      "content": "# Task\n\nAdd basic rate limiting to this API helper.\n\nKeep the implementation small. Different clients should not block each other, and the existing tests should still run.\n\n# Repository\n\nYou are working in:\n\n/workspace/runs/api_rate_limiting/beginner_api_rate_limiting_deepseek_deepseek-v4-pro_static_20260525T003100Z/worktree\n\nModify the repository to satisfy the task. Keep changes focused.\n",
+      "content_sha256": "bf217afcb445aaadcff67580e66c4d637be9935433f35f748ac48b1c92b8d026"
+    }
+  ],
+  "tool_choice": "none"
+}

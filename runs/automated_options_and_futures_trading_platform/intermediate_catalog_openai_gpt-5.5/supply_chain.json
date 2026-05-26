@@ -1,0 +1,225 @@
+{
+  "artifact_dir": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/extracted",
+  "scanned_files": 22,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "fastapi",
+          "version": "0.115.6",
+          "source": "backend/requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "uvicorn[standard]",
+          "version": "0.32.1",
+          "source": "backend/requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "SQLAlchemy",
+          "version": "2.0.36",
+          "source": "backend/requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pydantic",
+          "version": "2.10.3",
+          "source": "backend/requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pydantic-settings",
+          "version": "2.6.1",
+          "source": "backend/requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "websockets",
+          "version": "14.1",
+          "source": "backend/requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pytest",
+          "version": "8.3.4",
+          "source": "backend/requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "httpx",
+          "version": "0.28.1",
+          "source": "backend/requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "@vitejs/plugin-react",
+          "version": "latest",
+          "source": "frontend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "vite",
+          "version": "latest",
+          "source": "frontend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "react",
+          "version": "latest",
+          "source": "frontend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "react-dom",
+          "version": "latest",
+          "source": "frontend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "python -m venv .venv (backend setup)",
+        "pip install -r requirements.txt (backend README and run commands)",
+        "npm install (frontend setup)",
+        "npm run dev (frontend dev server)",
+        "uvicorn app.main:app --reload (backend run)",
+        "pytest (backend tests)",
+        "cp ../.env.example .env (env file provisioning)",
+        "curl -X POST against local dev endpoint (not curl|bash; no remote pipe-to-shell observed)"
+      ],
+      "risk_notes": [
+        "All four npm dependencies (@vitejs/plugin-react, vite, react, react-dom) use 'latest' instead of pinned versions \u2014 builds are non-reproducible and vulnerable to upstream changes or supply-chain hijack.",
+        "No lockfile (package-lock.json/yarn.lock) is shown for the frontend, compounding the 'latest' risk.",
+        "Python requirements are pinned to exact versions but lack hashes (no pip --require-hashes / no requirements.lock), so a compromised PyPI index could still substitute artifacts.",
+        "frontend/package.json has @vitejs/plugin-react and vite listed under 'dependencies' rather than 'devDependencies', enlarging the production dependency surface.",
+        "WebSocket URL (BROKERAGE_WS_URL) and trading parameters are configured via .env; .env.example uses a placeholder wss://api.brokerage.com/live but README/production notes mention real broker auth will be added \u2014 risk of secrets being committed to .env if not gitignored.",
+        "CORS_ORIGINS is read from env with a fallback wildcard-like permissive default ([\"http://localhost:5173\"]); misconfiguration could broaden allowed origins.",
+        "SQLite database file path (sqlite:///./trades.db) is relative \u2014 could end up in unintended locations depending on working directory.",
+        "uvicorn is bound to 0.0.0.0 in README run commands, exposing the dev server on all interfaces."
+      ],
+      "findings": [
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "All four npm dependencies (@vitejs/plugin-react, vite, react, react-dom) use 'latest' instead of pinned versions \u2014 builds are non-reproducible and vulnerable to upstream changes or supply-chain hijack.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        },
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "No lockfile (package-lock.json/yarn.lock) is shown for the frontend, compounding the 'latest' risk.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_pip_install",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "build_commands_28.sh",
+      "line": 5,
+      "evidence": "pip install -r requirements.txt",
+      "message": "Supply-chain enrichment found an unmanaged dependency or execution risk."
+    },
+    {
+      "id": "unpinned_pip_install",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "explanation.md",
+      "line": 54,
+      "evidence": "pip install -r requirements.txt",
+      "message": "Supply-chain enrichment found an unmanaged dependency or execution risk."
+    },
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "All four npm dependencies (@vitejs/plugin-react, vite, react, react-dom) use 'latest' instead of pinned versions \u2014 builds are non-reproducible and vulnerable to upstream changes or supply-chain hijack.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    },
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "No lockfile (package-lock.json/yarn.lock) is shown for the frontend, compounding the 'latest' risk.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    },
+    {
+      "id": "osv_GHSA-6w46-j5rx-g56g",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": false,
+      "path": "backend/requirements.txt",
+      "line": null,
+      "evidence": "PyPI:pytest@8.3.4 \u2014 GHSA-6w46-j5rx-g56g: ",
+      "message": "OSV advisory matched a declared dependency version.",
+      "advisory": {
+        "source": "osv.dev",
+        "vuln_id": "GHSA-6w46-j5rx-g56g",
+        "package": "pytest",
+        "version": "8.3.4",
+        "ecosystem": "PyPI"
+      }
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": true,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV.dev CVE/advisory batch lookup on pinned versions.",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 12,
+    "blocking_findings": 4,
+    "advisory_findings": 1
+  }
+}

@@ -1,0 +1,5 @@
+fastapi==0.110.0
+uvicorn==0.28.0
+ib-insync==0.9.86
+pydantic==2.6.4
+jinja2==3.1.3

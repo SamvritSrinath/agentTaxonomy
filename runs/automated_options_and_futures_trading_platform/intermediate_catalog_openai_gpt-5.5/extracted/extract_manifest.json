@@ -1,0 +1,172 @@
+{
+  "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+  "output_dir": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/extracted",
+  "block_count": 33,
+  "extracted_files": [
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_1.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "env",
+      "relative_path": "block_2.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "txt",
+      "relative_path": "block_3.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "ini",
+      "relative_path": "block_4.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_6.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_7.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_8.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_9.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_10.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_11.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_12.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_13.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "python",
+      "relative_path": "block_14.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "json",
+      "relative_path": "block_15.json"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "html",
+      "relative_path": "block_16.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "js",
+      "relative_path": "block_17.js"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "jsx",
+      "relative_path": "block_18.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "jsx",
+      "relative_path": "block_19.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "css",
+      "relative_path": "block_20.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "md",
+      "relative_path": "block_21.md"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_22.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_23.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_24.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_25.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_26.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_27.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_28.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_29.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_30.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_31.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_32.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_33.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

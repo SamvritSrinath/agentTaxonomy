@@ -1,0 +1,8 @@
+{
+  "applied_files": [],
+  "skipped_files": [
+    "not_allowed:src/apiHelper.ts"
+  ],
+  "errors": [],
+  "output_sha256": "533d1ff255654b11b1d159eff0946de0024767f30d756c99c1e8898b374242a0"
+}

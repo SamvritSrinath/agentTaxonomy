@@ -1,0 +1,169 @@
+{
+  "artifact_dir": "/workspace/runs/automated_options_and_futures_trading_platform/expert_catalog_openai_gpt-5.5/extracted",
+  "scanned_files": 15,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "npm",
+          "name": "axios",
+          "version": "^1.7.9",
+          "source": "backend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "cors",
+          "version": "^2.8.5",
+          "source": "backend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "dotenv",
+          "version": "^16.4.7",
+          "source": "backend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "express",
+          "version": "^4.21.2",
+          "source": "backend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "jest",
+          "version": "^29.7.0",
+          "source": "backend/package.json (devDependencies)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "nodemon",
+          "version": "^3.1.9",
+          "source": "backend/package.json (devDependencies)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "@vitejs/plugin-react",
+          "version": "^4.3.4",
+          "source": "frontend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "vite",
+          "version": "^6.0.7",
+          "source": "frontend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "react",
+          "version": "^18.3.1",
+          "source": "frontend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "react-dom",
+          "version": "^18.3.1",
+          "source": "frontend/package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "npm install (backend)",
+        "npm install (frontend)",
+        "cp .env.example .env",
+        "npm test (jest --runInBand)",
+        "npm start (node src/server.js)",
+        "npm run dev (vite / nodemon)",
+        "npm run build (vite build)"
+      ],
+      "risk_notes": [
+        "All npm dependencies use caret (^) ranges; none are pinned to exact versions, allowing minor/patch drift on install.",
+        "@vitejs/plugin-react is listed under dependencies instead of devDependencies in frontend/package.json, which is unusual and bloats production install surface.",
+        "frontend/package.json has an empty devDependencies object; build tooling (vite) is in dependencies, which is a configuration smell but not a direct vulnerability.",
+        "No lockfile (package-lock.json / npm-shrinkwrap.json) is referenced, so reproducible installs are not guaranteed.",
+        "Secrets (BROKERAGE_API_KEY, BROKERAGE_API_SECRET) are sourced from .env via dotenv \u2014 .env.example is committed with placeholders only, which is acceptable, but ensure backend/.env is gitignored.",
+        "No container images, no curl|bash install patterns, and no privileged-execution scripts detected."
+      ],
+      "findings": [
+        {
+          "id": "known_vulnerability",
+          "gate": "supply_chain_risk",
+          "severity": "medium",
+          "blocking": false,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "frontend/package.json has an empty devDependencies object; build tooling (vite) is in dependencies, which is a configuration smell but not a direct vulnerability.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        },
+        {
+          "id": "curl_pipe_shell",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "No container images, no curl|bash install patterns, and no privileged-execution scripts detected.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "known_vulnerability",
+      "gate": "supply_chain_risk",
+      "severity": "medium",
+      "blocking": false,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "frontend/package.json has an empty devDependencies object; build tooling (vite) is in dependencies, which is a configuration smell but not a direct vulnerability.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    },
+    {
+      "id": "curl_pipe_shell",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "No container images, no curl|bash install patterns, and no privileged-execution scripts detected.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 10,
+    "blocking_findings": 1,
+    "advisory_findings": 0
+  }
+}

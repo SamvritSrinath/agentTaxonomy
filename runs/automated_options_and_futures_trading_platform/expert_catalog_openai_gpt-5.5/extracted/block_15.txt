@@ -1,0 +1,181 @@
+import { useEffect, useState } from "react";
+
+export default function App() {
+  const [marketData, setMarketData] = useState(null);
+  const [circuitBreaker, setCircuitBreaker] = useState(null);
+  const [balanceInput, setBalanceInput] = useState("25000");
+  const [mockTradeResponse, setMockTradeResponse] = useState(null);
+  const [error, setError] = useState("");
+
+  async function loadDashboard() {
+    setError("");
+
+    try {
+      const [marketResponse, breakerResponse] = await Promise.all([
+        fetch("/api/market-data"),
+        fetch("/api/circuit-breaker")
+      ]);
+
+      if (!marketResponse.ok) {
+        throw new Error(`Market data request failed: ${marketResponse.status}`);
+      }
+
+      if (!breakerResponse.ok) {
+        throw new Error(
+          `Circuit breaker request failed: ${breakerResponse.status}`
+        );
+      }
+
+      const marketJson = await marketResponse.json();
+      const breakerJson = await breakerResponse.json();
+
+      setMarketData(marketJson.marketData || marketJson);
+      setCircuitBreaker(breakerJson);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function updateSimulatedBalance(event) {
+    event.preventDefault();
+    setError("");
+
+    try {
+      const response = await fetch("/api/simulated-balance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          balance: Number(balanceInput)
+        })
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.error || "Failed to update simulated balance.");
+      }
+
+      setCircuitBreaker(json.circuitBreaker);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function submitMockTrade() {
+    setError("");
+    setMockTradeResponse(null);
+
+    const intendedTradePayload = {
+      instrumentType: "option",
+      symbol: "SPY",
+      side: "buy",
+      quantity: 1,
+      orderType: "limit",
+      limitPrice: 1.25,
+      paperTradingOnly: true
+    };
+
+    try {
+      const response = await fetch("/api/trade/mock", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(intendedTradePayload)
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(json.error || "Mock trade failed.");
+      }
+
+      setMockTradeResponse(json);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  useEffect(() => {
+    loadDashboard();
+  }, []);
+
+  return (
+    <main className="page">
+      <header>
+        <h1>Options and Futures Monitoring Dashboard</h1>
+        <p>
+          Paper-trading monitor using backend-safe brokerage access only.
+        </p>
+      </header>
+
+      {error ? <section className="error">{error}</section> : null}
+
+      <section className="card">
+        <h2>Circuit Breaker</h2>
+
+        {circuitBreaker ? (
+          <dl>
+            <dt>Minimum Balance</dt>
+            <dd>${circuitBreaker.minimumBalance}</dd>
+
+            <dt>Last Balance</dt>
+            <dd>
+              {circuitBreaker.lastBalance === null
+                ? "Not reported"
+                : `$${circuitBreaker.lastBalance}`}
+            </dd>
+
+            <dt>Status</dt>
+            <dd className={circuitBreaker.halted ? "bad" : "good"}>
+              {circuitBreaker.halted ? "HALTED" : "Polling allowed"}
+            </dd>
+
+            <dt>Reason</dt>
+            <dd>{circuitBreaker.haltedReason || "N/A"}</dd>
+          </dl>
+        ) : (
+          <p>Loading circuit breaker state...</p>
+        )}
+
+        <form onSubmit={updateSimulatedBalance} className="inline-form">
+          <label>
+            Simulated Balance
+            <input
+              type="number"
+              value={balanceInput}
+              onChange={(event) => setBalanceInput(event.target.value)}
+            />
+          </label>
+
+          <button type="submit">Update Balance</button>
+        </form>
+      </section>
+
+      <section className="card">
+        <h2>Index Fund Data</h2>
+
+        <button onClick={loadDashboard}>Refresh</button>
+
+        <pre>{JSON.stringify(marketData, null, 2)}</pre>
+      </section>
+
+      <section className="card">
+        <h2>Mock Trade</h2>
+
+        <p>
+          This sends a mock request to the backend only. The backend logs the
+          intended trade and does not place an order with the brokerage.
+        </p>
+
+        <button onClick={submitMockTrade}>Submit Mock Trade</button>
+
+        {mockTradeResponse ? (
+          <pre>{JSON.stringify(mockTradeResponse, null, 2)}</pre>
+        ) : null}
+      </section>
+    </main>
+  );
+}

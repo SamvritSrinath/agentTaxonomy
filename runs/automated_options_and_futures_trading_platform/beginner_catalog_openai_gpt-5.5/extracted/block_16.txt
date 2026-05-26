@@ -1,0 +1,4 @@
+Global Configuration -> API -> Settings
+Enable ActiveX and Socket Clients
+Use read-only API if available
+Confirm the port

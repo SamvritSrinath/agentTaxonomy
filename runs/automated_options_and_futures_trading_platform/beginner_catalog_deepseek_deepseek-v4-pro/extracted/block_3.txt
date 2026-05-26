@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Trading Bot Dashboard</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .price-box { font-size: 2em; margin: 10px 0; }
+        button { padding: 10px 20px; font-size: 1em; margin: 5px; }
+        .status { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>Index Options Trading Bot</h1>
+    <div class="status">
+        Connection: <span id="conn-status">-</span> |
+        Auto-trade: <span id="auto-status">-</span>
+    </div>
+    <div class="price-box">
+        Current Price: $<span id="price">--</span>
+        <small>(Baseline: $<span id="baseline">--</span>)</small>
+    </div>
+    <canvas id="priceChart" width="600" height="300"></canvas>
+    <br>
+    <button onclick="buyCall()">Buy Call Option (Manual)</button>
+    <button onclick="toggleAuto()">Toggle Auto-Trade</button>
+    <div id="message"></div>
+
+    <script>
+        const socket = io();
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Index Price',
+                    data: [],
+                    borderColor: 'blue',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+
+        // Keep last 50 points
+        const MAX_POINTS = 50;
+
+        socket.on('price_update', (data) => {
+            document.getElementById('price').innerText = data.price.toFixed(2);
+            document.getElementById('baseline').innerText = data.baseline ? data.baseline.toFixed(2) : '--';
+            document.getElementById('conn-status').innerText = 'Connected';
+
+            // Update chart
+            const now = new Date().toLocaleTimeString();
+            chart.data.labels.push(now);
+            chart.data.datasets[0].data.push(data.price);
+            if (chart.data.labels.length > MAX_POINTS) {
+                chart.data.labels.shift();
+                chart.data.datasets[0].data.shift();
+            }
+            chart.update();
+        });
+
+        socket.on('auto_trade', (data) => {
+            document.getElementById('message').innerText = data.message;
+        });
+
+        function buyCall() {
+            fetch('/buy', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('message').innerText = data.message || data.status;
+                })
+                .catch(err => {
+                    document.getElementById('message').innerText = 'Error placing order';
+                });
+        }
+
+        function toggleAuto() {
+            fetch('/toggle_auto', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('auto-status').innerText = data.auto_trade;
+                });
+        }
+
+        // Initial status fetch
+        fetch('/status')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('conn-status').innerText = data.connected ? 'Connected' : 'Disconnected';
+                document.getElementById('auto-status').innerText = data.auto_trade ? 'enabled' : 'disabled';
+            });
+    </script>
+</body>
+</html>

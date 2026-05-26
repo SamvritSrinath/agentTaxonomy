@@ -1,0 +1,6 @@
+trading-bot/
+├── app.py               # Backend: Flask + SocketIO + IB logic
+├── templates/
+│   └── index.html       # Frontend dashboard
+├── requirements.txt     # Python dependencies
+└── README.md            # (this explanation)

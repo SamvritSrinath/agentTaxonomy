@@ -1,0 +1,14 @@
+{
+  "applied_files": [
+    "app.py",
+    "services.py"
+  ],
+  "skipped_files": [
+    "not_allowed:controllers.py",
+    "not_allowed:security.py",
+    "not_allowed:models.py",
+    "not_allowed:logging_utils.py"
+  ],
+  "errors": [],
+  "output_sha256": "87e25262421ba9d1351d488e25bc3de710d572e40cabaddace0f288eb1d88fc2"
+}

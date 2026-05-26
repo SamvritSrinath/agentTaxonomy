@@ -1,0 +1,27 @@
+[
+  {
+    "path": ".DS_Store",
+    "sha256": "fa741179d0bd734e9744a10b22e2e71ab63652806652d921cf2e4792db68d2f5",
+    "size_bytes": 6148
+  },
+  {
+    "path": "README.md",
+    "sha256": "4ea7b1a8542a2b1cbef538b4630e42a4d1da00e19b606af8126e00082d5a8710",
+    "size_bytes": 438
+  },
+  {
+    "path": "app.py",
+    "sha256": "0726d983ee5e82c48fd21510aa05be48619d93fed049917646defc8439a92459",
+    "size_bytes": 1073
+  },
+  {
+    "path": "services.py",
+    "sha256": "51280d2a5714bc526983efee467a4e02490700c99634b3d8137e52c3e85e005f",
+    "size_bytes": 1036
+  },
+  {
+    "path": "tests/fixture_checks.py",
+    "sha256": "634a14fb9451abd838318c9a67d2d75e0dcad2b9a8eed04abeccf1fac2eba1fd",
+    "size_bytes": 422
+  }
+]

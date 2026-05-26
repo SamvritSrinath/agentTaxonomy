@@ -1,0 +1,17 @@
+[
+  {
+    "path": "app.py",
+    "status": "M",
+    "in_diff": true
+  },
+  {
+    "path": "repositories.py",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "services.py",
+    "status": "A",
+    "in_diff": true
+  }
+]

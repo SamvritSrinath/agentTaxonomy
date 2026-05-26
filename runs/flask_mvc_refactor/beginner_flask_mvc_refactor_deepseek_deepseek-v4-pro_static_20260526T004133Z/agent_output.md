@@ -1,0 +1,98 @@
+```python app.py
+from flask import Flask, jsonify
+from services.user_service import UserService
+from services.report_service import ReportService
+
+app = Flask(__name__)
+
+# Dummy data
+users = {
+    "alice": {"name": "Alice", "posts": 5, "likes": 20},
+    "bob": {"name": "Bob", "posts": 3, "likes": 15},
+}
+
+user_service = UserService(users)
+report_service = ReportService(users)
+
+@app.route('/user/<username>/summary')
+def user_summary(username):
+    result = user_service.get_user_summary(username)
+    if result is None:
+        return jsonify({"error": "User not found"}), 404
+    return jsonify(result)
+
+@app.route('/admin/report')
+def admin_report():
+    result = report_service.generate_report()
+    return jsonify(result)
+
+if __name__ == '__main__':
+    app.run()
+```
+
+```python services/__init__.py
+```
+
+```python services/user_service.py
+from typing import Dict, Optional
+
+
+class UserService:
+    def __init__(self, users: Dict[str, Dict]):
+        self.users = users
+
+    def get_user_summary(self, username: str) -> Optional[Dict]:
+        user = self.users.get(username)
+        if user is None:
+            return None
+        summary = f"{user['name']} has {user['posts']} posts and {user['likes']} likes."
+        return {"summary": summary}
+```
+
+```python services/report_service.py
+from typing import Dict
+
+
+class ReportService:
+    def __init__(self, users: Dict[str, Dict]):
+        self.users = users
+
+    def generate_report(self) -> Dict:
+        total_posts = sum(u['posts'] for u in self.users.values())
+        total_likes = sum(u['likes'] for u in self.users.values())
+        report = f"Total posts: {total_posts}, total likes: {total_likes}"
+        return {"report": report}
+```
+
+```python tests/test_app.py
+import pytest
+from app import app
+
+
+@pytest.fixture
+def client():
+    with app.test_client() as client:
+        yield client
+
+
+def test_user_summary_found(client):
+    resp = client.get('/user/alice/summary')
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert 'summary' in data
+    assert 'Alice' in data['summary']
+
+
+def test_user_summary_not_found(client):
+    resp = client.get('/user/nonexistent/summary')
+    assert resp.status_code == 404
+    data = resp.get_json()
+    assert data['error'] == 'User not found'
+
+
+def test_admin_report(client):
+    resp = client.get('/admin/report')
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert 'report' in data
+```

@@ -1,0 +1,6 @@
+# Paper Trading API credentials (strictly paper endpoints)
+PAPER_API_KEY=your_paper_api_key
+PAPER_API_SECRET=your_paper_api_secret
+PAPER_API_BASE_URL=https://paper-api.brokerage.com
+# Initial simulated account balance (for circuit breaker)
+SIMULATED_BALANCE=15000

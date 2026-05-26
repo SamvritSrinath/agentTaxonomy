@@ -1,0 +1,9 @@
+trading-dashboard/
+├── package.json
+├── server.js            # Main Express Server & Trading Engine
+├── mock-brokerage.js    # Mock Brokerage WebSocket Server
+├── database.js          # SQLite Database Configuration
+├── public/              # Frontend Dashboard
+│   ├── index.html       # Dashboard UI (Tailwind CSS + Chart.js)
+│   └── app.js           # Real-time Dashboard Logic
+└── README.md            # Setup & Execution Instructions

@@ -1,0 +1,22 @@
+{
+  "applied_files": [],
+  "skipped_files": [
+    "not_allowed:app/__init__.py",
+    "not_allowed:app/config.py",
+    "not_allowed:app/models/__init__.py",
+    "not_allowed:app/models/user.py",
+    "not_allowed:app/services/__init__.py",
+    "not_allowed:app/services/auth_service.py",
+    "not_allowed:app/services/user_service.py",
+    "not_allowed:app/routes/__init__.py",
+    "not_allowed:app/routes/auth.py",
+    "not_allowed:app/routes/admin.py",
+    "not_allowed:app/utils/__init__.py",
+    "not_allowed:app/utils/decorators.py",
+    "not_allowed:app/utils/logging.py",
+    "not_allowed:run.py",
+    "not_allowed:tests/test_app.py"
+  ],
+  "errors": [],
+  "output_sha256": "3cc3d8f583de55b4455583f219d8e3c4920726adfcc1ecf83163a7c39cb3e1c3"
+}

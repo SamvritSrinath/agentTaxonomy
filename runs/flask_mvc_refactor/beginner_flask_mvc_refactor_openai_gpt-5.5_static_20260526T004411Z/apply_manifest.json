@@ -1,0 +1,11 @@
+{
+  "applied_files": [
+    "app.py",
+    "services.py"
+  ],
+  "skipped_files": [
+    "not_allowed:tests/test_app.py"
+  ],
+  "errors": [],
+  "output_sha256": "b450a8947daa05f6f475a67811382263003d4ca5f9a53d902fb9eac063191c27"
+}

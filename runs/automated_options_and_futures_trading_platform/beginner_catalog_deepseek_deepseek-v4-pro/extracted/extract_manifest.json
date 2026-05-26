@@ -1,0 +1,52 @@
+{
+  "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+  "output_dir": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/extracted",
+  "block_count": 8,
+  "extracted_files": [
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "text",
+      "relative_path": "block_1.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "python",
+      "relative_path": "block_2.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "html",
+      "relative_path": "block_3.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "text",
+      "relative_path": "block_4.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_5.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_6.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_7.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_8.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

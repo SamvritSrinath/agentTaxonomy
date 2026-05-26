@@ -1,0 +1,32 @@
+{
+  "source": "/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T005733Z/agent_output.md",
+  "output_dir": "/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T005733Z/extracted",
+  "block_count": 5,
+  "extracted_files": [
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T005733Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_1.py"
+    },
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T005733Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_2.py"
+    },
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T005733Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_3.py"
+    },
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T005733Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_4.py"
+    },
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T005733Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_5.py"
+    }
+  ]
+}

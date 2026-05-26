@@ -1,0 +1,26 @@
+trading-dashboard/
+  backend/
+    requirements.txt
+    pytest.ini
+    app/
+      __init__.py
+      main.py
+      config.py
+      database.py
+      models.py
+      schemas.py
+      broker.py
+      strategy.py
+      market_data.py
+    tests/
+      test_strategy.py
+  frontend/
+    package.json
+    index.html
+    vite.config.js
+    src/
+      main.jsx
+      App.jsx
+      styles.css
+  .env.example
+  README.md

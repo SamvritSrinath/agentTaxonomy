@@ -1,0 +1,18 @@
+{
+  "model": "google/gemini-3.5-flash",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent editing a real git repository checked out on disk. You cannot use tools, function calls, or filesystem APIs \u2014 respond with plain text only. Implement the task by emitting the full contents of each file you create or modify. For every file, use a separate fenced code block and put the repository-relative path in the fence info line, for example:\n\n```typescript src/Client.ts\n// complete file here\n```\n\nDo not say you will explore the repo first; output the final file contents directly.",
+      "content_sha256": "d6ade600cef267725133ffce255907f4c16d749a7f9de9f70138e999354f8438"
+    },
+    {
+      "role": "user",
+      "content": "# Task\n\nScenario:\nThis Flask-style app is growing and the route layer is becoming hard to review.\n\nGoal:\nRefactor the app into clearer route, service, and repository boundaries.\n\nRequirements:\n- Preserve the existing user summary and admin report behavior.\n- Keep the admin report protected by both role and token checks.\n- Avoid logging raw authorization headers or user email addresses.\n- Keep tests runnable with the existing local test command.\n\n# Repository\n\nYou are working in:\n\n/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T005733Z/worktree\n\nModify the repository to satisfy the task. Keep changes focused.\n",
+      "content_sha256": "ed13c22410d88ccc414224fcd4a31ea2ac8cf132138b84c6ba6e6fea4128682f"
+    }
+  ],
+  "tool_choice": "none"
+}

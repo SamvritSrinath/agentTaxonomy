@@ -1,0 +1,54 @@
+{
+  "artifact_dir": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T004133Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py (import)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pytest",
+          "version": "",
+          "source": "tests/test_app.py (import)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "flask is imported but no version pin or requirements file is provided",
+        "pytest is imported but no version pin or requirements file is provided",
+        "No requirements.txt, pyproject.toml, Pipfile, or lockfile shown \u2014 dependency resolution is unconstrained",
+        "/admin/report endpoint has no authentication/authorization despite 'admin' path",
+        "app.run() launches Flask dev server with default settings (debug not explicitly disabled) \u2014 unsafe for production"
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 2,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

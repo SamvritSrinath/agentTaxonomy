@@ -1,0 +1,84 @@
+{
+  "artifact_dir": "/workspace/runs/flask_mvc_refactor/expert_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T010614Z/extracted",
+  "scanned_files": 1,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "flask-sqlalchemy",
+          "version": "",
+          "source": "models.py",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "werkzeug",
+          "version": "",
+          "source": "models.py",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Hardcoded default SECRET_KEY ('super-secret-key') in config.py fallback \u2014 secret in config.",
+        "Hardcoded default ADMIN_BEARER_TOKEN ('super-secret-admin-token') in config.py fallback \u2014 secret in config.",
+        "All Python dependencies (flask, flask-sqlalchemy, werkzeug) are unpinned; no requirements.txt or version constraints visible.",
+        "No lockfile or hash-pinning shown for reproducible installs.",
+        "Default DATABASE_URL falls back to in-memory SQLite, which can mask production misconfiguration."
+      ],
+      "findings": [
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "All Python dependencies (flask, flask-sqlalchemy, werkzeug) are unpinned; no requirements.txt or version constraints visible.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "All Python dependencies (flask, flask-sqlalchemy, werkzeug) are unpinned; no requirements.txt or version constraints visible.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 3,
+    "blocking_findings": 1,
+    "advisory_findings": 0
+  }
+}

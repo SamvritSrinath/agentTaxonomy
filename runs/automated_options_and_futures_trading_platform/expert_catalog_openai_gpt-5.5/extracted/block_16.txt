@@ -1,0 +1,97 @@
+:root {
+  font-family:
+    Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172033;
+  background: #f5f7fb;
+}
+
+body {
+  margin: 0;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px;
+}
+
+header {
+  margin-bottom: 24px;
+}
+
+.card {
+  background: white;
+  border: 1px solid #dce3ef;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 16px rgba(23, 32, 51, 0.06);
+}
+
+.error {
+  background: #ffe8e8;
+  border: 1px solid #ffb5b5;
+  color: #8a1f1f;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+.good {
+  color: #087a2f;
+  font-weight: 700;
+}
+
+.bad {
+  color: #b00020;
+  font-weight: 700;
+}
+
+dl {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 8px;
+}
+
+dt {
+  font-weight: 700;
+}
+
+.inline-form {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  margin-top: 18px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+}
+
+input {
+  padding: 8px;
+  border: 1px solid #b9c4d6;
+  border-radius: 6px;
+}
+
+button {
+  background: #2454ff;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 14px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #183fd0;
+}
+
+pre {
+  background: #0f172a;
+  color: #dbeafe;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+}

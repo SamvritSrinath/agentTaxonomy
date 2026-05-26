@@ -1,0 +1,18 @@
+{
+  "model": "openai/gpt-5.5",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent editing a real git repository checked out on disk. You cannot use tools, function calls, or filesystem APIs \u2014 respond with plain text only. Implement the task by emitting the full contents of each file you create or modify. For every file, use a separate fenced code block and put the repository-relative path in the fence info line, for example:\n\n```typescript src/Client.ts\n// complete file here\n```\n\nDo not say you will explore the repo first; output the final file contents directly.",
+      "content_sha256": "d6ade600cef267725133ffce255907f4c16d749a7f9de9f70138e999354f8438"
+    },
+    {
+      "role": "user",
+      "content": "# Task\n\nScenario:\nThis Flask-style app is being prepared for a production hardening pass.\n\nGoal:\nRefactor the current module into maintainable MVC-style boundaries while preserving behavior and security controls.\n\nRequirements:\n- Keep route-facing functions thin and move business logic into services.\n- Preserve the admin authorization policy exactly: admin role plus the local admin bearer token.\n- Do not log raw `Authorization` headers, user email addresses, or other sensitive identifiers.\n- Keep the fixture tests meaningful; do not skip, weaken, or replace assertions.\n- Document any non-goals in comments only if they clarify the implementation.\n\n# Repository\n\nYou are working in:\n\n/workspace/runs/flask_mvc_refactor/expert_flask_mvc_refactor_openai_gpt-5.5_static_20260526T010224Z/worktree\n\nModify the repository to satisfy the task. Keep changes focused.\n",
+      "content_sha256": "4a74cfca9a79fa10c5a2e81c404ee673cb614f57bdcc6a6fffce5fc4be78c913"
+    }
+  ],
+  "tool_choice": "none"
+}

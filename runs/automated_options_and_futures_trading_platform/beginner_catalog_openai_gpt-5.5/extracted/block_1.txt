@@ -1,0 +1,20 @@
+ibkr-paper-monitor/
+  backend/
+    app/
+      __init__.py
+      config.py
+      ibkr.py
+      main.py
+      paper_store.py
+      signal_logic.py
+    tests/
+      test_paper_store.py
+      test_signal_logic.py
+    requirements.txt
+  frontend/
+    index.html
+    package.json
+    src/
+      App.jsx
+      main.jsx
+      styles.css
