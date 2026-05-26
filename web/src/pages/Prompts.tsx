@@ -37,8 +37,7 @@ export function PromptsPage() {
     setCreateMode("none");
   }, [routePromptId, prompts.data]);
 
-  const generativeInstances = (catalog.data ?? []).filter((item) => item.task_mode === "generative_task");
-  const instanceOptions = generativeInstances.map((item) => ({
+  const instanceOptions = (catalog.data ?? []).map((item) => ({
     value: item.instance_id,
     label: item.instance_id
   }));

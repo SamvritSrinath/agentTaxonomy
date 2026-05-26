@@ -27,7 +27,7 @@ class CatalogTests(unittest.TestCase):
         distribution = validate_distribution(catalog)
         self.assertEqual(distribution["splits"], {"dev": 24})
         self.assertEqual(distribution["visibility"], {"public": 24})
-        self.assertEqual(distribution["task_modes"], {"generative_task": 18, "repo_task": 6})
+        self.assertEqual(distribution["task_modes"], {"generative_task": 15, "repo_task": 9})
         self.assertEqual(distribution["skill_levels"], {"beginner": 8, "intermediate": 8, "expert": 8})
         self.assertEqual(
             distribution["problem_classes"],
@@ -53,6 +53,8 @@ class CatalogTests(unittest.TestCase):
         by_id = {instance.instance_id: instance for instance in catalog.instances}
         self.assertEqual(by_id["flask_mvc_refactor__repo_edit__beginner"].task_mode, TaskMode.REPO_TASK)
         self.assertEqual(by_id["api_rate_limiting__repo_edit__expert"].task_variant, "repo_edit")
+        self.assertEqual(by_id["database_operations__beginner"].task_mode, TaskMode.REPO_TASK)
+        self.assertIsNone(by_id["database_operations__beginner"].task_variant)
 
     def test_catalog_validates(self) -> None:
         catalog = build_catalog()

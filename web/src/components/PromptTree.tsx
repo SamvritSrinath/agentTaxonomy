@@ -31,11 +31,6 @@ export function PromptTree({
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
   const [expandedSkills, setExpandedSkills] = useState<Set<string>>(new Set());
 
-  const generativeCatalog = useMemo(
-    () => catalog.filter((item) => item.task_mode === "generative_task"),
-    [catalog]
-  );
-
   const promptsByInstance = useMemo(() => {
     const map = new Map<string, PromptVariant[]>();
     for (const prompt of prompts) {
@@ -48,7 +43,7 @@ export function PromptTree({
 
   const taskNodes = useMemo(() => {
     const byTask = new Map<string, TaskNode>();
-    for (const item of generativeCatalog) {
+    for (const item of catalog) {
       const existing = byTask.get(item.task_id);
       if (existing) {
         existing.instances.push(item);
@@ -61,7 +56,7 @@ export function PromptTree({
       }
     }
     return [...byTask.values()].sort((a, b) => a.taskId.localeCompare(b.taskId));
-  }, [generativeCatalog]);
+  }, [catalog]);
 
   function toggleTask(taskId: string) {
     setExpandedTasks((prev) => {

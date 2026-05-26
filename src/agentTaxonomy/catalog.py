@@ -129,9 +129,10 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
             prompt_text = prompt_path.read_text(encoding="utf-8")
             relative_prompt_path = prompt_path.relative_to(task_root.parents[2])
             task_mode = TaskMode(merged.get("task_mode", TaskMode.GENERATIVE_TASK.value))
+            task_variant = merged.get("task_variant")
             instance_id = f"{raw_task['task_id']}__{skill_level.value}"
-            if task_mode == TaskMode.REPO_TASK:
-                instance_id = f"{raw_task['task_id']}__{merged.get('task_variant', 'repo_edit')}__{skill_level.value}"
+            if task_mode == TaskMode.REPO_TASK and task_variant:
+                instance_id = f"{raw_task['task_id']}__{task_variant}__{skill_level.value}"
             instances.append(
                 BenchmarkInstance(
                     instance_id=instance_id,
@@ -155,7 +156,7 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
                     visibility=merged.get("visibility", "public"),
                     gold_strategy=merged["gold_strategy"],
                     task_family=raw_task.get("task_family", raw_task["task_id"]),
-                    task_variant=merged.get("task_variant"),
+                    task_variant=str(task_variant) if task_variant else None,
                     prompt_style=merged.get("prompt_style"),
                     repo=merged.get("repo"),
                     base_commit=merged.get("base_commit"),
