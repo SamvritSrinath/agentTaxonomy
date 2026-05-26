@@ -1,0 +1,168 @@
+import { useEffect, useState } from "react";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+function formatDate(value) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString();
+}
+
+export default function App() {
+  const [status, setStatus] = useState(null);
+  const [trades, setTrades] = useState([]);
+  const [error, setError] = useState("");
+
+  async function load() {
+    try {
+      setError("");
+
+      const [statusRes, tradesRes] = await Promise.all([
+        fetch(`${API_URL}/api/status`),
+        fetch(`${API_URL}/api/trades`)
+      ]);
+
+      if (!statusRes.ok) throw new Error("Failed to fetch status");
+      if (!tradesRes.ok) throw new Error("Failed to fetch trades");
+
+      setStatus(await statusRes.json());
+      setTrades(await tradesRes.json());
+    } catch (err) {
+      setError(err.message || String(err));
+    }
+  }
+
+  async function approveTrade(id) {
+    try {
+      setError("");
+      const res = await fetch(`${API_URL}/api/trades/${id}/approve`, {
+        method: "POST"
+      });
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || "Approval failed");
+      }
+
+      await load();
+    } catch (err) {
+      setError(err.message || String(err));
+    }
+  }
+
+  useEffect(() => {
+    load();
+    const timer = setInterval(load, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <main className="container">
+      <header className="header">
+        <div>
+          <h1>Trading Automation Dashboard</h1>
+          <p className="subtitle">
+            Paper/manual workflow for options strategy monitoring.
+          </p>
+        </div>
+        <button onClick={load}>Refresh</button>
+      </header>
+
+      {error && <section className="error">{error}</section>}
+
+      <section className="card">
+        <h2>Service Status</h2>
+        {status ? (
+          <div className="grid">
+            <div>
+              <span>Service</span>
+              <strong>{status.service}</strong>
+            </div>
+            <div>
+              <span>Watched Symbol</span>
+              <strong>{status.watch_symbol}</strong>
+            </div>
+            <div>
+              <span>Option Contract</span>
+              <strong>{status.option_contract_symbol}</strong>
+            </div>
+            <div>
+              <span>Mode</span>
+              <strong>{status.auto_trade_mode}</strong>
+            </div>
+            <div>
+              <span>Feed Enabled</span>
+              <strong>{String(status.feed_enabled)}</strong>
+            </div>
+          </div>
+        ) : (
+          <p>Loading...</p>
+        )}
+
+        {status && <p className="safety">{status.safety}</p>}
+      </section>
+
+      <section className="card">
+        <h2>Trade History</h2>
+
+        <div className="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Created</th>
+                <th>Underlying</th>
+                <th>Contract</th>
+                <th>Side</th>
+                <th>Qty</th>
+                <th>Status</th>
+                <th>Drop %</th>
+                <th>Signal Price</th>
+                <th>Broker/Paper ID</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {trades.length === 0 ? (
+                <tr>
+                  <td colSpan="11" className="empty">
+                    No trades recorded.
+                  </td>
+                </tr>
+              ) : (
+                trades.map((trade) => (
+                  <tr key={trade.id}>
+                    <td>{trade.id}</td>
+                    <td>{formatDate(trade.created_at)}</td>
+                    <td>{trade.underlying_symbol}</td>
+                    <td>{trade.symbol}</td>
+                    <td>
+                      {trade.side} {trade.option_type}
+                    </td>
+                    <td>{trade.quantity}</td>
+                    <td>
+                      <span className={`pill ${trade.status.toLowerCase()}`}>
+                        {trade.status}
+                      </span>
+                    </td>
+                    <td>{trade.signal_drop_pct.toFixed(2)}%</td>
+                    <td>{trade.price_at_signal.toFixed(2)}</td>
+                    <td>{trade.broker_order_id || "-"}</td>
+                    <td>
+                      {trade.status === "PENDING_APPROVAL" ? (
+                        <button onClick={() => approveTrade(trade.id)}>
+                          Approve Paper Fill
+                        </button>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  );
+}

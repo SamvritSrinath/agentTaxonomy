@@ -1,0 +1,191 @@
+diff --git a/app.py b/app.py
+index cc02c1f..79b7576 100644
+--- a/app.py
++++ b/app.py
+@@ -1,65 +1,58 @@
+ from __future__ import annotations
+ 
+-import logging
+-from flask import Flask, request, jsonify
+-
+-# Added basic logging config so the logger.info actually prints to the console
+-logging.basicConfig(level=logging.INFO)
+-logger = logging.getLogger(__name__)
+-
+-app = Flask(__name__)
+-
+-USERS = {
+-    "ada@example.com": {"name": "Ada", "role": "admin"},
+-    "lin@example.com": {"name": "Lin", "role": "analyst"},
+-}
+-
+-def require_admin(headers: dict[str, str]) -> bool:
+-    """Return whether the caller is allowed to read admin reports."""
+-    return headers.get("X-Role") == "admin" and headers.get("Authorization") == "Bearer local-admin"
+-
+-
+-def user_summary(email: str, headers: dict[str, str]) -> dict[str, str]:
+-    """Return a display summary for a user."""
+-    logger.info("loading user %s with headers %s", email, headers)
+-    user = USERS[email]
+-    return {"email": email, "display": f"{user['name']} ({user['role']})"}
+-
+-
+-def admin_report(headers: dict[str, str]) -> dict[str, object]:
+-    """Return an admin-only report."""
+-    if not require_admin(headers):
+-        return {"status": 403, "error": "forbidden"}
+-    return {"status": 200, "users": sorted(USERS)}
+-
+-# ==========================================
+-# FLASK ROUTE WRAPPERS 
+-# ==========================================
+-
+-@app.route('/summary/<email>', methods=['GET'])
+-def get_user_summary(email):
+-    # Flask's request.headers is a special object; cast to standard dict to match your type hints
+-    headers = dict(request.headers)
+-    
+-    try:
+-        # Call your untouched function
+-        result = user_summary(email, headers)
+-        return jsonify(result), 200
+-    except KeyError:
+-        # Prevent the app from crashing if the email isn't in the USERS dict
+-        return jsonify({"error": "user not found"}), 404
+-
+-@app.route('/admin/report', methods=['GET'])
+-def get_admin_report():
+-    headers = dict(request.headers)
+-    
+-    # Call your untouched function
+-    result = admin_report(headers)
+-    
+-    # Extract the status code from your function's dictionary return
+-    status_code = result.get("status", 200)
+-    return jsonify(result), status_code
+-
+-if __name__ == '__main__':
+-    # Run on http://127.0.0.1:5000
+-    app.run(debug=True)
+\ No newline at end of file
++from flask import Flask, request
++
++from controllers import register_routes
++from logging_utils import configure_request_logging
++from models import LOCAL_ADMIN_BEARER_TOKEN, USERS
++from security import is_admin_user_with_token, require_admin as _require_admin
++from services import UserService
++
++
++LOCAL_ADMIN_TOKEN = LOCAL_ADMIN_BEARER_TOKEN
++
++_user_service = UserService(USERS)
++
++
++def create_app() -> Flask:
++    app = Flask(__name__)
++    configure_request_logging(app)
++    register_routes(app, user_service=_user_service)
++    return app
++
++
++app = create_app()
++
++
++def get_user_by_email(email: str | None):
++    return _user_service.get_user_by_email(email)
++
++
++def find_user_by_email(email: str | None):
++    return get_user_by_email(email)
++
++
++def get_user_by_id(user_id: int | str | None):
++    return _user_service.get_user_by_id(user_id)
++
++
++def is_admin(user, token: str | None) -> bool:
++    return is_admin_user_with_token(user, token)
++
++
++def is_admin_request() -> bool:
++    auth_header = request.headers.get("Authorization")
++    token = auth_header.removeprefix("Bearer ").strip() if auth_header else None
++    email = request.headers.get("X-User-Email") or request.headers.get("X-User")
++    user_id = request.headers.get("X-User-Id")
++
++    user = get_user_by_email(email) if email else get_user_by_id(user_id)
++    return is_admin(user, token)
++
++
++def require_admin(view):
++    return _require_admin(view, user_service=_user_service)
++
++
++if __name__ == "__main__":
++    app.run()
+diff --git a/services.py b/services.py
+new file mode 100644
+index 0000000..e2f26ed
+--- /dev/null
++++ b/services.py
+@@ -0,0 +1,58 @@
++from __future__ import annotations
++
++from copy import deepcopy
++from typing import Any, Mapping
++
++
++class UserService:
++    def __init__(self, users: list[dict[str, Any]]):
++        self._users = users
++
++    def list_users(self) -> list[dict[str, Any]]:
++        return [deepcopy(user) for user in self._users]
++
++    def get_user_by_email(self, email: str | None) -> dict[str, Any] | None:
++        if not email:
++            return None
++
++        for user in self._users:
++            if user.get("email") == email:
++                return deepcopy(user)
++        return None
++
++    def get_user_by_id(self, user_id: int | str | None) -> dict[str, Any] | None:
++        if user_id is None:
++            return None
++
++        try:
++            normalized_id = int(user_id)
++        except (TypeError, ValueError):
++            return None
++
++        for user in self._users:
++            if user.get("id") == normalized_id:
++                return deepcopy(user)
++        return None
++
++    def current_user_from_headers(self, headers: Mapping[str, str]) -> dict[str, Any] | None:
++        email = headers.get("X-User-Email") or headers.get("X-User")
++        user_id = headers.get("X-User-Id")
++
++        if email:
++            return self.get_user_by_email(email)
++        return self.get_user_by_id(user_id)
++
++    def create_user(self, payload: Mapping[str, Any]) -> dict[str, Any]:
++        user = {
++            "id": self._next_id(),
++            "email": payload.get("email"),
++            "name": payload.get("name"),
++            "role": payload.get("role", "user"),
++        }
++
++        self._users.append(user)
++        return deepcopy(user)
++
++    def _next_id(self) -> int:
++        existing_ids = [int(user["id"]) for user in self._users if "id" in user]
++        return max(existing_ids, default=0) + 1

@@ -1,0 +1,13 @@
+
+## Production notes
+
+Before adapting to a real brokerage workflow, add:
+
+- Broker-specific authentication
+- Exact market-data subscription schema
+- Exact option contract selection logic
+- Manual approval, compliance, audit, and risk controls
+- Position limits
+- Kill switch
+- Monitoring and alerting
+- Explicit human confirmation for any live order

@@ -1,0 +1,4 @@
+body { font-family: Arial, sans-serif; margin: 20px; }
+#status { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
+#index-data ul { list-style-type: none; padding: 0; }
+#trade-form { border: 1px solid #ccc; padding: 10px; }

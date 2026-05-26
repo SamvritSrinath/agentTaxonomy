@@ -1,0 +1,144 @@
+diff --git a/app.py b/app.py
+index cc02c1f..49b02ca 100644
+--- a/app.py
++++ b/app.py
+@@ -1,65 +1,34 @@
+-from __future__ import annotations
+-
+-import logging
+-from flask import Flask, request, jsonify
+-
+-# Added basic logging config so the logger.info actually prints to the console
+-logging.basicConfig(level=logging.INFO)
+-logger = logging.getLogger(__name__)
++from flask import Flask, jsonify, abort
++from services import calculate_user_summary, generate_admin_report
+ 
+ app = Flask(__name__)
+ 
++# In-memory database
+ USERS = {
+-    "ada@example.com": {"name": "Ada", "role": "admin"},
+-    "lin@example.com": {"name": "Lin", "role": "analyst"},
++    1: {"id": 1, "name": "Alice", "email": "alice@example.com", "role": "user"},
++    2: {"id": 2, "name": "Bob", "email": "bob@example.com", "role": "user"},
++    3: {"id": 3, "name": "Charlie", "email": "charlie@example.com", "role": "admin"},
+ }
+ 
+-def require_admin(headers: dict[str, str]) -> bool:
+-    """Return whether the caller is allowed to read admin reports."""
+-    return headers.get("X-Role") == "admin" and headers.get("Authorization") == "Bearer local-admin"
+-
+-
+-def user_summary(email: str, headers: dict[str, str]) -> dict[str, str]:
+-    """Return a display summary for a user."""
+-    logger.info("loading user %s with headers %s", email, headers)
+-    user = USERS[email]
+-    return {"email": email, "display": f"{user['name']} ({user['role']})"}
+-
+-
+-def admin_report(headers: dict[str, str]) -> dict[str, object]:
+-    """Return an admin-only report."""
+-    if not require_admin(headers):
+-        return {"status": 403, "error": "forbidden"}
+-    return {"status": 200, "users": sorted(USERS)}
+-
+-# ==========================================
+-# FLASK ROUTE WRAPPERS 
+-# ==========================================
+-
+-@app.route('/summary/<email>', methods=['GET'])
+-def get_user_summary(email):
+-    # Flask's request.headers is a special object; cast to standard dict to match your type hints
+-    headers = dict(request.headers)
+-    
+-    try:
+-        # Call your untouched function
+-        result = user_summary(email, headers)
+-        return jsonify(result), 200
+-    except KeyError:
+-        # Prevent the app from crashing if the email isn't in the USERS dict
+-        return jsonify({"error": "user not found"}), 404
+-
+-@app.route('/admin/report', methods=['GET'])
++ORDERS = [
++    {"id": 101, "user_id": 1, "amount": 50.0, "status": "completed"},
++    {"id": 102, "user_id": 1, "amount": 30.0, "status": "completed"},
++    {"id": 103, "user_id": 2, "amount": 100.0, "status": "pending"},
++    {"id": 104, "user_id": 1, "amount": 20.0, "status": "cancelled"},
++    {"id": 105, "user_id": 2, "amount": 45.0, "status": "completed"},
++]
++
++@app.route("/users/<int:user_id>/summary", methods=["GET"])
++def get_user_summary(user_id):
++    summary = calculate_user_summary(user_id, USERS, ORDERS)
++    if summary is None:
++        return jsonify({"error": "User not found"}), 404
++    return jsonify(summary)
++
++@app.route("/admin/report", methods=["GET"])
+ def get_admin_report():
+-    headers = dict(request.headers)
+-    
+-    # Call your untouched function
+-    result = admin_report(headers)
+-    
+-    # Extract the status code from your function's dictionary return
+-    status_code = result.get("status", 200)
+-    return jsonify(result), status_code
++    report = generate_admin_report(USERS, ORDERS)
++    return jsonify(report)
+ 
+-if __name__ == '__main__':
+-    # Run on http://127.0.0.1:5000
+-    app.run(debug=True)
+\ No newline at end of file
++if __name__ == "__main__":
++    app.run(debug=True)
+diff --git a/services.py b/services.py
+new file mode 100644
+index 0000000..a6d8bd6
+--- /dev/null
++++ b/services.py
+@@ -0,0 +1,41 @@
++from typing import Dict, Any, Optional, List
++
++def calculate_user_summary(user_id: int, users: Dict[int, Dict[str, Any]], orders: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
++    """
++    Calculates the summary for a given user.
++    Returns None if the user does not exist.
++    """
++    user = users.get(user_id)
++    if not user:
++        return None
++    
++    user_orders = [o for o in orders if o["user_id"] == user_id]
++    completed_orders = [o for o in user_orders if o["status"] == "completed"]
++    total_spent = sum(o["amount"] for o in completed_orders)
++    
++    return {
++        "user_id": user["id"],
++        "name": user["name"],
++        "email": user["email"],
++        "total_orders": len(user_orders),
++        "completed_orders": len(completed_orders),
++        "total_spent": total_spent
++    }
++
++def generate_admin_report(users: Dict[int, Dict[str, Any]], orders: List[Dict[str, Any]]) -> Dict[str, Any]:
++    """
++    Generates a high-level admin report of users and orders.
++    """
++    completed_orders = [o for o in orders if o["status"] == "completed"]
++    total_revenue = sum(o["amount"] for o in completed_orders)
++    total_users = len(users)
++    
++    avg_order_value = total_revenue / len(completed_orders) if completed_orders else 0.0
++    
++    return {
++        "total_users": total_users,
++        "total_orders": len(orders),
++        "completed_orders": len(completed_orders),
++        "total_revenue": total_revenue,
++        "average_order_value": avg_order_value
++    }

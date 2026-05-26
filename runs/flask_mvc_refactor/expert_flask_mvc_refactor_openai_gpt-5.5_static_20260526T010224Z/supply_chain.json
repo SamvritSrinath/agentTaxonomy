@@ -1,0 +1,45 @@
+{
+  "artifact_dir": "/workspace/runs/flask_mvc_refactor/expert_flask_mvc_refactor_openai_gpt-5.5_static_20260526T010224Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py, controllers.py, security.py, logging_utils.py (import flask)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Flask dependency is imported but no version pin found (no requirements.txt, pyproject.toml, or setup.py in the provided output).",
+        "Default admin bearer token fallback 'local-admin-token' is hard-coded in models.py via os.environ.get(..., 'local-admin-token') \u2014 weak default secret if LOCAL_ADMIN_BEARER_TOKEN env var is unset.",
+        "Admin credentials (admin@example.com) and user records are embedded in source (models.py USERS) rather than externalized.",
+        "No package manager manifest, lockfile, or container image declared in the provided text \u2014 supply-chain provenance for Flask and transitive deps is unverifiable from this output."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 1,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

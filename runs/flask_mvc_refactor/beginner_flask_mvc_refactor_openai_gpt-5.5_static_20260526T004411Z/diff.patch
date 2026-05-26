@@ -1,0 +1,164 @@
+diff --git a/app.py b/app.py
+index cc02c1f..8b125a3 100644
+--- a/app.py
++++ b/app.py
+@@ -1,65 +1,54 @@
+-from __future__ import annotations
++from flask import Flask
+ 
+-import logging
+-from flask import Flask, request, jsonify
+-
+-# Added basic logging config so the logger.info actually prints to the console
+-logging.basicConfig(level=logging.INFO)
+-logger = logging.getLogger(__name__)
++from services import build_admin_report, build_user_summary
+ 
+ app = Flask(__name__)
+ 
+-USERS = {
+-    "ada@example.com": {"name": "Ada", "role": "admin"},
+-    "lin@example.com": {"name": "Lin", "role": "analyst"},
+-}
+-
+-def require_admin(headers: dict[str, str]) -> bool:
+-    """Return whether the caller is allowed to read admin reports."""
+-    return headers.get("X-Role") == "admin" and headers.get("Authorization") == "Bearer local-admin"
+-
+-
+-def user_summary(email: str, headers: dict[str, str]) -> dict[str, str]:
+-    """Return a display summary for a user."""
+-    logger.info("loading user %s with headers %s", email, headers)
+-    user = USERS[email]
+-    return {"email": email, "display": f"{user['name']} ({user['role']})"}
+-
+-
+-def admin_report(headers: dict[str, str]) -> dict[str, object]:
+-    """Return an admin-only report."""
+-    if not require_admin(headers):
+-        return {"status": 403, "error": "forbidden"}
+-    return {"status": 200, "users": sorted(USERS)}
+-
+-# ==========================================
+-# FLASK ROUTE WRAPPERS 
+-# ==========================================
+-
+-@app.route('/summary/<email>', methods=['GET'])
+-def get_user_summary(email):
+-    # Flask's request.headers is a special object; cast to standard dict to match your type hints
+-    headers = dict(request.headers)
+-    
+-    try:
+-        # Call your untouched function
+-        result = user_summary(email, headers)
+-        return jsonify(result), 200
+-    except KeyError:
+-        # Prevent the app from crashing if the email isn't in the USERS dict
+-        return jsonify({"error": "user not found"}), 404
+-
+-@app.route('/admin/report', methods=['GET'])
+-def get_admin_report():
+-    headers = dict(request.headers)
+-    
+-    # Call your untouched function
+-    result = admin_report(headers)
+-    
+-    # Extract the status code from your function's dictionary return
+-    status_code = result.get("status", 200)
+-    return jsonify(result), status_code
+-
+-if __name__ == '__main__':
+-    # Run on http://127.0.0.1:5000
+-    app.run(debug=True)
+\ No newline at end of file
++users = [
++    {
++        "id": 1,
++        "name": "Alice",
++        "email": "alice@example.com",
++        "active": True,
++        "is_admin": True,
++    },
++    {
++        "id": 2,
++        "name": "Bob",
++        "email": "bob@example.com",
++        "active": True,
++        "is_admin": False,
++    },
++    {
++        "id": 3,
++        "name": "Charlie",
++        "email": "charlie@example.com",
++        "active": False,
++        "is_admin": False,
++    },
++]
++
++orders = [
++    {"id": 1, "user_id": 1, "total": 120.00},
++    {"id": 2, "user_id": 1, "total": 35.50},
++    {"id": 3, "user_id": 2, "total": 80.00},
++]
++
++
++@app.route("/users/<int:user_id>/summary")
++def user_summary(user_id):
++    summary = build_user_summary(user_id, users, orders)
++
++    if summary is None:
++        return {"error": "User not found"}, 404
++
++    return summary
++
++
++@app.route("/admin/report")
++def admin_report():
++    return build_admin_report(users, orders)
++
++
++if __name__ == "__main__":
++    app.run(debug=True)
+diff --git a/services.py b/services.py
+new file mode 100644
+index 0000000..e7c3f28
+--- /dev/null
++++ b/services.py
+@@ -0,0 +1,37 @@
++def build_user_summary(user_id, users, orders):
++    user = _find_user(user_id, users)
++
++    if user is None:
++        return None
++
++    user_orders = [
++        order for order in orders if order.get("user_id") == user_id
++    ]
++    total_spent = sum(order.get("total", 0) for order in user_orders)
++
++    return {
++        "id": user.get("id"),
++        "name": user.get("name"),
++        "email": user.get("email"),
++        "active": user.get("active", False),
++        "order_count": len(user_orders),
++        "total_spent": total_spent,
++    }
++
++
++def build_admin_report(users, orders):
++    return {
++        "total_users": len(users),
++        "active_users": sum(1 for user in users if user.get("active", False)),
++        "admin_users": sum(1 for user in users if user.get("is_admin", False)),
++        "total_orders": len(orders),
++        "total_revenue": sum(order.get("total", 0) for order in orders),
++    }
++
++
++def _find_user(user_id, users):
++    for user in users:
++        if user.get("id") == user_id:
++            return user
++
++    return None

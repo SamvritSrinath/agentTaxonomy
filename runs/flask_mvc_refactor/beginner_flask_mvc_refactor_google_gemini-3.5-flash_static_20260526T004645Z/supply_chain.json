@@ -1,0 +1,44 @@
+{
+  "artifact_dir": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T004645Z/extracted",
+  "scanned_files": 1,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py (import flask)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Flask dependency is not pinned to a specific version and no requirements.txt/pyproject.toml is provided.",
+        "app.run(debug=True) is enabled in app.py \u2014 Werkzeug debugger should never be exposed in production (RCE risk).",
+        "No dependency manifest (requirements.txt, Pipfile, pyproject.toml) was generated alongside the code, so the supply chain is undeclared."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 1,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}
