@@ -1,0 +1,4 @@
+$ openrouter model=deepseek/deepseek-v4-pro
+applied_files=['sql/remove_duplicate_customers.sql']
+skipped=[]
+errors=[]

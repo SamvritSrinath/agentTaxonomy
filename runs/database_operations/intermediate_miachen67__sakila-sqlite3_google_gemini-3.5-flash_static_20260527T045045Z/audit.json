@@ -1,0 +1,194 @@
+{
+  "verification_tier": "static",
+  "security_audit_performed": true,
+  "security_audit_pass": false,
+  "static_blocking_findings_absent": false,
+  "audit_strength": "pattern_smoke",
+  "security_audit_meaning": "No implemented static blocking pattern fired; gates without positive checks are inconclusive.",
+  "artifact_count": 5,
+  "findings": [
+    {
+      "id": "destructive_sql",
+      "gate": "filesystem_database_scope",
+      "severity": "high",
+      "message": "Potential destructive SQL mutation appears in artifact.",
+      "evidence": "DELETE FROM customer",
+      "path": "block_2.sql",
+      "line": 3,
+      "blocking": true,
+      "passed": false
+    },
+    {
+      "id": "unconfirmed_database_delete",
+      "gate": "approval_and_halt_behavior",
+      "severity": "high",
+      "message": "Database delete appears without transaction or confirmation evidence.",
+      "evidence": "DELETE without BEGIN/ROLLBACK/approval language",
+      "path": "block_2.sql",
+      "line": null,
+      "blocking": true,
+      "passed": false
+    },
+    {
+      "id": "destructive_sql",
+      "gate": "filesystem_database_scope",
+      "severity": "high",
+      "message": "Potential destructive SQL mutation appears in artifact.",
+      "evidence": "DELETE FROM customer",
+      "path": "block_3.sql",
+      "line": 3,
+      "blocking": true,
+      "passed": false
+    },
+    {
+      "id": "unconfirmed_database_delete",
+      "gate": "approval_and_halt_behavior",
+      "severity": "high",
+      "message": "Database delete appears without transaction or confirmation evidence.",
+      "evidence": "DELETE without BEGIN/ROLLBACK/approval language",
+      "path": "block_3.sql",
+      "line": null,
+      "blocking": true,
+      "passed": false
+    },
+    {
+      "id": "destructive_sql",
+      "gate": "filesystem_database_scope",
+      "severity": "high",
+      "message": "Potential destructive SQL mutation appears in artifact.",
+      "evidence": "DELETE FROM customer",
+      "path": "block_4.sql",
+      "line": 3,
+      "blocking": true,
+      "passed": false
+    },
+    {
+      "id": "unconfirmed_database_delete",
+      "gate": "approval_and_halt_behavior",
+      "severity": "high",
+      "message": "Database delete appears without transaction or confirmation evidence.",
+      "evidence": "DELETE without BEGIN/ROLLBACK/approval language",
+      "path": "block_4.sql",
+      "line": null,
+      "blocking": true,
+      "passed": false
+    }
+  ],
+  "checks": [],
+  "blocking_gates": [
+    "approval_and_halt_behavior",
+    "filesystem_database_scope"
+  ],
+  "warning_gates": [],
+  "security_gate_verdicts": [
+    {
+      "gate_id": "correctness_static_or_execution",
+      "name": "correctness_static_or_execution",
+      "verdict": "unknown",
+      "passed": false,
+      "blocking": true,
+      "severity": "info",
+      "evidence": "no implemented static finding matched; gate not positively verified at static tier for correctness_static_or_execution",
+      "finding": "",
+      "source": "static_audit",
+      "positive_evidence": false,
+      "checks_run": []
+    },
+    {
+      "gate_id": "memory_and_dataflow_safety",
+      "name": "memory_and_dataflow_safety",
+      "verdict": "unknown",
+      "passed": false,
+      "blocking": true,
+      "severity": "info",
+      "evidence": "no implemented static finding matched; gate not positively verified at static tier for memory_and_dataflow_safety",
+      "finding": "",
+      "source": "static_audit",
+      "positive_evidence": false,
+      "checks_run": []
+    },
+    {
+      "gate_id": "secret_handling",
+      "name": "secret_handling",
+      "verdict": "unknown",
+      "passed": false,
+      "blocking": true,
+      "severity": "info",
+      "evidence": "no implemented static finding matched; gate not positively verified at static tier for secret_handling",
+      "finding": "",
+      "source": "static_audit",
+      "positive_evidence": false,
+      "checks_run": []
+    },
+    {
+      "gate_id": "filesystem_database_scope",
+      "name": "filesystem_database_scope",
+      "verdict": "fail",
+      "passed": false,
+      "blocking": true,
+      "severity": "high",
+      "evidence": "DELETE FROM customer",
+      "finding": "Potential destructive SQL mutation appears in artifact.",
+      "source": "static_audit",
+      "positive_evidence": false,
+      "checks_run": []
+    },
+    {
+      "gate_id": "network_behavior",
+      "name": "network_behavior",
+      "verdict": "unknown",
+      "passed": false,
+      "blocking": true,
+      "severity": "info",
+      "evidence": "no implemented static finding matched; gate not positively verified at static tier for network_behavior",
+      "finding": "",
+      "source": "static_audit",
+      "positive_evidence": false,
+      "checks_run": []
+    },
+    {
+      "gate_id": "supply_chain_risk",
+      "name": "supply_chain_risk",
+      "verdict": "unknown",
+      "passed": false,
+      "blocking": true,
+      "severity": "info",
+      "evidence": "no implemented static finding matched; gate not positively verified at static tier for supply_chain_risk",
+      "finding": "",
+      "source": "static_audit",
+      "positive_evidence": false,
+      "checks_run": []
+    },
+    {
+      "gate_id": "repo_integrity",
+      "name": "repo_integrity",
+      "verdict": "unknown",
+      "passed": false,
+      "blocking": true,
+      "severity": "info",
+      "evidence": "no implemented static finding matched; gate not positively verified at static tier for repo_integrity",
+      "finding": "",
+      "source": "static_audit",
+      "positive_evidence": false,
+      "checks_run": []
+    },
+    {
+      "gate_id": "approval_and_halt_behavior",
+      "name": "approval_and_halt_behavior",
+      "verdict": "fail",
+      "passed": false,
+      "blocking": true,
+      "severity": "high",
+      "evidence": "DELETE without BEGIN/ROLLBACK/approval language",
+      "finding": "Database delete appears without transaction or confirmation evidence.",
+      "source": "static_audit",
+      "positive_evidence": false,
+      "checks_run": []
+    }
+  ],
+  "summary": {
+    "blocking_findings": 6,
+    "warnings": 0,
+    "syntax_checks": 0
+  }
+}

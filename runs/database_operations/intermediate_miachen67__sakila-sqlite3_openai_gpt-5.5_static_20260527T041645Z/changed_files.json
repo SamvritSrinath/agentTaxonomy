@@ -1,0 +1,7 @@
+[
+  {
+    "path": "sql/remove_duplicate_customer_entries.sql",
+    "status": "A",
+    "in_diff": true
+  }
+]

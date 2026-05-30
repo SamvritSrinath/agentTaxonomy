@@ -1,0 +1,4 @@
+$ openrouter model=google/gemini-3.5-flash
+applied_files=['README.md', 'sql/remove_duplicates.sql', 'sql/remove_duplicate_customers.sql', 'sql/deduplicate_customers.sql']
+skipped=[]
+errors=[]

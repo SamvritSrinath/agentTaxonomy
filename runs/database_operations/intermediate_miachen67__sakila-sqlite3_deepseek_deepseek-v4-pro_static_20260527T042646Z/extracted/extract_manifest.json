@@ -1,0 +1,12 @@
+{
+  "source": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260527T042646Z/agent_output.md",
+  "output_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260527T042646Z/extracted",
+  "block_count": 1,
+  "extracted_files": [
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260527T042646Z/agent_output.md",
+      "language": "sql",
+      "relative_path": "block_1.sql"
+    }
+  ]
+}

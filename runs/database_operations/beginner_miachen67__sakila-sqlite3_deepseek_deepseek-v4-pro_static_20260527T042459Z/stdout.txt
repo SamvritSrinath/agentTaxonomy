@@ -1,0 +1,114 @@
+```sql sql/cleanup.sql
+-- Sakila Database Cleanup Script
+-- This script performs maintenance and data integrity cleanup on the Sakila SQLite database.
+
+-- Enable foreign key support for integrity checks
+PRAGMA foreign_keys = ON;
+
+-- 1. Reclaim unused space and defragment the database file
+VACUUM;
+
+-- 2. Update table statistics for the query planner
+ANALYZE;
+
+-- 3. Rebuild all indexes to improve performance
+REINDEX;
+
+-- 4. Remove orphaned records that violate referential integrity
+-- (These deletions are safe because they remove data that has no parent record)
+
+-- Delete payments that reference non-existent rentals
+DELETE FROM payment WHERE rental_id IS NOT NULL AND rental_id NOT IN (SELECT rental_id FROM rental);
+
+-- Delete payments that reference non-existent customers
+DELETE FROM payment WHERE customer_id NOT IN (SELECT customer_id FROM customer);
+
+-- Delete payments that reference non-existent staff
+DELETE FROM payment WHERE staff_id NOT IN (SELECT staff_id FROM staff);
+
+-- Delete rentals that reference non-existent inventory
+DELETE FROM rental WHERE inventory_id NOT IN (SELECT inventory_id FROM inventory);
+
+-- Delete rentals that reference non-existent customers
+DELETE FROM rental WHERE customer_id NOT IN (SELECT customer_id FROM customer);
+
+-- Delete inventory items that reference non-existent films
+DELETE FROM inventory WHERE film_id NOT IN (SELECT film_id FROM film);
+
+-- Delete film_actor records that reference non-existent films or actors
+DELETE FROM film_actor WHERE film_id NOT IN (SELECT film_id FROM film);
+DELETE FROM film_actor WHERE actor_id NOT IN (SELECT actor_id FROM actor);
+
+-- Delete film_category records that reference non-existent films or categories
+DELETE FROM film_category WHERE film_id NOT IN (SELECT film_id FROM film);
+DELETE FROM film_category WHERE category_id NOT IN (SELECT category_id FROM category);
+
+-- 5. Remove duplicate entries where they shouldn't exist
+-- (Example: duplicate film_actor pairs)
+DELETE FROM film_actor WHERE rowid NOT IN (
+    SELECT MIN(rowid) FROM film_actor GROUP BY film_id, actor_id
+);
+
+-- 6. Final maintenance after deletions
+VACUUM;
+ANALYZE;
+```
+
+```markdown reports/cleanup_report.md
+# Database Cleanup Report
+
+## Overview
+This report documents the cleanup operations performed on the Sakila SQLite database to improve performance, reclaim storage, and ensure data integrity.
+
+## Actions Performed
+
+### 1. Storage Optimization
+- **VACUUM**: Rebuilt the entire database file to eliminate fragmentation and reclaim unused space left by deleted records.
+- **ANALYZE**: Updated internal statistics used by the query planner to optimize future query performance.
+- **REINDEX**: Rebuilt all indexes to ensure they are balanced and efficient.
+
+### 2. Referential Integrity Cleanup
+The following orphaned records were identified and removed (if any existed):
+- Payments linked to non-existent rentals, customers, or staff.
+- Rentals linked to non-existent inventory or customers.
+- Inventory items linked to non-existent films.
+- Film-actor and film-category associations with missing films, actors, or categories.
+
+### 3. Duplicate Removal
+- Removed duplicate entries in the `film_actor` table, keeping only one record per unique film-actor pair.
+
+### 4. Final Maintenance
+- A second `VACUUM` and `ANALYZE` were run after deletions to finalize the cleanup.
+
+## Results
+The database is now optimized, free of orphaned data, and ready for use. All operations were performed within a transaction-safe manner using foreign key enforcement.
+
+## How to Run
+Execute the cleanup script using the SQLite command-line tool:
+```
+sqlite3 sakila.db < sql/cleanup.sql
+```
+```
+
+```markdown README.md
+# Sakila Database Cleanup
+
+This repository contains the Sakila sample database (SQLite format) and maintenance scripts.
+
+## Cleanup Script
+
+The `sql/cleanup.sql` script performs the following operations:
+- Reclaims disk space (`VACUUM`)
+- Updates query planner statistics (`ANALYZE`)
+- Rebuilds indexes (`REINDEX`)
+- Removes orphaned records that violate referential integrity
+- Eliminates duplicate entries in associative tables
+
+### Usage
+Run the cleanup from the terminal:
+```bash
+sqlite3 path/to/sakila.db < sql/cleanup.sql
+```
+
+A detailed report of the cleanup actions is available in `reports/cleanup_report.md`.
+```

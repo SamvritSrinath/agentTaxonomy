@@ -1,0 +1,9 @@
+
+This script:
+- Disables foreign key checks temporarily.
+- Drops all Sakila views.
+- Drops all Sakila tables.
+- Runs `VACUUM` to reclaim disk space.
+
+### 2. Data-Only Cleanup (Truncate)
+To delete all data from the tables while keeping the database schema and structure intact, run the `clean_data.sql` script:

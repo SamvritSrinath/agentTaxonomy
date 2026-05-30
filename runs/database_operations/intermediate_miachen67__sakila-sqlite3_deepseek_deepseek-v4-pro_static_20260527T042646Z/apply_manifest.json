@@ -1,0 +1,8 @@
+{
+  "applied_files": [
+    "sql/remove_duplicate_customers.sql"
+  ],
+  "skipped_files": [],
+  "errors": [],
+  "output_sha256": "7e2660a9199df22b163245dfdd66bf962e194ade699969881c7c85d0402bcf0f"
+}

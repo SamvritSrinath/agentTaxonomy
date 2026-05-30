@@ -1,0 +1,22 @@
+[
+  {
+    "path": "README.md",
+    "status": "M",
+    "in_diff": true
+  },
+  {
+    "path": "sql/deduplicate_customers.sql",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "sql/remove_duplicate_customers.sql",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "sql/remove_duplicates.sql",
+    "status": "A",
+    "in_diff": true
+  }
+]

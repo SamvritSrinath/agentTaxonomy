@@ -1,0 +1,42 @@
+{
+  "source": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/agent_output.md",
+  "output_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/extracted",
+  "block_count": 6,
+  "extracted_files": [
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/agent_output.md",
+      "language": "sql",
+      "relative_path": "block_1.sql"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/agent_output.md",
+      "language": "sql",
+      "relative_path": "block_2.sql"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/agent_output.md",
+      "language": "markdown",
+      "relative_path": "block_3.md"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/agent_output.md",
+      "language": "markdown",
+      "relative_path": "block_4.md"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/agent_output.md",
+      "language": "text",
+      "relative_path": "block_5.txt"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/agent_output.md",
+      "language": "text",
+      "relative_path": "block_6.txt"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

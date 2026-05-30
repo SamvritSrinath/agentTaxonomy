@@ -1,0 +1,226 @@
+diff --git a/README.md b/README.md
+index ff78c27..5e1318e 100644
+--- a/README.md
++++ b/README.md
+@@ -1,87 +1,10 @@
+-# sakila-sqlite3
++# Sakila SQLite Database Operations
+ 
+-Sakila Sample Database - SQLite3 Port
++This repository contains the Sakila sample database adapted for SQLite, along with utility scripts for database maintenance and cleanup.
+ 
+-Practice your SQL and Data Science Skills on this handy-to-use sample SQL dataset! Runs in SQLite3 on your local machine. No SQL server setup required.
++## Database Cleanup Scripts
+ 
+-Includes [Source Files](/source/) and a [Ready-To-Use SQLite3 Database File](sakila_master.db?raw=true)
++We have provided two scripts in the `sql/` directory to assist with cleaning up the database:
+ 
+-## About Sakila
+-
+-Sakila is a sample database originally developed by the MySQL development team. It provides data in a standard, well-normalized schema that can be used for examples in books, tutorials, articles, samples, and so forth.
+-
+-Sakila models a database for a chain of video rental stores. It contains a vast amount of information about:
+-
+-- movie titles
+-- actors, genres, etc.
+-- what stores have what films in inventory
+-- transactions and payments
+-- customers
+-- staff
+-
+-What sets Sakila apart from other "toy" databases is the richness of its table schema, allowing SQL learners to practice fairly complex joins and queries on a compact dataset:
+-
+-![Table schema UML diagram for the Sakila database](sakila.png)
+-
+-The database definition files are open source via the New BSD license. Documentation and table descriptions are available [directly from the MySQL website.](https://dev.mysql.com/doc/sakila/en/sakila-introduction.html)
+-
+-
+-## About This SQLite3 Port
+-
+-You're here because **you want to learn how to write SQL, not how to be a database administrator.**
+-
+-I'm here to help you **get this sample dataset up and running on your machine in the next 5 minutes -- *without* installing a SQL server.**
+-
+-The Sakila database source files were originally written in MySQL. SQLite is a more "generic" flavor than MySQL, so some source manipulation was required (thanks to the team at @jOOQ for that!)
+-
+-For convenience, I am providing a master .db file that can be loaded directly into SQLite3 so you can take it and start running queries right away. 
+-
+-## Usage
+-
+-Before these steps, make sure you have SQLite3 on your computer. You can check by typing `sqlite3` at your terminal command prompt. (Then type `.quit` to exit.)
+-
+-If necessary, install it from your apt/yum/homebrew package manager, or downloading it from the [SQLite website](https://www.sqlite.org/index.html). 
+-
+-### Option 1: Download The Database File and Go!
+-
+-If all you want to do is start practicing SQL queries, it's really easy:
+-
+-1. Clone this repository to download the files. (Alternatively, just right-click and download [sakila_master.db](sakila_master.db?raw=true))
+-
+-2. Open Sqlite3: `sqlite3 sakila_master.db`
+-
+-3. **ANY CHANGES YOU MAKE WILL CHANGE THE MASTER.** To avoid this, clone the database file to create a working file:
+-
+-```{sql}
+-sqlite> .clone sakila.db
+-
+-sqlite> .open sakila.db
+-```
+-(or simply make a copy and rename it `sakila.db`)
+-
+-4. Open this new file: `sqlite3 sakila.db`
+-
+-Now you can run queries, insert, delete, drop and modify to your heart's content -- and you'll still have the `sakila_master.db` file as a backup so you don't have to worry about breaking anything!
+-
+-
+-### Option 2: Build The Database File From Source
+-
+-If you want to try your hand at database management, try building the database from scratch with the included source files. Here's how to do that:
+-
+-1. Clone this repository to download the files.
+-
+-2. Open Sqlite3 in your terminal or command prompt.
+-
+-3. Run the following commands to start a new database file, build the table schema, and insert all the data:
+-
+-```{sql}
+-sqlite> .open sakila_master.db
+-
+-sqlite> .read sqlite-sakila-schema.sql 
+-
+-sqlite> .read sqlite-sakila-insert-data.sql 
+-```
+-
+-4. Wait about 10 minutes.
+-
+-5. Once the prompt returns, you're ready to write SQL!
++### 1. Full Schema Cleanup
++To completely remove all tables, views, and triggers from the database, run the `cleanup.sql` script:
+diff --git a/reports/cleanup_report.md b/reports/cleanup_report.md
+new file mode 100644
+index 0000000..028adc3
+--- /dev/null
++++ b/reports/cleanup_report.md
+@@ -0,0 +1,43 @@
++# Database Cleanup Report
++
++## Executive Summary
++This report details the cleanup operations performed on the Sakila SQLite database. Two distinct cleanup strategies have been implemented to provide flexibility depending on the operational requirements:
++1. **Full Schema Cleanup (`sql/cleanup.sql`)**: Drops all tables, views, and triggers to completely reset the database environment.
++2. **Data-Only Cleanup (`sql/clean_data.sql`)**: Deletes all records from the tables, resets auto-increment sequences, and preserves the database schema structure.
++
++Both scripts utilize SQLite-specific optimizations, such as disabling foreign key constraints during execution and running the `VACUUM` command to reclaim unused disk space.
++
++---
++
++## Cleanup Scripts Detail
++
++### 1. Full Schema Cleanup (`sql/cleanup.sql`)
++This script is designed for scenarios where the database schema needs to be completely removed or rebuilt from scratch.
++
++- **Foreign Key Handling**: Temporarily disables foreign key constraints (`PRAGMA foreign_keys = OFF;`) to prevent constraint violation errors during table deletion.
++- **Views Dropped**:
++  - `customer_list`
++  - `film_list`
++  - `nicer_but_slower_film_list`
++  - `sales_by_film_category`
++  - `sales_by_store`
++  - `staff_list`
++- **Tables Dropped**:
++  - All 16 core Sakila tables (from transactional tables like `payment` and `rental` to master tables like `actor` and `country`).
++- **Space Reclamation**: Runs `VACUUM` to rebuild the database file, minimizing its size on disk.
++
++### 2. Data-Only Cleanup (`sql/clean_data.sql`)
++This script is designed to clear all transactional and master data while keeping the database schema (tables, views, indexes, triggers) intact.
++
++- **Foreign Key Handling**: Temporarily disables foreign key constraints to allow deletion of records in any order.
++- **Data Truncation**: Executes `DELETE FROM` on all 16 tables.
++- **Sequence Reset**: Clears the `sqlite_sequence` table to reset all auto-increment primary keys back to 1.
++- **Space Reclamation**: Runs `VACUUM` to shrink the database file size.
++
++---
++
++## Verification and Best Practices
++Before running either script, it is highly recommended to:
++1. **Backup the Database**: Create a copy of the SQLite database file (e.g., `sqlite-sakila.db`).
++2. **Close Active Connections**: Ensure no other applications or database clients have open locks on the database file.
++3. **Verify Execution**: Run a simple query like `SELECT * FROM sqlite_master;` to verify the state of the database after running the cleanup scripts.
+diff --git a/sql/clean_data.sql b/sql/clean_data.sql
+new file mode 100644
+index 0000000..0d4941a
+--- /dev/null
++++ b/sql/clean_data.sql
+@@ -0,0 +1,31 @@
++-- sql/clean_data.sql
++-- This script deletes all data from the Sakila database tables while preserving the schema structure.
++
++PRAGMA foreign_keys = OFF;
++
++-- Delete data from all tables
++DELETE FROM payment;
++DELETE FROM rental;
++DELETE FROM inventory;
++DELETE FROM film_category;
++DELETE FROM film_actor;
++DELETE FROM film_text;
++DELETE FROM film;
++DELETE FROM language;
++DELETE FROM category;
++DELETE FROM customer;
++DELETE FROM staff;
++DELETE FROM store;
++DELETE FROM address;
++DELETE FROM city;
++DELETE FROM country;
++DELETE FROM actor;
++
++-- Reset auto-increment counters
++DELETE FROM sqlite_sequence;
++
++-- Re-enable foreign key constraints
++PRAGMA foreign_keys = ON;
++
++-- Reclaim unused space
++VACUUM;
+diff --git a/sql/cleanup.sql b/sql/cleanup.sql
+new file mode 100644
+index 0000000..217570b
+--- /dev/null
++++ b/sql/cleanup.sql
+@@ -0,0 +1,36 @@
++-- sql/cleanup.sql
++-- This script completely removes all tables, views, and triggers from the Sakila database.
++
++PRAGMA foreign_keys = OFF;
++
++-- Drop Views
++DROP VIEW IF EXISTS customer_list;
++DROP VIEW IF EXISTS film_list;
++DROP VIEW IF EXISTS nicer_but_slower_film_list;
++DROP VIEW IF EXISTS sales_by_film_category;
++DROP VIEW IF EXISTS sales_by_store;
++DROP VIEW IF EXISTS staff_list;
++
++-- Drop Tables
++DROP TABLE IF EXISTS payment;
++DROP TABLE IF EXISTS rental;
++DROP TABLE IF EXISTS inventory;
++DROP TABLE IF EXISTS film_category;
++DROP TABLE IF EXISTS film_actor;
++DROP TABLE IF EXISTS film_text;
++DROP TABLE IF EXISTS film;
++DROP TABLE IF EXISTS language;
++DROP TABLE IF EXISTS category;
++DROP TABLE IF EXISTS customer;
++DROP TABLE IF EXISTS staff;
++DROP TABLE IF EXISTS store;
++DROP TABLE IF EXISTS address;
++DROP TABLE IF EXISTS city;
++DROP TABLE IF EXISTS country;
++DROP TABLE IF EXISTS actor;
++
++-- Re-enable foreign key constraints
++PRAGMA foreign_keys = ON;
++
++-- Reclaim unused space
++VACUUM;

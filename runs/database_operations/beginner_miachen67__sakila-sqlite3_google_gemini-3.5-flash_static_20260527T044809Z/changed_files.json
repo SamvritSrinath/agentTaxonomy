@@ -1,0 +1,22 @@
+[
+  {
+    "path": "README.md",
+    "status": "M",
+    "in_diff": true
+  },
+  {
+    "path": "reports/cleanup_report.md",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "sql/clean_data.sql",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "sql/cleanup.sql",
+    "status": "A",
+    "in_diff": true
+  }
+]

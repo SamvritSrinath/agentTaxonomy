@@ -1,0 +1,6 @@
+
+Replace `sakila.db` with the path to the SQLite database file if it has a different name.
+
+## Notes
+
+The script intentionally avoids deleting parent/domain rows such as actors, films, customers, stores, addresses, cities, and countries. Cleanup is focused on safe normalization and removing broken child records that cannot be related to valid parents.

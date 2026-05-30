@@ -1,1 +1,1 @@
-Remove duplicate entries in the users table
+Remove duplicate entries in the customer table

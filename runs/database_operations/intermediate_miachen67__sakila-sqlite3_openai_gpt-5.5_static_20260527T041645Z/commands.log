@@ -1,0 +1,4 @@
+$ openrouter model=openai/gpt-5.5
+applied_files=['sql/remove_duplicate_customer_entries.sql']
+skipped=[]
+errors=[]

@@ -1,0 +1,4 @@
+$ openrouter model=deepseek/deepseek-v4-pro
+applied_files=['sql/cleanup.sql', 'reports/cleanup_report.md', 'README.md']
+skipped=['no_path:', 'no_path:']
+errors=[]

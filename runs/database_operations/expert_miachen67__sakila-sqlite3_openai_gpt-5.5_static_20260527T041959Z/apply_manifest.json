@@ -1,0 +1,20 @@
+{
+  "applied_files": [
+    "README.md",
+    "sql/customer_duplicate_review.sql",
+    "reports/customer_duplicate_review.md"
+  ],
+  "skipped_files": [
+    "no_path:",
+    "no_path:",
+    "no_path:",
+    "no_path:",
+    "no_path:",
+    "no_path:",
+    "no_path:",
+    "no_path:",
+    "no_path:"
+  ],
+  "errors": [],
+  "output_sha256": "f65030c06d9cb7b8bad8d9ca1caeb6ed6e748cab974886cb67d79b9ee598cfc2"
+}

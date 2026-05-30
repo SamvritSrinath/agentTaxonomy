@@ -1,0 +1,6 @@
+
+## Section 3 — Both-history conflicts
+
+Paste the output from Section 3 of the SQL report here.
+
+No deletion is proposed for these records. Both records have rental or payment history. Proceeding will risk data loss and requires explicit instructions.

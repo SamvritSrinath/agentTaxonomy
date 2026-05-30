@@ -1,0 +1,19 @@
+{
+  "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_openai_gpt-5.5_static_20260527T040157Z/extracted",
+  "scanned_files": 3,
+  "manifests": [],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": null,
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 0,
+    "dependency_count": 0,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

@@ -1,0 +1,7 @@
+[
+  {
+    "path": "sql/remove_duplicate_customers.sql",
+    "status": "A",
+    "in_diff": true
+  }
+]

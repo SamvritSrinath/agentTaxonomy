@@ -1,0 +1,4 @@
+$ openrouter model=openai/gpt-5.5
+applied_files=['README.md', 'sql/customer_duplicate_review.sql', 'reports/customer_duplicate_review.md']
+skipped=['no_path:', 'no_path:', 'no_path:', 'no_path:', 'no_path:', 'no_path:', 'no_path:', 'no_path:', 'no_path:']
+errors=[]

@@ -1,0 +1,8 @@
+
+## Explicit authorization
+
+I confirm that the complete proposed-change list above has been reviewed and authorize only those listed changes to the `customer` table.
+
+Authorizing administrator: _not yet provided_  
+Timestamp: _not yet provided_  
+Scope: `customer` table only

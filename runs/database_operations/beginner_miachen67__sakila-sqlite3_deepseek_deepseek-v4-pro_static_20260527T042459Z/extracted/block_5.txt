@@ -1,0 +1,2 @@
+
+A detailed report of the cleanup actions is available in `reports/cleanup_report.md`.

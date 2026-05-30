@@ -1,0 +1,50 @@
+
+The analysis script only uses `SELECT` statements. It does **not** modify any data.
+
+## Interpreting the Report
+
+The report is divided into three sections:
+
+1. **Group Summary** – Lists every email that appears more than once, the number of
+   customers sharing that email, and the classification:
+   - `PROPOSE_DELETE` – Names match; one record has rental/payment history; the
+     other(s) have none and are candidates for deletion.
+   - `NAMES_DIFFER` – The customers have the same email but their first or last name
+     differ in spelling. Manual review is required to determine which record is
+     authoritative.
+   - `BOTH_HAVE_HISTORY` – All customers sharing the email have rental or payment
+     history. Deleting any record risks data loss. The report shows rental counts and
+     total payment amounts for your assessment.
+   - `NEEDS_REVIEW` – All customers have no history; the script cannot automatically
+     decide which to keep. Manual review is necessary.
+
+2. **Detail: Groups with both/all history** – Shows customer IDs, rental counts, and
+   total payment amounts for cases where every record has history. Use this information
+   to decide whether a manual merge or delete is safe.
+
+3. **Detail: Groups with deletion candidates or name differences** – Shows individual
+   customer records flagged as `>>> CANDIDATE FOR DELETION <<<`, or marked for name
+   review. No payment amounts are displayed because they are not required for the
+   decision (names differ) or only the history flag is needed.
+
+## Next Steps
+
+### 1. Review the report carefully
+
+- For **PROPOSE_DELETE** groups, verify that the record without history can indeed be
+  removed. Confirm that the remaining record(s) are the correct ones.
+- For **NAMES_DIFFER** groups, decide which record(s) reflect the true customer and which
+  should be removed or merged.
+- For **BOTH_HAVE_HISTORY** groups, assess whether you can safely eliminate duplicates
+  without losing rental/payment history. This may involve merging data before deletion.
+- For **NEEDS_REVIEW** groups, determine how to handle the duplicates manually.
+
+### 2. Obtain explicit confirmation
+
+**Do not proceed** without explicit, documented approval from the relevant stakeholders.
+All deletions must be confirmed.
+
+### 3. Execute deletions (after confirmation)
+
+Once you have a confirmed list of customer IDs to delete, you can run SQL statements
+like:

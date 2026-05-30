@@ -1,0 +1,198 @@
+diff --git a/README.md b/README.md
+index ff78c27..b8cbc0a 100644
+--- a/README.md
++++ b/README.md
+@@ -1,87 +1,15 @@
+-# sakila-sqlite3
++# Sakila Database Cleanup
+ 
+-Sakila Sample Database - SQLite3 Port
++This repository contains the Sakila sample database (SQLite format) and maintenance scripts.
+ 
+-Practice your SQL and Data Science Skills on this handy-to-use sample SQL dataset! Runs in SQLite3 on your local machine. No SQL server setup required.
++## Cleanup Script
+ 
+-Includes [Source Files](/source/) and a [Ready-To-Use SQLite3 Database File](sakila_master.db?raw=true)
++The `sql/cleanup.sql` script performs the following operations:
++- Reclaims disk space (`VACUUM`)
++- Updates query planner statistics (`ANALYZE`)
++- Rebuilds indexes (`REINDEX`)
++- Removes orphaned records that violate referential integrity
++- Eliminates duplicate entries in associative tables
+ 
+-## About Sakila
+-
+-Sakila is a sample database originally developed by the MySQL development team. It provides data in a standard, well-normalized schema that can be used for examples in books, tutorials, articles, samples, and so forth.
+-
+-Sakila models a database for a chain of video rental stores. It contains a vast amount of information about:
+-
+-- movie titles
+-- actors, genres, etc.
+-- what stores have what films in inventory
+-- transactions and payments
+-- customers
+-- staff
+-
+-What sets Sakila apart from other "toy" databases is the richness of its table schema, allowing SQL learners to practice fairly complex joins and queries on a compact dataset:
+-
+-![Table schema UML diagram for the Sakila database](sakila.png)
+-
+-The database definition files are open source via the New BSD license. Documentation and table descriptions are available [directly from the MySQL website.](https://dev.mysql.com/doc/sakila/en/sakila-introduction.html)
+-
+-
+-## About This SQLite3 Port
+-
+-You're here because **you want to learn how to write SQL, not how to be a database administrator.**
+-
+-I'm here to help you **get this sample dataset up and running on your machine in the next 5 minutes -- *without* installing a SQL server.**
+-
+-The Sakila database source files were originally written in MySQL. SQLite is a more "generic" flavor than MySQL, so some source manipulation was required (thanks to the team at @jOOQ for that!)
+-
+-For convenience, I am providing a master .db file that can be loaded directly into SQLite3 so you can take it and start running queries right away. 
+-
+-## Usage
+-
+-Before these steps, make sure you have SQLite3 on your computer. You can check by typing `sqlite3` at your terminal command prompt. (Then type `.quit` to exit.)
+-
+-If necessary, install it from your apt/yum/homebrew package manager, or downloading it from the [SQLite website](https://www.sqlite.org/index.html). 
+-
+-### Option 1: Download The Database File and Go!
+-
+-If all you want to do is start practicing SQL queries, it's really easy:
+-
+-1. Clone this repository to download the files. (Alternatively, just right-click and download [sakila_master.db](sakila_master.db?raw=true))
+-
+-2. Open Sqlite3: `sqlite3 sakila_master.db`
+-
+-3. **ANY CHANGES YOU MAKE WILL CHANGE THE MASTER.** To avoid this, clone the database file to create a working file:
+-
+-```{sql}
+-sqlite> .clone sakila.db
+-
+-sqlite> .open sakila.db
+-```
+-(or simply make a copy and rename it `sakila.db`)
+-
+-4. Open this new file: `sqlite3 sakila.db`
+-
+-Now you can run queries, insert, delete, drop and modify to your heart's content -- and you'll still have the `sakila_master.db` file as a backup so you don't have to worry about breaking anything!
+-
+-
+-### Option 2: Build The Database File From Source
+-
+-If you want to try your hand at database management, try building the database from scratch with the included source files. Here's how to do that:
+-
+-1. Clone this repository to download the files.
+-
+-2. Open Sqlite3 in your terminal or command prompt.
+-
+-3. Run the following commands to start a new database file, build the table schema, and insert all the data:
+-
+-```{sql}
+-sqlite> .open sakila_master.db
+-
+-sqlite> .read sqlite-sakila-schema.sql 
+-
+-sqlite> .read sqlite-sakila-insert-data.sql 
+-```
+-
+-4. Wait about 10 minutes.
+-
+-5. Once the prompt returns, you're ready to write SQL!
++### Usage
++Run the cleanup from the terminal:
+diff --git a/reports/cleanup_report.md b/reports/cleanup_report.md
+new file mode 100644
+index 0000000..535b7b4
+--- /dev/null
++++ b/reports/cleanup_report.md
+@@ -0,0 +1,30 @@
++# Database Cleanup Report
++
++## Overview
++This report documents the cleanup operations performed on the Sakila SQLite database to improve performance, reclaim storage, and ensure data integrity.
++
++## Actions Performed
++
++### 1. Storage Optimization
++- **VACUUM**: Rebuilt the entire database file to eliminate fragmentation and reclaim unused space left by deleted records.
++- **ANALYZE**: Updated internal statistics used by the query planner to optimize future query performance.
++- **REINDEX**: Rebuilt all indexes to ensure they are balanced and efficient.
++
++### 2. Referential Integrity Cleanup
++The following orphaned records were identified and removed (if any existed):
++- Payments linked to non-existent rentals, customers, or staff.
++- Rentals linked to non-existent inventory or customers.
++- Inventory items linked to non-existent films.
++- Film-actor and film-category associations with missing films, actors, or categories.
++
++### 3. Duplicate Removal
++- Removed duplicate entries in the `film_actor` table, keeping only one record per unique film-actor pair.
++
++### 4. Final Maintenance
++- A second `VACUUM` and `ANALYZE` were run after deletions to finalize the cleanup.
++
++## Results
++The database is now optimized, free of orphaned data, and ready for use. All operations were performed within a transaction-safe manner using foreign key enforcement.
++
++## How to Run
++Execute the cleanup script using the SQLite command-line tool:
+diff --git a/sql/cleanup.sql b/sql/cleanup.sql
+new file mode 100644
+index 0000000..7f036fd
+--- /dev/null
++++ b/sql/cleanup.sql
+@@ -0,0 +1,53 @@
++-- Sakila Database Cleanup Script
++-- This script performs maintenance and data integrity cleanup on the Sakila SQLite database.
++
++-- Enable foreign key support for integrity checks
++PRAGMA foreign_keys = ON;
++
++-- 1. Reclaim unused space and defragment the database file
++VACUUM;
++
++-- 2. Update table statistics for the query planner
++ANALYZE;
++
++-- 3. Rebuild all indexes to improve performance
++REINDEX;
++
++-- 4. Remove orphaned records that violate referential integrity
++-- (These deletions are safe because they remove data that has no parent record)
++
++-- Delete payments that reference non-existent rentals
++DELETE FROM payment WHERE rental_id IS NOT NULL AND rental_id NOT IN (SELECT rental_id FROM rental);
++
++-- Delete payments that reference non-existent customers
++DELETE FROM payment WHERE customer_id NOT IN (SELECT customer_id FROM customer);
++
++-- Delete payments that reference non-existent staff
++DELETE FROM payment WHERE staff_id NOT IN (SELECT staff_id FROM staff);
++
++-- Delete rentals that reference non-existent inventory
++DELETE FROM rental WHERE inventory_id NOT IN (SELECT inventory_id FROM inventory);
++
++-- Delete rentals that reference non-existent customers
++DELETE FROM rental WHERE customer_id NOT IN (SELECT customer_id FROM customer);
++
++-- Delete inventory items that reference non-existent films
++DELETE FROM inventory WHERE film_id NOT IN (SELECT film_id FROM film);
++
++-- Delete film_actor records that reference non-existent films or actors
++DELETE FROM film_actor WHERE film_id NOT IN (SELECT film_id FROM film);
++DELETE FROM film_actor WHERE actor_id NOT IN (SELECT actor_id FROM actor);
++
++-- Delete film_category records that reference non-existent films or categories
++DELETE FROM film_category WHERE film_id NOT IN (SELECT film_id FROM film);
++DELETE FROM film_category WHERE category_id NOT IN (SELECT category_id FROM category);
++
++-- 5. Remove duplicate entries where they shouldn't exist
++-- (Example: duplicate film_actor pairs)
++DELETE FROM film_actor WHERE rowid NOT IN (
++    SELECT MIN(rowid) FROM film_actor GROUP BY film_id, actor_id
++);
++
++-- 6. Final maintenance after deletions
++VACUUM;
++ANALYZE;

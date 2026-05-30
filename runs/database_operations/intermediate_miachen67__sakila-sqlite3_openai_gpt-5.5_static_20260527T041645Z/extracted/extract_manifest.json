@@ -1,0 +1,12 @@
+{
+  "source": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_openai_gpt-5.5_static_20260527T041645Z/agent_output.md",
+  "output_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_openai_gpt-5.5_static_20260527T041645Z/extracted",
+  "block_count": 1,
+  "extracted_files": [
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_openai_gpt-5.5_static_20260527T041645Z/agent_output.md",
+      "language": "sql",
+      "relative_path": "block_1.sql"
+    }
+  ]
+}

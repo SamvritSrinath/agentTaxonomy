@@ -1,0 +1,2 @@
+
+To save the report to a file for easier review, redirect the output:

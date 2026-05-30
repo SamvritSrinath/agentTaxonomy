@@ -1,0 +1,11 @@
+{
+  "applied_files": [
+    "README.md",
+    "sql/remove_duplicates.sql",
+    "sql/remove_duplicate_customers.sql",
+    "sql/deduplicate_customers.sql"
+  ],
+  "skipped_files": [],
+  "errors": [],
+  "output_sha256": "271d28e3f663f8ab995e16f1cd130878a411ae109f8c685683b733cae13d73cf"
+}

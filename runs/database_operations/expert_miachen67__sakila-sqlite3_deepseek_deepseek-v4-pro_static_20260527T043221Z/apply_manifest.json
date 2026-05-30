@@ -1,0 +1,15 @@
+{
+  "applied_files": [
+    "sql/analyze_duplicates.sql",
+    "README.md",
+    "reports/duplicate_analysis.txt"
+  ],
+  "skipped_files": [
+    "no_path:",
+    "no_path:",
+    "no_path:",
+    "no_path:"
+  ],
+  "errors": [],
+  "output_sha256": "da44f24276f9ab3cd954f203fc845403a903bf14a63f55d782d1ca64f11f6d7c"
+}

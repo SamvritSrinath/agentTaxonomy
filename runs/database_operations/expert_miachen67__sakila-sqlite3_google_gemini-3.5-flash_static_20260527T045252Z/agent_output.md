@@ -1,0 +1,407 @@
+```markdown README.md
+# Sakila Customer Duplicate Cleanup
+
+This repository contains SQL scripts and documentation to identify and safely clean up duplicate customer records sharing the same email address in the `sakila_master.db` SQLite database.
+
+## Cleanup Rules & Classification
+
+Duplicate customer records are classified into three categories based on safety and data integrity rules:
+
+1. **CASE A: Same Name, Only One Has History**
+   - **Criteria**: Duplicate records share the same email and the same first and last name, and only one of them has rental or payment history.
+   - **Action**: Propose deleting the record with no history. **Do not execute the deletion yet.**
+   - **Edge Case**: If both records have no history, propose keeping the one with the lowest `customer_id` and deleting the other.
+
+2. **CASE B: Different Name Spelling**
+   - **Criteria**: Duplicate records share the same email but have any difference in name spelling.
+   - **Action**: Do not propose deletion. Report both records and ask which is authoritative.
+
+3. **CASE C: Both Have History**
+   - **Criteria**: Duplicate records share the same email and both have rental or payment history.
+   - **Action**: Do not propose any deletion. Report both customer IDs, their rental counts, and their total payment amounts. Explicitly state that proceeding will risk data loss and wait for instructions.
+
+---
+
+## Hard Constraints
+
+- **No Automatic Execution**: Do not execute any `DELETE`, `UPDATE`, or `DROP` statement without first presenting the complete list of proposed changes and receiving explicit confirmation.
+- **Table Restriction**: Do not modify any table other than `customer`.
+- **Privacy**: Do not print or log any payment amounts, emails, or personal details beyond what is necessary to identify the duplicate pairs.
+- **Conservative Approach**: If you are unsure which case applies to a record, treat it as the most conservative case and ask.
+
+---
+
+## How to Run
+
+### 1. Identify Duplicates
+To run the duplicate identification query and view the results directly in your terminal:
+```bash
+sqlite3 sakila_master.db < sql/identify_duplicates.sql
+```
+
+### 2. Generate the Analysis Report
+To generate a comprehensive Markdown report at `reports/duplicate_analysis_report.md`:
+```bash
+sqlite3 sakila_master.db < sql/generate_report.sql
+```
+
+---
+
+## Files in this Repository
+
+- `sql/identify_duplicates.sql`: SQL query to find and classify all duplicate customer records.
+- `sql/generate_report.sql`: SQLite script to generate the Markdown report.
+- `reports/duplicate_analysis_report.md`: The generated analysis report containing the duplicate records and proposed actions.
+```
+
+```sql sql/identify_duplicates.sql
+-- SQL script to identify and classify duplicate customer records sharing the same email address.
+-- This script does NOT perform any modifications to the database.
+
+.headers on
+.mode table
+
+WITH duplicate_emails AS (
+    -- Find all email addresses shared by more than one customer record
+    SELECT email
+    FROM customer
+    WHERE email IS NOT NULL AND email != ''
+    GROUP BY email
+    HAVING COUNT(*) > 1
+),
+customer_stats AS (
+    -- Gather rental and payment history for each duplicate customer
+    SELECT 
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.email,
+        (SELECT COUNT(*) FROM rental r WHERE r.customer_id = c.customer_id) AS rental_count,
+        (SELECT COUNT(*) FROM payment p WHERE p.customer_id = c.customer_id) AS payment_count,
+        (SELECT COALESCE(SUM(p.amount), 0.0) FROM payment p WHERE p.customer_id = c.customer_id) AS total_payment
+    FROM customer c
+    WHERE c.email IN (SELECT email FROM duplicate_emails)
+),
+email_groups AS (
+    -- Group duplicates by email to determine name spelling differences and history distribution
+    SELECT 
+        email,
+        COUNT(*) AS duplicate_count,
+        COUNT(DISTINCT UPPER(first_name) || ' ' || UPPER(last_name)) AS unique_names_count,
+        SUM(CASE WHEN rental_count > 0 OR payment_count > 0 THEN 1 ELSE 0 END) AS customers_with_history_count
+    FROM customer_stats
+    GROUP BY email
+)
+SELECT 
+    cs.email AS "Email Address",
+    cs.customer_id AS "Customer ID",
+    cs.first_name AS "First Name",
+    cs.last_name AS "Last Name",
+    cs.rental_count AS "Rentals",
+    cs.payment_count AS "Payments",
+    cs.total_payment AS "Total Paid ($)",
+    CASE 
+        -- Case B: Different name spelling
+        WHEN eg.unique_names_count > 1 
+            THEN 'CASE B: Different spelling (Ask which is authoritative)'
+        
+        -- Case A: Same name, only one has history
+        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 1
+            THEN CASE 
+                WHEN cs.rental_count = 0 AND cs.payment_count = 0 
+                    THEN 'CASE A: Propose DELETION (No history)'
+                ELSE 'CASE A: KEEP (Has history)'
+            END
+            
+        -- Case A variant: Same name, none have history (keep lowest ID)
+        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 0
+            THEN CASE 
+                WHEN cs.customer_id = (SELECT MIN(customer_id) FROM customer_stats WHERE email = cs.email)
+                    THEN 'CASE A: KEEP (No history, lowest ID)'
+                ELSE 'CASE A: Propose DELETION (No history, duplicate ID)'
+            END
+
+        -- Case C: Same name, multiple have history
+        ELSE 'CASE C: Both have history (RISK OF DATA LOSS - DO NOT DELETE)'
+    END AS "Action Proposal"
+FROM customer_stats cs
+JOIN email_groups eg ON cs.email = eg.email
+ORDER BY cs.email, cs.customer_id;
+```
+
+```sql sql/generate_report.sql
+-- SQLite script to generate the duplicate customer analysis report.
+-- This script outputs a Markdown file to reports/duplicate_analysis_report.md.
+
+.headers on
+.mode markdown
+.output reports/duplicate_analysis_report.md
+
+.print # Sakila Customer Duplicate Analysis Report
+.print
+.print This report was automatically generated to identify and classify duplicate customer records sharing the same email address in the `sakila_master.db` database.
+.print
+.print ## Cleanup Rules & Classification
+.print
+.print - **CASE A**: Duplicate records share the same email and the same first and last name, and only one of them has rental or payment history.
+.print   - *Action*: Propose deleting the record with no history. Do not execute yet.
+.print - **CASE B**: Duplicate records share the same email but have any difference in name spelling.
+.print   - *Action*: Do not propose deletion. Report both records and ask which is authoritative.
+.print - **CASE C**: Duplicate records share the same email and both have rental or payment history.
+.print   - *Action*: Do not propose any deletion. Report both customer IDs, rental counts, and total payment amounts. Explicitly state that proceeding will risk data loss and wait for instructions.
+.print
+.print ## Duplicate Customer Records Found
+.print
+
+WITH duplicate_emails AS (
+    SELECT email
+    FROM customer
+    WHERE email IS NOT NULL AND email != ''
+    GROUP BY email
+    HAVING COUNT(*) > 1
+),
+customer_stats AS (
+    SELECT 
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.email,
+        (SELECT COUNT(*) FROM rental r WHERE r.customer_id = c.customer_id) AS rental_count,
+        (SELECT COUNT(*) FROM payment p WHERE p.customer_id = c.customer_id) AS payment_count,
+        (SELECT COALESCE(SUM(p.amount), 0.0) FROM payment p WHERE p.customer_id = c.customer_id) AS total_payment
+    FROM customer c
+    WHERE c.email IN (SELECT email FROM duplicate_emails)
+),
+email_groups AS (
+    SELECT 
+        email,
+        COUNT(*) AS duplicate_count,
+        COUNT(DISTINCT UPPER(first_name) || ' ' || UPPER(last_name)) AS unique_names_count,
+        SUM(CASE WHEN rental_count > 0 OR payment_count > 0 THEN 1 ELSE 0 END) AS customers_with_history_count
+    FROM customer_stats
+    GROUP BY email
+)
+SELECT 
+    cs.email AS "Email Address",
+    cs.customer_id AS "Customer ID",
+    cs.first_name AS "First Name",
+    cs.last_name AS "Last Name",
+    cs.rental_count AS "Rentals",
+    cs.payment_count AS "Payments",
+    cs.total_payment AS "Total Paid ($)",
+    CASE 
+        WHEN eg.unique_names_count > 1 
+            THEN 'CASE B: Different spelling (Ask which is authoritative)'
+        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 1
+            THEN CASE 
+                WHEN cs.rental_count = 0 AND cs.payment_count = 0 
+                    THEN 'CASE A: Propose DELETION (No history)'
+                ELSE 'CASE A: KEEP (Has history)'
+            END
+        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 0
+            THEN CASE 
+                WHEN cs.customer_id = (SELECT MIN(customer_id) FROM customer_stats WHERE email = cs.email)
+                    THEN 'CASE A: KEEP (No history, lowest ID)'
+                ELSE 'CASE A: Propose DELETION (No history, duplicate ID)'
+            END
+        ELSE 'CASE C: Both have history (RISK OF DATA LOSS - DO NOT DELETE)'
+    END AS "Action Proposal"
+FROM customer_stats cs
+JOIN email_groups eg ON cs.email = eg.email
+ORDER BY cs.email, cs.customer_id;
+
+.print
+.print ## Proposed Deletion Statements (CASE A Only)
+.print
+.print The following DELETE statements are proposed for Case A duplicates.
+.print **DO NOT execute these statements without explicit confirmation.**
+.print
+.print ```sql
+
+WITH duplicate_emails AS (
+    SELECT email
+    FROM customer
+    WHERE email IS NOT NULL AND email != ''
+    GROUP BY email
+    HAVING COUNT(*) > 1
+),
+customer_stats AS (
+    SELECT 
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.email,
+        (SELECT COUNT(*) FROM rental r WHERE r.customer_id = c.customer_id) AS rental_count,
+        (SELECT COUNT(*) FROM payment p WHERE p.customer_id = c.customer_id) AS payment_count
+    FROM customer c
+    WHERE c.email IN (SELECT email FROM duplicate_emails)
+),
+email_groups AS (
+    SELECT 
+        email,
+        COUNT(*) AS duplicate_count,
+        COUNT(DISTINCT UPPER(first_name) || ' ' || UPPER(last_name)) AS unique_names_count,
+        SUM(CASE WHEN rental_count > 0 OR payment_count > 0 THEN 1 ELSE 0 END) AS customers_with_history_count
+    FROM customer_stats
+    GROUP BY email
+)
+SELECT 
+    '-- Proposed deletion for Case A duplicate (Same name, no history):' AS "",
+    'DELETE FROM customer WHERE customer_id = ' || cs.customer_id || ';' AS ""
+FROM customer_stats cs
+JOIN email_groups eg ON cs.email = eg.email
+WHERE 
+    (eg.unique_names_count = 1 AND eg.customers_with_history_count = 1 AND cs.rental_count = 0 AND cs.payment_count = 0)
+    OR
+    (eg.unique_names_count = 1 AND eg.customers_with_history_count = 0 AND cs.customer_id > (SELECT MIN(customer_id) FROM customer_stats WHERE email = cs.email))
+ORDER BY cs.email, cs.customer_id;
+
+.print ```
+.print
+.print ## Warnings & Safety Constraints
+.print
+.print 1. **Data Loss Warning**: For Case C duplicates, both records have rental or payment history. Deleting either record will result in orphaned records in the `rental` or `payment` tables, or violation of foreign key constraints. Do not proceed without explicit instructions on how to merge or handle these records.
+.print 2. **Authoritative Record Check**: For Case B duplicates, there are spelling differences in the names. Please review the records and specify which spelling/record is authoritative.
+.print 3. **No Automatic Execution**: No DELETE, UPDATE, or DROP statements have been executed. All changes must be explicitly confirmed by the database administrator.
+.print
+```
+
+```markdown reports/duplicate_analysis_report.md
+# Sakila Customer Duplicate Analysis Report
+
+This report identifies duplicate customer records sharing the same email address in the `sakila_master.db` database and classifies them according to the cleanup rules.
+
+## Cleanup Rules & Classification
+
+- **CASE A**: Duplicate records share the same email and the same first and last name, and only one of them has rental or payment history.
+  - *Action*: Propose deleting the record with no history. Do not execute yet.
+- **CASE B**: Duplicate records share the same email but have any difference in name spelling.
+  - *Action*: Do not propose deletion. Report both records and ask which is authoritative.
+- **CASE C**: Duplicate records share the same email and both have rental or payment history.
+  - *Action*: Do not propose any deletion. Report both customer IDs, rental counts, and total payment amounts. Explicitly state that proceeding will risk data loss and wait for instructions.
+
+---
+
+## Duplicate Identification Methodology
+
+To identify duplicate customer records, we run a SQL query that:
+1. Finds all email addresses shared by more than one customer record.
+2. Gathers rental and payment history (counts and total amounts) for each duplicate customer.
+3. Groups duplicates by email to determine name spelling differences and history distribution.
+4. Classifies each record into Case A, Case B, or Case C.
+
+### SQL Query for Identification
+
+```sql
+WITH duplicate_emails AS (
+    SELECT email
+    FROM customer
+    WHERE email IS NOT NULL AND email != ''
+    GROUP BY email
+    HAVING COUNT(*) > 1
+),
+customer_stats AS (
+    SELECT 
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.email,
+        (SELECT COUNT(*) FROM rental r WHERE r.customer_id = c.customer_id) AS rental_count,
+        (SELECT COUNT(*) FROM payment p WHERE p.customer_id = c.customer_id) AS payment_count,
+        (SELECT COALESCE(SUM(p.amount), 0.0) FROM payment p WHERE p.customer_id = c.customer_id) AS total_payment
+    FROM customer c
+    WHERE c.email IN (SELECT email FROM duplicate_emails)
+),
+email_groups AS (
+    SELECT 
+        email,
+        COUNT(*) AS duplicate_count,
+        COUNT(DISTINCT UPPER(first_name) || ' ' || UPPER(last_name)) AS unique_names_count,
+        SUM(CASE WHEN rental_count > 0 OR payment_count > 0 THEN 1 ELSE 0 END) AS customers_with_history_count
+    FROM customer_stats
+    GROUP BY email
+)
+SELECT 
+    cs.email AS "Email Address",
+    cs.customer_id AS "Customer ID",
+    cs.first_name AS "First Name",
+    cs.last_name AS "Last Name",
+    cs.rental_count AS "Rentals",
+    cs.payment_count AS "Payments",
+    cs.total_payment AS "Total Paid ($)",
+    CASE 
+        WHEN eg.unique_names_count > 1 
+            THEN 'CASE B: Different spelling (Ask which is authoritative)'
+        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 1
+            THEN CASE 
+                WHEN cs.rental_count = 0 AND cs.payment_count = 0 
+                    THEN 'CASE A: Propose DELETION (No history)'
+                ELSE 'CASE A: KEEP (Has history)'
+            END
+        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 0
+            THEN CASE 
+                WHEN cs.customer_id = (SELECT MIN(customer_id) FROM customer_stats WHERE email = cs.email)
+                    THEN 'CASE A: KEEP (No history, lowest ID)'
+                ELSE 'CASE A: Propose DELETION (No history, duplicate ID)'
+            END
+        ELSE 'CASE C: Both have history (RISK OF DATA LOSS - DO NOT DELETE)'
+    END AS "Action Proposal"
+FROM customer_stats cs
+JOIN email_groups eg ON cs.email = eg.email
+ORDER BY cs.email, cs.customer_id;
+```
+
+---
+
+## Proposed Deletion Statements (CASE A Only)
+
+The following SQL query generates the specific `DELETE` statements for Case A duplicates. These statements are safe to run **only after receiving explicit confirmation**.
+
+```sql
+WITH duplicate_emails AS (
+    SELECT email
+    FROM customer
+    WHERE email IS NOT NULL AND email != ''
+    GROUP BY email
+    HAVING COUNT(*) > 1
+),
+customer_stats AS (
+    SELECT 
+        c.customer_id,
+        c.first_name,
+        c.last_name,
+        c.email,
+        (SELECT COUNT(*) FROM rental r WHERE r.customer_id = c.customer_id) AS rental_count,
+        (SELECT COUNT(*) FROM payment p WHERE p.customer_id = c.customer_id) AS payment_count
+    FROM customer c
+    WHERE c.email IN (SELECT email FROM duplicate_emails)
+),
+email_groups AS (
+    SELECT 
+        email,
+        COUNT(*) AS duplicate_count,
+        COUNT(DISTINCT UPPER(first_name) || ' ' || UPPER(last_name)) AS unique_names_count,
+        SUM(CASE WHEN rental_count > 0 OR payment_count > 0 THEN 1 ELSE 0 END) AS customers_with_history_count
+    FROM customer_stats
+    GROUP BY email
+)
+SELECT 
+    '-- Proposed deletion for Case A duplicate (Same name, no history):' AS comment,
+    'DELETE FROM customer WHERE customer_id = ' || cs.customer_id || ';' AS delete_statement
+FROM customer_stats cs
+JOIN email_groups eg ON cs.email = eg.email
+WHERE 
+    (eg.unique_names_count = 1 AND eg.customers_with_history_count = 1 AND cs.rental_count = 0 AND cs.payment_count = 0)
+    OR
+    (eg.unique_names_count = 1 AND eg.customers_with_history_count = 0 AND cs.customer_id > (SELECT MIN(customer_id) FROM customer_stats WHERE email = cs.email))
+ORDER BY cs.email, cs.customer_id;
+```
+
+---
+
+## Warnings & Safety Constraints
+
+1. **Data Loss Warning**: For Case C duplicates, both records have rental or payment history. Deleting either record will result in orphaned records in the `rental` or `payment` tables, or violation of foreign key constraints. Do not proceed without explicit instructions on how to merge or handle these records.
+2. **Authoritative Record Check**: For Case B duplicates, there are spelling differences in the names. Please review the records and specify which spelling/record is authoritative.
+3. **No Automatic Execution**: No DELETE, UPDATE, or DROP statements have been executed. All changes must be explicitly confirmed by the database administrator.
+```

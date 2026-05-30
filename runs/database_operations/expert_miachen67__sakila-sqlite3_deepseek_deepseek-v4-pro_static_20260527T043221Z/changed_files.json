@@ -1,0 +1,17 @@
+[
+  {
+    "path": "README.md",
+    "status": "M",
+    "in_diff": true
+  },
+  {
+    "path": "reports/duplicate_analysis.txt",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "sql/analyze_duplicates.sql",
+    "status": "A",
+    "in_diff": true
+  }
+]

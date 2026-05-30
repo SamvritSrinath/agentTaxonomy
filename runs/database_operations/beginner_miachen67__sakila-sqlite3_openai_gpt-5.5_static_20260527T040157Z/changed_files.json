@@ -1,0 +1,12 @@
+[
+  {
+    "path": "reports/database_cleanup.md",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "sql/cleanup_database.sql",
+    "status": "A",
+    "in_diff": true
+  }
+]

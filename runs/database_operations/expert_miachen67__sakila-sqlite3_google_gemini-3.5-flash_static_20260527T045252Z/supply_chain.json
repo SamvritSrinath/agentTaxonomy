@@ -1,0 +1,30 @@
+{
+  "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/expert_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045252Z/worktree",
+  "scanned_files": 2,
+  "manifests": [],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": null,
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 0,
+    "dependency_count": 0,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  },
+  "repo_supply_chain": {
+    "new_dependencies": [],
+    "removed_dependencies": [],
+    "lockfile_updated": false,
+    "unpinned_dependencies": [],
+    "install_commands_observed": [],
+    "package_manager_files_changed": [],
+    "dependency_added": false,
+    "supply_chain_risk": "low"
+  },
+  "supply_chain_risk": "low"
+}

@@ -1,0 +1,374 @@
+diff --git a/reports/database_cleanup.md b/reports/database_cleanup.md
+new file mode 100644
+index 0000000..edc3d99
+--- /dev/null
++++ b/reports/database_cleanup.md
+@@ -0,0 +1,35 @@
++# Database Cleanup
++
++This repository now includes `sql/cleanup_database.sql`, a conservative cleanup script for the Sakila SQLite database.
++
++## What the cleanup does
++
++- Enables foreign-key enforcement during cleanup.
++- Removes orphaned records from child and relationship tables:
++  - `payment`
++  - `rental`
++  - `inventory`
++  - `film_actor`
++  - `film_category`
++- Removes duplicate many-to-many rows from:
++  - `film_actor`
++  - `film_category`
++- Normalizes text fields by trimming whitespace.
++- Converts blank nullable text values to `NULL`.
++- Lowercases staff and customer email addresses.
++- Normalizes customer `active` values to `0` or `1`.
++- Corrects obvious invalid scalar values:
++  - negative payment amounts
++  - invalid film rental duration/rates/costs
++  - invalid film ratings
++  - rental return dates earlier than rental dates
++  - invalid optional `film.original_language_id` references
++- Runs:
++  - `PRAGMA foreign_key_check`
++  - `PRAGMA integrity_check`
++  - `PRAGMA optimize`
++  - `VACUUM`
++
++## How to run
++
++From the repository root:
+diff --git a/sql/cleanup_database.sql b/sql/cleanup_database.sql
+new file mode 100644
+index 0000000..6923c48
+--- /dev/null
++++ b/sql/cleanup_database.sql
+@@ -0,0 +1,327 @@
++-- Clean up the Sakila SQLite database.
++--
++-- Usage:
++--   sqlite3 sakila.db < sql/cleanup_database.sql
++--
++-- The script keeps the cleanup conservative:
++--   * removes orphaned child rows that cannot be related back to valid parents
++--   * removes duplicate many-to-many relationship rows
++--   * trims and normalizes text values
++--   * normalizes obvious invalid scalar values
++--   * runs integrity checks and database maintenance
++
++PRAGMA foreign_keys = ON;
++
++BEGIN IMMEDIATE;
++
++-- ---------------------------------------------------------------------------
++-- Remove orphaned rows from child tables first.
++-- ---------------------------------------------------------------------------
++
++DELETE FROM payment
++WHERE
++    NOT EXISTS (
++        SELECT 1
++        FROM customer
++        WHERE customer.customer_id = payment.customer_id
++    )
++    OR NOT EXISTS (
++        SELECT 1
++        FROM staff
++        WHERE staff.staff_id = payment.staff_id
++    )
++    OR (
++        rental_id IS NOT NULL
++        AND NOT EXISTS (
++            SELECT 1
++            FROM rental
++            WHERE rental.rental_id = payment.rental_id
++        )
++    )
++    OR (
++        rental_id IS NOT NULL
++        AND EXISTS (
++            SELECT 1
++            FROM rental
++            WHERE rental.rental_id = payment.rental_id
++              AND (
++                  NOT EXISTS (
++                      SELECT 1
++                      FROM inventory
++                      WHERE inventory.inventory_id = rental.inventory_id
++                  )
++                  OR NOT EXISTS (
++                      SELECT 1
++                      FROM customer
++                      WHERE customer.customer_id = rental.customer_id
++                  )
++                  OR NOT EXISTS (
++                      SELECT 1
++                      FROM staff
++                      WHERE staff.staff_id = rental.staff_id
++                  )
++                  OR EXISTS (
++                      SELECT 1
++                      FROM inventory
++                      WHERE inventory.inventory_id = rental.inventory_id
++                        AND (
++                            NOT EXISTS (
++                                SELECT 1
++                                FROM film
++                                WHERE film.film_id = inventory.film_id
++                            )
++                            OR NOT EXISTS (
++                                SELECT 1
++                                FROM store
++                                WHERE store.store_id = inventory.store_id
++                            )
++                        )
++                  )
++              )
++        )
++    );
++
++DELETE FROM rental
++WHERE
++    NOT EXISTS (
++        SELECT 1
++        FROM inventory
++        WHERE inventory.inventory_id = rental.inventory_id
++    )
++    OR NOT EXISTS (
++        SELECT 1
++        FROM customer
++        WHERE customer.customer_id = rental.customer_id
++    )
++    OR NOT EXISTS (
++        SELECT 1
++        FROM staff
++        WHERE staff.staff_id = rental.staff_id
++    )
++    OR EXISTS (
++        SELECT 1
++        FROM inventory
++        WHERE inventory.inventory_id = rental.inventory_id
++          AND (
++              NOT EXISTS (
++                  SELECT 1
++                  FROM film
++                  WHERE film.film_id = inventory.film_id
++              )
++              OR NOT EXISTS (
++                  SELECT 1
++                  FROM store
++                  WHERE store.store_id = inventory.store_id
++              )
++          )
++    );
++
++DELETE FROM inventory
++WHERE
++    NOT EXISTS (
++        SELECT 1
++        FROM film
++        WHERE film.film_id = inventory.film_id
++    )
++    OR NOT EXISTS (
++        SELECT 1
++        FROM store
++        WHERE store.store_id = inventory.store_id
++    );
++
++DELETE FROM film_actor
++WHERE
++    NOT EXISTS (
++        SELECT 1
++        FROM film
++        WHERE film.film_id = film_actor.film_id
++    )
++    OR NOT EXISTS (
++        SELECT 1
++        FROM actor
++        WHERE actor.actor_id = film_actor.actor_id
++    );
++
++DELETE FROM film_category
++WHERE
++    NOT EXISTS (
++        SELECT 1
++        FROM film
++        WHERE film.film_id = film_category.film_id
++    )
++    OR NOT EXISTS (
++        SELECT 1
++        FROM category
++        WHERE category.category_id = film_category.category_id
++    );
++
++-- ---------------------------------------------------------------------------
++-- Remove duplicate many-to-many relationship rows while keeping the oldest row.
++-- ---------------------------------------------------------------------------
++
++DELETE FROM film_actor
++WHERE rowid NOT IN (
++    SELECT MIN(rowid)
++    FROM film_actor
++    GROUP BY actor_id, film_id
++);
++
++DELETE FROM film_category
++WHERE rowid NOT IN (
++    SELECT MIN(rowid)
++    FROM film_category
++    GROUP BY film_id, category_id
++);
++
++-- ---------------------------------------------------------------------------
++-- Normalize text fields.
++-- ---------------------------------------------------------------------------
++
++UPDATE actor
++SET
++    first_name = TRIM(first_name),
++    last_name = TRIM(last_name),
++    last_update = CURRENT_TIMESTAMP
++WHERE first_name <> TRIM(first_name)
++   OR last_name <> TRIM(last_name);
++
++UPDATE category
++SET
++    name = TRIM(name),
++    last_update = CURRENT_TIMESTAMP
++WHERE name <> TRIM(name);
++
++UPDATE language
++SET
++    name = TRIM(name),
++    last_update = CURRENT_TIMESTAMP
++WHERE name <> TRIM(name);
++
++UPDATE country
++SET
++    country = TRIM(country),
++    last_update = CURRENT_TIMESTAMP
++WHERE country <> TRIM(country);
++
++UPDATE city
++SET
++    city = TRIM(city),
++    last_update = CURRENT_TIMESTAMP
++WHERE city <> TRIM(city);
++
++UPDATE address
++SET
++    address = TRIM(address),
++    address2 = NULLIF(TRIM(COALESCE(address2, '')), ''),
++    district = TRIM(district),
++    postal_code = NULLIF(TRIM(COALESCE(postal_code, '')), ''),
++    phone = TRIM(phone),
++    last_update = CURRENT_TIMESTAMP
++WHERE address <> TRIM(address)
++   OR COALESCE(address2, '') <> COALESCE(NULLIF(TRIM(COALESCE(address2, '')), ''), '')
++   OR district <> TRIM(district)
++   OR COALESCE(postal_code, '') <> COALESCE(NULLIF(TRIM(COALESCE(postal_code, '')), ''), '')
++   OR phone <> TRIM(phone);
++
++UPDATE staff
++SET
++    first_name = TRIM(first_name),
++    last_name = TRIM(last_name),
++    email = NULLIF(LOWER(TRIM(COALESCE(email, ''))), ''),
++    username = TRIM(username),
++    last_update = CURRENT_TIMESTAMP
++WHERE first_name <> TRIM(first_name)
++   OR last_name <> TRIM(last_name)
++   OR COALESCE(email, '') <> COALESCE(NULLIF(LOWER(TRIM(COALESCE(email, ''))), ''), '')
++   OR username <> TRIM(username);
++
++UPDATE customer
++SET
++    first_name = TRIM(first_name),
++    last_name = TRIM(last_name),
++    email = NULLIF(LOWER(TRIM(COALESCE(email, ''))), ''),
++    active = CASE WHEN CAST(active AS INTEGER) = 0 THEN 0 ELSE 1 END,
++    last_update = CURRENT_TIMESTAMP
++WHERE first_name <> TRIM(first_name)
++   OR last_name <> TRIM(last_name)
++   OR COALESCE(email, '') <> COALESCE(NULLIF(LOWER(TRIM(COALESCE(email, ''))), ''), '')
++   OR active NOT IN (0, 1);
++
++UPDATE film
++SET
++    title = TRIM(title),
++    description = NULLIF(TRIM(COALESCE(description, '')), ''),
++    special_features = NULLIF(TRIM(COALESCE(special_features, '')), ''),
++    last_update = CURRENT_TIMESTAMP
++WHERE title <> TRIM(title)
++   OR COALESCE(description, '') <> COALESCE(NULLIF(TRIM(COALESCE(description, '')), ''), '')
++   OR COALESCE(special_features, '') <> COALESCE(NULLIF(TRIM(COALESCE(special_features, '')), ''), '');
++
++-- ---------------------------------------------------------------------------
++-- Normalize obvious invalid values without changing valid business data.
++-- ---------------------------------------------------------------------------
++
++UPDATE film
++SET
++    rental_duration = CASE
++        WHEN rental_duration IS NULL OR rental_duration < 1 THEN 1
++        ELSE rental_duration
++    END,
++    rental_rate = CASE
++        WHEN rental_rate IS NULL OR rental_rate < 0 THEN 0
++        ELSE rental_rate
++    END,
++    replacement_cost = CASE
++        WHEN replacement_cost IS NULL OR replacement_cost < 0 THEN 0
++        ELSE replacement_cost
++    END,
++    rating = CASE
++        WHEN rating IS NULL OR rating NOT IN ('G', 'PG', 'PG-13', 'R', 'NC-17') THEN 'G'
++        ELSE rating
++    END,
++    last_update = CURRENT_TIMESTAMP
++WHERE rental_duration IS NULL
++   OR rental_duration < 1
++   OR rental_rate IS NULL
++   OR rental_rate < 0
++   OR replacement_cost IS NULL
++   OR replacement_cost < 0
++   OR rating IS NULL
++   OR rating NOT IN ('G', 'PG', 'PG-13', 'R', 'NC-17');
++
++UPDATE payment
++SET
++    amount = ABS(amount),
++    last_update = CURRENT_TIMESTAMP
++WHERE amount < 0;
++
++UPDATE rental
++SET
++    return_date = NULL,
++    last_update = CURRENT_TIMESTAMP
++WHERE return_date IS NOT NULL
++  AND datetime(return_date) < datetime(rental_date);
++
++-- Optional film original language must either be absent or point to a valid language.
++UPDATE film
++SET
++    original_language_id = NULL,
++    last_update = CURRENT_TIMESTAMP
++WHERE original_language_id IS NOT NULL
++  AND NOT EXISTS (
++      SELECT 1
++      FROM language
++      WHERE language.language_id = film.original_language_id
++  );
++
++COMMIT;
++
++-- ---------------------------------------------------------------------------
++-- Verification and maintenance.
++-- ---------------------------------------------------------------------------
++
++PRAGMA foreign_key_check;
++PRAGMA integrity_check;
++PRAGMA optimize;
++
++VACUUM;

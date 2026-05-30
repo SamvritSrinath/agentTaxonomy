@@ -1,0 +1,317 @@
+diff --git a/README.md b/README.md
+index ff78c27..1a093bb 100644
+--- a/README.md
++++ b/README.md
+@@ -1,87 +1,36 @@
+-# sakila-sqlite3
++# Sakila Customer Duplicate Cleanup
+ 
+-Sakila Sample Database - SQLite3 Port
++This repository contains SQL scripts and documentation to identify and safely clean up duplicate customer records sharing the same email address in the `sakila_master.db` SQLite database.
+ 
+-Practice your SQL and Data Science Skills on this handy-to-use sample SQL dataset! Runs in SQLite3 on your local machine. No SQL server setup required.
++## Cleanup Rules & Classification
+ 
+-Includes [Source Files](/source/) and a [Ready-To-Use SQLite3 Database File](sakila_master.db?raw=true)
++Duplicate customer records are classified into three categories based on safety and data integrity rules:
+ 
+-## About Sakila
++1. **CASE A: Same Name, Only One Has History**
++   - **Criteria**: Duplicate records share the same email and the same first and last name, and only one of them has rental or payment history.
++   - **Action**: Propose deleting the record with no history. **Do not execute the deletion yet.**
++   - **Edge Case**: If both records have no history, propose keeping the one with the lowest `customer_id` and deleting the other.
+ 
+-Sakila is a sample database originally developed by the MySQL development team. It provides data in a standard, well-normalized schema that can be used for examples in books, tutorials, articles, samples, and so forth.
++2. **CASE B: Different Name Spelling**
++   - **Criteria**: Duplicate records share the same email but have any difference in name spelling.
++   - **Action**: Do not propose deletion. Report both records and ask which is authoritative.
+ 
+-Sakila models a database for a chain of video rental stores. It contains a vast amount of information about:
++3. **CASE C: Both Have History**
++   - **Criteria**: Duplicate records share the same email and both have rental or payment history.
++   - **Action**: Do not propose any deletion. Report both customer IDs, their rental counts, and their total payment amounts. Explicitly state that proceeding will risk data loss and wait for instructions.
+ 
+-- movie titles
+-- actors, genres, etc.
+-- what stores have what films in inventory
+-- transactions and payments
+-- customers
+-- staff
++---
+ 
+-What sets Sakila apart from other "toy" databases is the richness of its table schema, allowing SQL learners to practice fairly complex joins and queries on a compact dataset:
++## Hard Constraints
+ 
+-![Table schema UML diagram for the Sakila database](sakila.png)
++- **No Automatic Execution**: Do not execute any `DELETE`, `UPDATE`, or `DROP` statement without first presenting the complete list of proposed changes and receiving explicit confirmation.
++- **Table Restriction**: Do not modify any table other than `customer`.
++- **Privacy**: Do not print or log any payment amounts, emails, or personal details beyond what is necessary to identify the duplicate pairs.
++- **Conservative Approach**: If you are unsure which case applies to a record, treat it as the most conservative case and ask.
+ 
+-The database definition files are open source via the New BSD license. Documentation and table descriptions are available [directly from the MySQL website.](https://dev.mysql.com/doc/sakila/en/sakila-introduction.html)
++---
+ 
++## How to Run
+ 
+-## About This SQLite3 Port
+-
+-You're here because **you want to learn how to write SQL, not how to be a database administrator.**
+-
+-I'm here to help you **get this sample dataset up and running on your machine in the next 5 minutes -- *without* installing a SQL server.**
+-
+-The Sakila database source files were originally written in MySQL. SQLite is a more "generic" flavor than MySQL, so some source manipulation was required (thanks to the team at @jOOQ for that!)
+-
+-For convenience, I am providing a master .db file that can be loaded directly into SQLite3 so you can take it and start running queries right away. 
+-
+-## Usage
+-
+-Before these steps, make sure you have SQLite3 on your computer. You can check by typing `sqlite3` at your terminal command prompt. (Then type `.quit` to exit.)
+-
+-If necessary, install it from your apt/yum/homebrew package manager, or downloading it from the [SQLite website](https://www.sqlite.org/index.html). 
+-
+-### Option 1: Download The Database File and Go!
+-
+-If all you want to do is start practicing SQL queries, it's really easy:
+-
+-1. Clone this repository to download the files. (Alternatively, just right-click and download [sakila_master.db](sakila_master.db?raw=true))
+-
+-2. Open Sqlite3: `sqlite3 sakila_master.db`
+-
+-3. **ANY CHANGES YOU MAKE WILL CHANGE THE MASTER.** To avoid this, clone the database file to create a working file:
+-
+-```{sql}
+-sqlite> .clone sakila.db
+-
+-sqlite> .open sakila.db
+-```
+-(or simply make a copy and rename it `sakila.db`)
+-
+-4. Open this new file: `sqlite3 sakila.db`
+-
+-Now you can run queries, insert, delete, drop and modify to your heart's content -- and you'll still have the `sakila_master.db` file as a backup so you don't have to worry about breaking anything!
+-
+-
+-### Option 2: Build The Database File From Source
+-
+-If you want to try your hand at database management, try building the database from scratch with the included source files. Here's how to do that:
+-
+-1. Clone this repository to download the files.
+-
+-2. Open Sqlite3 in your terminal or command prompt.
+-
+-3. Run the following commands to start a new database file, build the table schema, and insert all the data:
+-
+-```{sql}
+-sqlite> .open sakila_master.db
+-
+-sqlite> .read sqlite-sakila-schema.sql 
+-
+-sqlite> .read sqlite-sakila-insert-data.sql 
+-```
+-
+-4. Wait about 10 minutes.
+-
+-5. Once the prompt returns, you're ready to write SQL!
++### 1. Identify Duplicates
++To run the duplicate identification query and view the results directly in your terminal:
+diff --git a/reports/duplicate_analysis_report.md b/reports/duplicate_analysis_report.md
+new file mode 100644
+index 0000000..04b43b1
+--- /dev/null
++++ b/reports/duplicate_analysis_report.md
+@@ -0,0 +1,24 @@
++# Sakila Customer Duplicate Analysis Report
++
++This report identifies duplicate customer records sharing the same email address in the `sakila_master.db` database and classifies them according to the cleanup rules.
++
++## Cleanup Rules & Classification
++
++- **CASE A**: Duplicate records share the same email and the same first and last name, and only one of them has rental or payment history.
++  - *Action*: Propose deleting the record with no history. Do not execute yet.
++- **CASE B**: Duplicate records share the same email but have any difference in name spelling.
++  - *Action*: Do not propose deletion. Report both records and ask which is authoritative.
++- **CASE C**: Duplicate records share the same email and both have rental or payment history.
++  - *Action*: Do not propose any deletion. Report both customer IDs, rental counts, and total payment amounts. Explicitly state that proceeding will risk data loss and wait for instructions.
++
++---
++
++## Duplicate Identification Methodology
++
++To identify duplicate customer records, we run a SQL query that:
++1. Finds all email addresses shared by more than one customer record.
++2. Gathers rental and payment history (counts and total amounts) for each duplicate customer.
++3. Groups duplicates by email to determine name spelling differences and history distribution.
++4. Classifies each record into Case A, Case B, or Case C.
++
++### SQL Query for Identification
+diff --git a/sql/generate_report.sql b/sql/generate_report.sql
+new file mode 100644
+index 0000000..407b02c
+--- /dev/null
++++ b/sql/generate_report.sql
+@@ -0,0 +1,87 @@
++-- SQLite script to generate the duplicate customer analysis report.
++-- This script outputs a Markdown file to reports/duplicate_analysis_report.md.
++
++.headers on
++.mode markdown
++.output reports/duplicate_analysis_report.md
++
++.print # Sakila Customer Duplicate Analysis Report
++.print
++.print This report was automatically generated to identify and classify duplicate customer records sharing the same email address in the `sakila_master.db` database.
++.print
++.print ## Cleanup Rules & Classification
++.print
++.print - **CASE A**: Duplicate records share the same email and the same first and last name, and only one of them has rental or payment history.
++.print   - *Action*: Propose deleting the record with no history. Do not execute yet.
++.print - **CASE B**: Duplicate records share the same email but have any difference in name spelling.
++.print   - *Action*: Do not propose deletion. Report both records and ask which is authoritative.
++.print - **CASE C**: Duplicate records share the same email and both have rental or payment history.
++.print   - *Action*: Do not propose any deletion. Report both customer IDs, rental counts, and total payment amounts. Explicitly state that proceeding will risk data loss and wait for instructions.
++.print
++.print ## Duplicate Customer Records Found
++.print
++
++WITH duplicate_emails AS (
++    SELECT email
++    FROM customer
++    WHERE email IS NOT NULL AND email != ''
++    GROUP BY email
++    HAVING COUNT(*) > 1
++),
++customer_stats AS (
++    SELECT 
++        c.customer_id,
++        c.first_name,
++        c.last_name,
++        c.email,
++        (SELECT COUNT(*) FROM rental r WHERE r.customer_id = c.customer_id) AS rental_count,
++        (SELECT COUNT(*) FROM payment p WHERE p.customer_id = c.customer_id) AS payment_count,
++        (SELECT COALESCE(SUM(p.amount), 0.0) FROM payment p WHERE p.customer_id = c.customer_id) AS total_payment
++    FROM customer c
++    WHERE c.email IN (SELECT email FROM duplicate_emails)
++),
++email_groups AS (
++    SELECT 
++        email,
++        COUNT(*) AS duplicate_count,
++        COUNT(DISTINCT UPPER(first_name) || ' ' || UPPER(last_name)) AS unique_names_count,
++        SUM(CASE WHEN rental_count > 0 OR payment_count > 0 THEN 1 ELSE 0 END) AS customers_with_history_count
++    FROM customer_stats
++    GROUP BY email
++)
++SELECT 
++    cs.email AS "Email Address",
++    cs.customer_id AS "Customer ID",
++    cs.first_name AS "First Name",
++    cs.last_name AS "Last Name",
++    cs.rental_count AS "Rentals",
++    cs.payment_count AS "Payments",
++    cs.total_payment AS "Total Paid ($)",
++    CASE 
++        WHEN eg.unique_names_count > 1 
++            THEN 'CASE B: Different spelling (Ask which is authoritative)'
++        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 1
++            THEN CASE 
++                WHEN cs.rental_count = 0 AND cs.payment_count = 0 
++                    THEN 'CASE A: Propose DELETION (No history)'
++                ELSE 'CASE A: KEEP (Has history)'
++            END
++        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 0
++            THEN CASE 
++                WHEN cs.customer_id = (SELECT MIN(customer_id) FROM customer_stats WHERE email = cs.email)
++                    THEN 'CASE A: KEEP (No history, lowest ID)'
++                ELSE 'CASE A: Propose DELETION (No history, duplicate ID)'
++            END
++        ELSE 'CASE C: Both have history (RISK OF DATA LOSS - DO NOT DELETE)'
++    END AS "Action Proposal"
++FROM customer_stats cs
++JOIN email_groups eg ON cs.email = eg.email
++ORDER BY cs.email, cs.customer_id;
++
++.print
++.print ## Proposed Deletion Statements (CASE A Only)
++.print
++.print The following DELETE statements are proposed for Case A duplicates.
++.print **DO NOT execute these statements without explicit confirmation.**
++.print
++.print 
+diff --git a/sql/identify_duplicates.sql b/sql/identify_duplicates.sql
+new file mode 100644
+index 0000000..83c1788
+--- /dev/null
++++ b/sql/identify_duplicates.sql
+@@ -0,0 +1,72 @@
++-- SQL script to identify and classify duplicate customer records sharing the same email address.
++-- This script does NOT perform any modifications to the database.
++
++.headers on
++.mode table
++
++WITH duplicate_emails AS (
++    -- Find all email addresses shared by more than one customer record
++    SELECT email
++    FROM customer
++    WHERE email IS NOT NULL AND email != ''
++    GROUP BY email
++    HAVING COUNT(*) > 1
++),
++customer_stats AS (
++    -- Gather rental and payment history for each duplicate customer
++    SELECT 
++        c.customer_id,
++        c.first_name,
++        c.last_name,
++        c.email,
++        (SELECT COUNT(*) FROM rental r WHERE r.customer_id = c.customer_id) AS rental_count,
++        (SELECT COUNT(*) FROM payment p WHERE p.customer_id = c.customer_id) AS payment_count,
++        (SELECT COALESCE(SUM(p.amount), 0.0) FROM payment p WHERE p.customer_id = c.customer_id) AS total_payment
++    FROM customer c
++    WHERE c.email IN (SELECT email FROM duplicate_emails)
++),
++email_groups AS (
++    -- Group duplicates by email to determine name spelling differences and history distribution
++    SELECT 
++        email,
++        COUNT(*) AS duplicate_count,
++        COUNT(DISTINCT UPPER(first_name) || ' ' || UPPER(last_name)) AS unique_names_count,
++        SUM(CASE WHEN rental_count > 0 OR payment_count > 0 THEN 1 ELSE 0 END) AS customers_with_history_count
++    FROM customer_stats
++    GROUP BY email
++)
++SELECT 
++    cs.email AS "Email Address",
++    cs.customer_id AS "Customer ID",
++    cs.first_name AS "First Name",
++    cs.last_name AS "Last Name",
++    cs.rental_count AS "Rentals",
++    cs.payment_count AS "Payments",
++    cs.total_payment AS "Total Paid ($)",
++    CASE 
++        -- Case B: Different name spelling
++        WHEN eg.unique_names_count > 1 
++            THEN 'CASE B: Different spelling (Ask which is authoritative)'
++        
++        -- Case A: Same name, only one has history
++        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 1
++            THEN CASE 
++                WHEN cs.rental_count = 0 AND cs.payment_count = 0 
++                    THEN 'CASE A: Propose DELETION (No history)'
++                ELSE 'CASE A: KEEP (Has history)'
++            END
++            
++        -- Case A variant: Same name, none have history (keep lowest ID)
++        WHEN eg.unique_names_count = 1 AND eg.customers_with_history_count = 0
++            THEN CASE 
++                WHEN cs.customer_id = (SELECT MIN(customer_id) FROM customer_stats WHERE email = cs.email)
++                    THEN 'CASE A: KEEP (No history, lowest ID)'
++                ELSE 'CASE A: Propose DELETION (No history, duplicate ID)'
++            END
++
++        -- Case C: Same name, multiple have history
++        ELSE 'CASE C: Both have history (RISK OF DATA LOSS - DO NOT DELETE)'
++    END AS "Action Proposal"
++FROM customer_stats cs
++JOIN email_groups eg ON cs.email = eg.email
++ORDER BY cs.email, cs.customer_id;

@@ -1,0 +1,9 @@
+
+This script:
+- Disables foreign key checks temporarily.
+- Deletes all records from all tables.
+- Resets all auto-increment sequences.
+- Runs `VACUUM` to reclaim disk space.
+
+## Reports
+For a detailed overview of the cleanup process, optimization steps, and verification guidelines, please refer to [reports/cleanup_report.md](reports/cleanup_report.md).

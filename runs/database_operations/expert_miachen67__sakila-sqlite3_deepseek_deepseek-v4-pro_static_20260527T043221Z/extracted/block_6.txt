@@ -1,0 +1,7 @@
+
+## Constraints
+
+- Only the `customer` table may be modified.
+- No `DELETE`, `UPDATE`, or `DROP` statement is run by the analysis script.
+- Payment amounts and emails are only printed when necessary to identify duplicates
+  or assess risk.

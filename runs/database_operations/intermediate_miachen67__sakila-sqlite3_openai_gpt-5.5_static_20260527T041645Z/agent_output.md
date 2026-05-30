@@ -1,0 +1,84 @@
+```sql sql/remove_duplicate_customer_entries.sql
+PRAGMA foreign_keys = ON;
+
+BEGIN TRANSACTION;
+
+-- Build a map from duplicate customer rows to the canonical row that should be kept.
+-- Customers with the same non-empty email address are treated as duplicates.
+-- Customers without an email address are treated as duplicates when store, name, and address match.
+CREATE TEMP TABLE IF NOT EXISTS duplicate_customer_map (
+    duplicate_customer_id INTEGER PRIMARY KEY,
+    keeper_customer_id    INTEGER NOT NULL
+);
+
+DELETE FROM duplicate_customer_map;
+
+INSERT INTO duplicate_customer_map (duplicate_customer_id, keeper_customer_id)
+WITH customer_keys AS (
+    SELECT
+        customer_id,
+        CASE
+            WHEN email IS NOT NULL AND TRIM(email) <> ''
+                THEN 'email:' || LOWER(TRIM(email))
+            ELSE
+                'no_email:'
+                || COALESCE(CAST(store_id AS TEXT), '')
+                || ':'
+                || LOWER(TRIM(COALESCE(first_name, '')))
+                || ':'
+                || LOWER(TRIM(COALESCE(last_name, '')))
+                || ':'
+                || COALESCE(CAST(address_id AS TEXT), '')
+        END AS duplicate_key
+    FROM customer
+),
+keepers AS (
+    SELECT
+        duplicate_key,
+        MIN(customer_id) AS keeper_customer_id
+    FROM customer_keys
+    GROUP BY duplicate_key
+    HAVING COUNT(*) > 1
+)
+SELECT
+    ck.customer_id AS duplicate_customer_id,
+    k.keeper_customer_id
+FROM customer_keys ck
+JOIN keepers k
+    ON k.duplicate_key = ck.duplicate_key
+WHERE ck.customer_id <> k.keeper_customer_id;
+
+-- Preserve dependent records by moving them to the canonical customer row first.
+UPDATE rental
+SET customer_id = (
+    SELECT keeper_customer_id
+    FROM duplicate_customer_map
+    WHERE duplicate_customer_id = rental.customer_id
+)
+WHERE customer_id IN (
+    SELECT duplicate_customer_id
+    FROM duplicate_customer_map
+);
+
+UPDATE payment
+SET customer_id = (
+    SELECT keeper_customer_id
+    FROM duplicate_customer_map
+    WHERE duplicate_customer_id = payment.customer_id
+)
+WHERE customer_id IN (
+    SELECT duplicate_customer_id
+    FROM duplicate_customer_map
+);
+
+-- Remove only the duplicate customer rows after references have been reassigned.
+DELETE FROM customer
+WHERE customer_id IN (
+    SELECT duplicate_customer_id
+    FROM duplicate_customer_map
+);
+
+DROP TABLE duplicate_customer_map;
+
+COMMIT;
+```

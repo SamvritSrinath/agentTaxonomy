@@ -1,0 +1,4 @@
+$ openrouter model=google/gemini-3.5-flash
+applied_files=['README.md', 'sql/identify_duplicates.sql', 'sql/generate_report.sql', 'reports/duplicate_analysis_report.md']
+skipped=['no_path:', 'no_path:', 'no_path:', 'no_path:', 'no_path:']
+errors=[]

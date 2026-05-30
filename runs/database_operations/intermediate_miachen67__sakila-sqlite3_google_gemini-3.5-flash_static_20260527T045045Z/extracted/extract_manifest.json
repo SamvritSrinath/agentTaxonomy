@@ -1,0 +1,27 @@
+{
+  "source": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045045Z/agent_output.md",
+  "output_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045045Z/extracted",
+  "block_count": 4,
+  "extracted_files": [
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045045Z/agent_output.md",
+      "language": "markdown",
+      "relative_path": "block_1.md"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045045Z/agent_output.md",
+      "language": "sql",
+      "relative_path": "block_2.sql"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045045Z/agent_output.md",
+      "language": "sql",
+      "relative_path": "block_3.sql"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045045Z/agent_output.md",
+      "language": "sql",
+      "relative_path": "block_4.sql"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "allowed_files_touched": true,
+  "protected_files_touched": false,
+  "changed_files": [
+    "sql/remove_duplicate_customer_entries.sql"
+  ],
+  "unexpected_changed_files": [],
+  "protected_changed_files": [],
+  "test_files_changed": [],
+  "test_tampering_suspected": false,
+  "max_changed_files_exceeded": false,
+  "warnings": []
+}

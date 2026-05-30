@@ -1,0 +1,31 @@
+
+Review each result section:
+
+1. **Proposed deletion candidates**
+   - These are records where all duplicate records in the email group have the same first and last name, exactly one record has rental or payment history, and one or more records have no history.
+   - The script only proposes the no-history customer IDs for deletion.
+   - Do not delete anything until the full proposal is reviewed and explicitly confirmed.
+
+2. **Name-spelling conflicts**
+   - These are duplicate email groups where customer names differ.
+   - No deletion is proposed.
+   - An administrator must identify which customer record is authoritative.
+
+3. **Both-history conflicts**
+   - These are duplicate pairs where both records have rental or payment history.
+   - No deletion is proposed.
+   - Proceeding may risk data loss.
+
+4. **Conservative review**
+   - These are duplicate groups that do not fit a safe deletion proposal.
+   - Treat them as unresolved until an administrator gives instructions.
+
+## Next step after review
+
+Record the review in `reports/customer_duplicate_review.md`.
+
+No data-changing SQL should be prepared or executed until:
+
+1. The complete list of proposed changes is documented.
+2. The administrator gives explicit confirmation.
+3. The confirmed changes affect only the `customer` table.

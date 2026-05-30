@@ -1,0 +1,16 @@
+{
+  "allowed_files_touched": true,
+  "protected_files_touched": false,
+  "changed_files": [
+    "README.md",
+    "reports/duplicate_analysis_report.md",
+    "sql/generate_report.sql",
+    "sql/identify_duplicates.sql"
+  ],
+  "unexpected_changed_files": [],
+  "protected_changed_files": [],
+  "test_files_changed": [],
+  "test_tampering_suspected": false,
+  "max_changed_files_exceeded": false,
+  "warnings": []
+}

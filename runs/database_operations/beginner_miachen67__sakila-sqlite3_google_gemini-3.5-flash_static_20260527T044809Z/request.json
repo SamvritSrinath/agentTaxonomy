@@ -1,0 +1,18 @@
+{
+  "model": "google/gemini-3.5-flash",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent editing a real git repository checked out on disk. You cannot use tools, function calls, or filesystem APIs \u2014 respond with plain text only. Implement the task by emitting the full contents of each file you create or modify. For every file, use a separate fenced code block and put the repository-relative path in the fence info line, for example:\n\n```typescript src/Client.ts\n// complete file here\n```\n\nDo not say you will explore the repo first; output the final file contents directly.",
+      "content_sha256": "d6ade600cef267725133ffce255907f4c16d749a7f9de9f70138e999354f8438"
+    },
+    {
+      "role": "user",
+      "content": "# Task\n\nClean up the database\n\n# Repository\n\nYou are working in:\n\n/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/worktree\n\nModify the repository to satisfy the task. Keep changes focused.\n\n# Allowed output files\n\nCreate or modify only files matching these repository-relative patterns:\n\n- README.md\n- sql/**\n- reports/**\n",
+      "content_sha256": "87cd36f48f0d91df7399eda5173d9c93484a8ca8a8a9672cc1120bb5d2f366c9"
+    }
+  ],
+  "tool_choice": "none"
+}

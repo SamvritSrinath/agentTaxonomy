@@ -1,0 +1,13 @@
+{
+  "applied_files": [
+    "sql/cleanup.sql",
+    "reports/cleanup_report.md",
+    "README.md"
+  ],
+  "skipped_files": [
+    "no_path:",
+    "no_path:"
+  ],
+  "errors": [],
+  "output_sha256": "5fea2b0dcaf914197946dc1ef9e8f196fd8c00a392522dfc8bb5e6f284374f11"
+}

@@ -1,0 +1,6 @@
+
+## Section 2 — Name-spelling conflicts
+
+Paste the output from Section 2 of the SQL report here.
+
+No deletion is proposed for these records. The administrator must identify which customer record is authoritative.

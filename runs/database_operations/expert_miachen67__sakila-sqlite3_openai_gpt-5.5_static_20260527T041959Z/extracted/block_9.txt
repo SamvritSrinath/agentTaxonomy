@@ -1,0 +1,6 @@
+
+## Section 4 — Conservative review
+
+Paste the output from Section 4 of the SQL report here.
+
+These records do not meet safe proposal criteria. Treat them as unresolved until the administrator gives instructions.
