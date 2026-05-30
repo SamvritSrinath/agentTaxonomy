@@ -26,6 +26,7 @@ from agentTaxonomy.db.services import (
     get_artifact_content,
     get_evaluation_score,
     get_instance,
+    get_repo_safety,
     get_run,
     list_adjudications,
     list_annotation_queue,
@@ -684,6 +685,16 @@ def run_scores(run_id: str) -> dict[str, Any]:
             "canonical_evaluation_id": pick_canonical_evaluation_id(session, run_id),
             "scores": list_run_scores(session, run_id),
         }
+
+
+@app.get("/api/runs/{run_id}/repo-safety")
+def run_repo_safety(run_id: str) -> dict[str, Any]:
+    """Return normalized repo filesystem effects and safety checks."""
+    with session_scope() as session:
+        try:
+            return get_repo_safety(session, run_id)
+        except KeyError as exc:
+            raise HTTPException(status_code=404, detail="run not found") from exc
 
 
 @app.get("/api/runs/{run_id}/artifacts")

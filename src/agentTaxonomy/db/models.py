@@ -62,6 +62,9 @@ class BenchmarkInstanceRecord(ProvenanceMixin, Base):
     expected_safe_outcome: Mapped[str] = mapped_column(String(128), nullable=False)
     prompt_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     agent_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    repo_fixture_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    sandbox_profile: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confirmation_required: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     expected_failure_modes: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     expected_correctness_oracles: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     expected_security_oracles: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
@@ -69,6 +72,14 @@ class BenchmarkInstanceRecord(ProvenanceMixin, Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     runs: Mapped[list["RunRecord"]] = relationship(back_populates="instance")
+    task_constraints: Mapped[list["TaskConstraintRecord"]] = relationship(
+        back_populates="instance",
+        cascade="all, delete-orphan",
+    )
+    expected_repo_outcomes: Mapped[list["ExpectedRepoOutcomeRecord"]] = relationship(
+        back_populates="instance",
+        cascade="all, delete-orphan",
+    )
 
 
 class PromptVariantRecord(ProvenanceMixin, Base):
@@ -164,6 +175,49 @@ class TaskRepoBindingRecord(ProvenanceMixin, Base):
     )
 
 
+class TaskConstraintRecord(ProvenanceMixin, Base):
+    """Machine-readable safety constraint attached to a task instance."""
+
+    __tablename__ = "task_constraints"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    instance_id: Mapped[str] = mapped_column(ForeignKey("benchmark_instances.instance_id", ondelete="CASCADE"), nullable=False)
+    constraint_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    value: Mapped[str] = mapped_column(Text, nullable=False)
+    severity: Mapped[str] = mapped_column(String(64), nullable=False)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    instance: Mapped[BenchmarkInstanceRecord] = relationship(back_populates="task_constraints")
+
+    __table_args__ = (
+        Index("ix_task_constraints_instance", "instance_id"),
+        Index("ix_task_constraints_type", "constraint_type"),
+    )
+
+
+class ExpectedRepoOutcomeRecord(ProvenanceMixin, Base):
+    """Expected path-level repo behavior for task-specific safety checks."""
+
+    __tablename__ = "expected_repo_outcomes"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    instance_id: Mapped[str] = mapped_column(ForeignKey("benchmark_instances.instance_id", ondelete="CASCADE"), nullable=False)
+    expected_action: Mapped[str] = mapped_column(String(128), nullable=False)
+    path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    should_modify: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    instance: Mapped[BenchmarkInstanceRecord] = relationship(back_populates="expected_repo_outcomes")
+
+    __table_args__ = (
+        Index("ix_expected_repo_outcomes_instance", "instance_id"),
+        Index("ix_expected_repo_outcomes_action", "expected_action"),
+    )
+
+
 class RunRecord(ProvenanceMixin, Base):
     """One physical agent execution over one benchmark instance."""
 
@@ -193,6 +247,8 @@ class RunRecord(ProvenanceMixin, Base):
     artifacts: Mapped[list["ArtifactRecord"]] = relationship(back_populates="run", cascade="all, delete-orphan")
     trace_events: Mapped[list["TraceEventRecord"]] = relationship(back_populates="run", cascade="all, delete-orphan")
     findings: Mapped[list["FindingRecord"]] = relationship(back_populates="run", cascade="all, delete-orphan")
+    repo_run_diffs: Mapped[list["RepoRunDiffRecord"]] = relationship(back_populates="run", cascade="all, delete-orphan")
+    safety_events: Mapped[list["RunSafetyEventRecord"]] = relationship(back_populates="run", cascade="all, delete-orphan")
 
     __table_args__ = (
         Index("ix_runs_run_dir", "run_dir"),
@@ -301,6 +357,55 @@ class ArtifactVersionRecord(ProvenanceMixin, Base):
     artifact: Mapped[ArtifactRecord] = relationship(back_populates="versions")
 
     __table_args__ = (UniqueConstraint("artifact_id", "revision", name="uq_artifact_revision"),)
+
+
+class RepoRunDiffRecord(ProvenanceMixin, Base):
+    """Path-level filesystem effect observed in a repo-task run."""
+
+    __tablename__ = "repo_run_diffs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("runs.id", ondelete="CASCADE"), nullable=False)
+    path: Mapped[str] = mapped_column(Text, nullable=False)
+    change_type: Mapped[str] = mapped_column(String(64), nullable=False)
+    before_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    after_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    is_allowed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    severity: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    run: Mapped[RunRecord] = relationship(back_populates="repo_run_diffs")
+
+    __table_args__ = (
+        Index("ix_repo_run_diffs_run", "run_id"),
+        Index("ix_repo_run_diffs_path", "path"),
+        Index("ix_repo_run_diffs_change_type", "change_type"),
+    )
+
+
+class RunSafetyEventRecord(ProvenanceMixin, Base):
+    """Safety-relevant event derived from repo effects, traces, or output."""
+
+    __tablename__ = "run_safety_events"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=new_uuid)
+    run_id: Mapped[str] = mapped_column(ForeignKey("runs.id", ondelete="CASCADE"), nullable=False)
+    event_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    severity: Mapped[str] = mapped_column(String(64), nullable=False)
+    path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    command: Mapped[str | None] = mapped_column(Text, nullable=True)
+    explanation: Mapped[str] = mapped_column(Text, nullable=False)
+    metadata_json: Mapped[dict[str, Any]] = mapped_column("metadata", JSON, default=dict, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    run: Mapped[RunRecord] = relationship(back_populates="safety_events")
+
+    __table_args__ = (
+        Index("ix_run_safety_events_run", "run_id"),
+        Index("ix_run_safety_events_type", "event_type"),
+        Index("ix_run_safety_events_severity", "severity"),
+    )
 
 
 class TraceEventRecord(ProvenanceMixin, Base):

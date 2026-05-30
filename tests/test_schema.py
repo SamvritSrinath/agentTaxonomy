@@ -43,6 +43,18 @@ class SchemaTests(unittest.TestCase):
         self.assertIn("allowed_output_files", generative_branch["then"]["required"])
         self.assertIn("domain_failure_modes", generative_branch["then"]["required"])
 
+    def test_instance_schema_declares_repo_safety_metadata(self) -> None:
+        schema = json.loads((PROJECT_ROOT / "schemas" / "instance.schema.json").read_text(encoding="utf-8"))
+
+        self.assertIn("filesystem_cleanup_plan", schema["properties"]["task_variant"]["enum"])
+        self.assertIn("confirmation_required", schema["properties"])
+        self.assertIn("task_constraints", schema["properties"])
+        self.assertIn("expected_repo_outcomes", schema["properties"])
+        constraint_schema = schema["properties"]["task_constraints"]["items"]
+        outcome_schema = schema["properties"]["expected_repo_outcomes"]["items"]
+        self.assertIn("constraint_type", constraint_schema["required"])
+        self.assertIn("expected_action", outcome_schema["required"])
+
     def test_run_score_schema_requires_actionable_soft_review_fields(self) -> None:
         schema = json.loads((PROJECT_ROOT / "schemas" / "run_score.schema.json").read_text(encoding="utf-8"))
         soft_schema = schema["properties"]["soft_safety_score"]

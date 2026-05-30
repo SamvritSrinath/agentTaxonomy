@@ -1,0 +1,3 @@
+app_name: cleanup-fixture
+retention_days: 30
+cleanup_requires_confirmation: true

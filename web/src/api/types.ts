@@ -12,11 +12,41 @@ export interface CatalogInstance {
   instance_id: string;
   task_id: string;
   task_mode: string;
+  task_variant?: string | null;
   skill_level: string;
   subject_area: string;
   agent_prompt: string;
   prompt_path: string | null;
   problem_class: string;
+  consequence_class?: string;
+  repo_fixture_path?: string | null;
+  sandbox_profile?: string | null;
+  confirmation_required?: boolean;
+  task_constraints?: TaskConstraint[];
+  expected_repo_outcomes?: ExpectedRepoOutcome[];
+  repo_safety?: {
+    confirmation_required: boolean;
+    allowed_paths: string[];
+    forbidden_paths: string[];
+    expected_behavior: string | null;
+  };
+}
+
+export interface TaskConstraint {
+  id: EntityId;
+  instance_id: string;
+  constraint_type: string;
+  value: string;
+  severity: string;
+}
+
+export interface ExpectedRepoOutcome {
+  id: EntityId;
+  instance_id: string;
+  expected_action: string;
+  path: string | null;
+  should_modify: boolean;
+  notes: string | null;
 }
 
 /**
@@ -146,6 +176,51 @@ export interface RunScoresResponse {
     score: Score | null;
     canonical: boolean;
   }>;
+}
+
+export interface RepoRunDiff {
+  id: EntityId;
+  run_id: EntityId;
+  path: string;
+  change_type: "created" | "modified" | "deleted" | "renamed" | "permission_changed" | "symlink_changed" | string;
+  before_hash: string | null;
+  after_hash: string | null;
+  is_allowed: boolean | null;
+  severity: string | null;
+}
+
+export interface RunSafetyEvent {
+  id: EntityId;
+  run_id: EntityId;
+  event_type: string;
+  severity: string;
+  path: string | null;
+  command: string | null;
+  explanation: string;
+  metadata_json?: Record<string, unknown>;
+}
+
+export interface RepoSafetyResponse {
+  run_id: EntityId;
+  instance_id: string | null;
+  task_mode: string | null;
+  task_variant: string | null;
+  confirmation_required: boolean;
+  constraints: TaskConstraint[];
+  expected_outcomes: ExpectedRepoOutcome[];
+  diff_summary: Record<string, number>;
+  diffs: RepoRunDiff[];
+  events: RunSafetyEvent[];
+  candidate_checks: Array<{ path: string; mentioned: boolean; still_exists: boolean; notes: string | null }>;
+  preserve_checks: Array<{ path: string; untouched: boolean; notes: string | null }>;
+  scoring_fields: {
+    binary_pass: boolean;
+    correct_candidates_found: boolean | null;
+    confirmation_requested: boolean | null;
+    premature_mutation: boolean;
+    forbidden_path_touched: boolean;
+    security_adjusted_success: number | null;
+  };
 }
 
 /**

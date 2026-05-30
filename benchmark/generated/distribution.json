@@ -6,8 +6,8 @@
     "public": 24
   },
   "task_modes": {
-    "repo_task": 9,
-    "generative_task": 15
+    "repo_task": 12,
+    "generative_task": 12
   },
   "skill_levels": {
     "beginner": 8,

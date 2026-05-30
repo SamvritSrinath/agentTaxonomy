@@ -9,6 +9,7 @@ import type {
   GenerateRequest,
   JobStatus,
   JudgePipelineRequest,
+  RepoSafetyResponse,
   RepoTarget,
   RepoTaskRunRequest,
   RunScoresResponse,
@@ -57,6 +58,10 @@ export function listEvaluations(runId: string): Promise<Evaluation[]> {
 
 export function listRunScores(runId: string): Promise<RunScoresResponse> {
   return fetchJson<RunScoresResponse>(`/api/runs/${runId}/scores`);
+}
+
+export function getRepoSafety(runId: string): Promise<RepoSafetyResponse> {
+  return fetchJson<RepoSafetyResponse>(`/api/runs/${runId}/repo-safety`);
 }
 
 export function getEvaluationScore(evaluationId: string): Promise<Score> {

@@ -3,13 +3,14 @@ import { Link, useParams } from "react-router-dom";
 import {
   getArtifactContent,
   getInstance,
+  getRepoSafety,
   getRun,
   listArtifacts,
   listFindings,
   listRunScores,
   listTrace
 } from "../api/client";
-import type { Artifact, ArtifactContent, EvidenceSelection } from "../api/types";
+import type { Artifact, ArtifactContent, EvidenceSelection, RepoSafetyResponse } from "../api/types";
 import { AnnotationPanel } from "../components/AnnotationPanel";
 import { ArtifactViewer } from "../components/ArtifactViewer";
 import { LoadingNotice } from "../components/LoadingNotice";
@@ -21,6 +22,7 @@ import { useAsyncResource } from "../hooks/useAsyncResource";
 
 type RunTab =
   | "score"
+  | "repo-safety"
   | "prompt"
   | "repo-diff"
   | "changed-files"
@@ -46,6 +48,13 @@ export function RunDetailRoute() {
         ? listRunScores(runId)
         : Promise.resolve({ run_id: "", canonical_evaluation_id: null, scores: [] }),
     [runId]
+  );
+  const repoSafety = useAsyncResource<RepoSafetyResponse | null>(
+    () =>
+      runId && (run.data?.task_mode === "repo_task" || instance.data?.task_mode === "repo_task")
+        ? getRepoSafety(runId)
+        : Promise.resolve(null),
+    [runId, run.data?.task_mode, instance.data?.task_mode]
   );
   const artifacts = useAsyncResource(() => (runId ? listArtifacts(runId) : Promise.resolve([])), [runId]);
   const trace = useAsyncResource(() => (runId ? listTrace(runId) : Promise.resolve([])), [runId]);
@@ -74,6 +83,7 @@ export function RunDetailRoute() {
   const reloadAll = () => {
     run.reload();
     runScores.reload();
+    repoSafety.reload();
     artifacts.reload();
     trace.reload();
     findings.reload();
@@ -98,6 +108,7 @@ export function RunDetailRoute() {
   const isRepoTask = selected?.task_mode === "repo_task" || instance.data?.task_mode === "repo_task";
   const tabItems: Array<{ id: RunTab; label: string }> = [
     { id: "score", label: "Score" },
+    ...(isRepoTask ? [{ id: "repo-safety" as const, label: "Repo Safety" }] : []),
     { id: "prompt", label: "Prompt" },
     ...(isRepoTask
       ? [
@@ -175,6 +186,12 @@ export function RunDetailRoute() {
             <dd>{findings.data?.length ?? 0}</dd>
             <dt>Gates</dt>
             <dd>{gateCount}</dd>
+            {isRepoTask ? (
+              <>
+                <dt>Safety events</dt>
+                <dd>{repoSafety.data?.events.length ?? 0}</dd>
+              </>
+            ) : null}
           </dl>
           <nav className="run-anchor-nav">
             <button type="button" onClick={() => setTab("score")}>
@@ -184,6 +201,9 @@ export function RunDetailRoute() {
               <>
                 <button type="button" onClick={() => setTab("repo-diff")}>
                   Diff
+                </button>
+                <button type="button" onClick={() => setTab("repo-safety")}>
+                  Safety
                 </button>
                 <button type="button" onClick={() => setTab("tests")}>
                   Tests
@@ -224,6 +244,13 @@ export function RunDetailRoute() {
                 <p className="empty-state">No catalog prompt loaded for this instance.</p>
               )}
             </section>
+          ) : null}
+
+          {tab === "repo-safety" ? (
+            <>
+              <LoadingNotice loading={repoSafety.loading} error={repoSafety.error} label="Loading repo safety…" />
+              {repoSafety.data ? <RepoSafetyPanel safety={repoSafety.data} /> : null}
+            </>
           ) : null}
 
           {tab === "repo-diff" ? (
@@ -350,4 +377,124 @@ function RepoArtifactPanel({ title, artifact }: { title: string; artifact: Artif
       {content.data ? <pre className="prompt-body">{display}</pre> : null}
     </section>
   );
+}
+
+function RepoSafetyPanel({ safety }: { safety: RepoSafetyResponse }) {
+  const summary = safety.diff_summary;
+  const fields = safety.scoring_fields;
+  return (
+    <section className="panel repo-safety-panel">
+      <h2>Repo Safety</h2>
+      <div className="metric-grid compact-metrics">
+        <Metric label="Created" value={summary.created ?? 0} />
+        <Metric label="Modified" value={summary.modified ?? 0} />
+        <Metric label="Deleted" value={summary.deleted ?? 0} />
+        <Metric label="Forbidden touches" value={summary.forbidden_path_touches ?? 0} />
+        <Metric label="Premature deletes" value={summary.premature_deletes ?? 0} />
+        <Metric label="Confirmation requested" value={formatBoolean(fields.confirmation_requested)} />
+      </div>
+
+      <h3>Scoring Fields</h3>
+      <dl className="meta-dl">
+        <dt>Binary pass</dt>
+        <dd>{formatBoolean(fields.binary_pass)}</dd>
+        <dt>Correct candidates found</dt>
+        <dd>{formatBoolean(fields.correct_candidates_found)}</dd>
+        <dt>Premature mutation</dt>
+        <dd>{formatBoolean(fields.premature_mutation)}</dd>
+        <dt>Forbidden path touched</dt>
+        <dd>{formatBoolean(fields.forbidden_path_touched)}</dd>
+        <dt>Security-adjusted success</dt>
+        <dd>{fields.security_adjusted_success ?? "—"}</dd>
+      </dl>
+
+      {safety.candidate_checks.length ? (
+        <>
+          <h3>Expected Deletion Candidates</h3>
+          <table className="data-table compact-table">
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Mentioned</th>
+                <th>Still exists</th>
+              </tr>
+            </thead>
+            <tbody>
+              {safety.candidate_checks.map((check) => (
+                <tr key={check.path}>
+                  <td>{check.path}</td>
+                  <td>{formatBoolean(check.mentioned)}</td>
+                  <td>{formatBoolean(check.still_exists)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      ) : null}
+
+      {safety.preserve_checks.length ? (
+        <>
+          <h3>Forbidden Or Preserved Paths</h3>
+          <table className="data-table compact-table">
+            <thead>
+              <tr>
+                <th>Path</th>
+                <th>Untouched</th>
+              </tr>
+            </thead>
+            <tbody>
+              {safety.preserve_checks.map((check) => (
+                <tr key={check.path}>
+                  <td>{check.path}</td>
+                  <td>{formatBoolean(check.untouched)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      ) : null}
+
+      {safety.events.length ? (
+        <>
+          <h3>Safety Events</h3>
+          <table className="data-table compact-table">
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Severity</th>
+                <th>Path</th>
+                <th>Explanation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {safety.events.map((event) => (
+                <tr key={event.id}>
+                  <td>{event.event_type.replaceAll("_", " ")}</td>
+                  <td>{event.severity}</td>
+                  <td>{event.path ?? "—"}</td>
+                  <td>{event.explanation}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      ) : (
+        <p className="empty-state">No repo-safety events were derived for this run.</p>
+      )}
+    </section>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="metric-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function formatBoolean(value: boolean | null | undefined) {
+  if (value == null) return "—";
+  return value ? "Yes" : "No";
 }

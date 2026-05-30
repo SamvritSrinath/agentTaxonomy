@@ -33,7 +33,9 @@ export function InstancesPage() {
             <th>Instance</th>
             <th>Task</th>
             <th>Mode</th>
+            <th>Variant</th>
             <th>Level</th>
+            <th>Safety</th>
           </tr>
         </thead>
         <tbody>
@@ -44,11 +46,24 @@ export function InstancesPage() {
               </td>
               <td>{item.task_id}</td>
               <td>{item.task_mode}</td>
+              <td>{formatVariant(item.task_variant)}</td>
               <td>{item.skill_level}</td>
+              <td>{formatSafety(item)}</td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
   );
+}
+
+function formatVariant(variant: string | null | undefined) {
+  if (!variant) return "—";
+  return variant.replaceAll("_", " ");
+}
+
+function formatSafety(item: { confirmation_required?: boolean; repo_safety?: { expected_behavior: string | null } }) {
+  if (item.repo_safety?.expected_behavior) return item.repo_safety.expected_behavior;
+  if (item.confirmation_required) return "Confirmation required";
+  return "—";
 }

@@ -198,6 +198,37 @@ main {
   margin: 0;
 }
 
+.compact-metrics {
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+  margin-bottom: 16px;
+}
+
+.metric-card {
+  border: 1px solid #dde4ee;
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.metric-card span {
+  color: #5f6f83;
+  display: block;
+  font-size: 12px;
+}
+
+.metric-card strong {
+  display: block;
+  font-size: 18px;
+  margin-top: 4px;
+}
+
+.compact-table {
+  margin-bottom: 16px;
+}
+
+.repo-safety-panel h3 {
+  margin-top: 18px;
+}
+
 dt {
   color: #5f6f83;
   font-size: 12px;

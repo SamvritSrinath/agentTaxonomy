@@ -17,6 +17,8 @@ from .schema import (
     SafeOutcome,
     SkillLevel,
     SoftReviewRubric,
+    ExpectedRepoOutcomeSpec,
+    TaskConstraintSpec,
     TaskMode,
     UtilityOracleSpec,
 )
@@ -131,7 +133,7 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
             task_mode = TaskMode(merged.get("task_mode", TaskMode.GENERATIVE_TASK.value))
             task_variant = merged.get("task_variant")
             instance_id = f"{raw_task['task_id']}__{skill_level.value}"
-            if task_mode == TaskMode.REPO_TASK and task_variant:
+            if task_mode == TaskMode.REPO_TASK and task_variant == "repo_edit":
                 instance_id = f"{raw_task['task_id']}__{task_variant}__{skill_level.value}"
             instances.append(
                 BenchmarkInstance(
@@ -160,6 +162,10 @@ def build_generative_catalog(task_root: Path) -> list[BenchmarkInstance]:
                     prompt_style=merged.get("prompt_style"),
                     repo=merged.get("repo"),
                     base_commit=merged.get("base_commit"),
+                    sandbox_profile=str(merged["sandbox_profile"]) if merged.get("sandbox_profile") else None,
+                    confirmation_required=bool(merged.get("confirmation_required", False)),
+                    task_constraints=_task_constraints(merged),
+                    expected_repo_outcomes=_expected_repo_outcomes(merged),
                     tags=list(raw_task.get("tags", [])),
                     runtime_profiles=_runtime_profiles(merged),
                     expected_artifacts=list(merged["expected_artifacts"]),
@@ -232,6 +238,45 @@ def _runtime_profiles(raw_task: dict[str, object]) -> list[RuntimeProfileSpec]:
                 services=[str(item) for item in profile.get("services", [])],
                 checks=[str(item) for item in profile.get("checks", [])],
                 requires=[str(item) for item in profile.get("requires", [])],
+            )
+        )
+    return parsed
+
+
+def _task_constraints(raw_task: dict[str, object]) -> list[TaskConstraintSpec]:
+    """Parse structured task constraints from task metadata."""
+    constraints = raw_task.get("task_constraints", [])
+    if not isinstance(constraints, list):
+        return []
+    parsed: list[TaskConstraintSpec] = []
+    for item in constraints:
+        if not isinstance(item, dict):
+            continue
+        parsed.append(
+            TaskConstraintSpec(
+                constraint_type=str(item["constraint_type"]),
+                value=str(item["value"]),
+                severity=str(item["severity"]),
+            )
+        )
+    return parsed
+
+
+def _expected_repo_outcomes(raw_task: dict[str, object]) -> list[ExpectedRepoOutcomeSpec]:
+    """Parse structured expected repo outcomes from task metadata."""
+    outcomes = raw_task.get("expected_repo_outcomes", [])
+    if not isinstance(outcomes, list):
+        return []
+    parsed: list[ExpectedRepoOutcomeSpec] = []
+    for item in outcomes:
+        if not isinstance(item, dict):
+            continue
+        parsed.append(
+            ExpectedRepoOutcomeSpec(
+                expected_action=str(item["expected_action"]),
+                path=str(item["path"]) if item.get("path") is not None else None,
+                should_modify=bool(item["should_modify"]),
+                notes=str(item["notes"]) if item.get("notes") is not None else None,
             )
         )
     return parsed

@@ -246,6 +246,29 @@ class RuntimeProfileSpec:
 
 
 @dataclass(frozen=True)
+class TaskConstraintSpec:
+    """Machine-readable safety constraint for a task instance.
+
+    ``constraint_type`` is intentionally open-ended so catalog authors can add
+    task-specific constraints without changing the schema for every new family.
+    """
+
+    constraint_type: str
+    value: str
+    severity: str
+
+
+@dataclass(frozen=True)
+class ExpectedRepoOutcomeSpec:
+    """Expected path-level behavior for repo-task safety checks."""
+
+    expected_action: str
+    should_modify: bool
+    path: str | None = None
+    notes: str | None = None
+
+
+@dataclass(frozen=True)
 class BenchmarkInstance:
     """One evaluable benchmark task (for example ``task_id__beginner``).
 
@@ -274,6 +297,10 @@ class BenchmarkInstance:
     prompt_style: str | None = None
     repo: str | None = None
     base_commit: str | None = None
+    sandbox_profile: str | None = None
+    confirmation_required: bool = False
+    task_constraints: list[TaskConstraintSpec] = field(default_factory=list)
+    expected_repo_outcomes: list[ExpectedRepoOutcomeSpec] = field(default_factory=list)
     tags: list[str] = field(default_factory=list)
     runtime_profiles: list[RuntimeProfileSpec] = field(default_factory=list)
     expected_artifacts: list[str] = field(default_factory=list)
@@ -337,6 +364,12 @@ class BenchmarkInstance:
             assert self.base_commit is not None
             if len(self.base_commit) != 40 or any(ch not in "0123456789abcdef" for ch in self.base_commit):
                 raise ValueError(f"{self.instance_id} has an invalid base commit: {self.base_commit}")
+            for item in self.task_constraints:
+                if not item.constraint_type.strip() or not item.value.strip() or not item.severity.strip():
+                    raise ValueError(f"{self.instance_id} has an invalid task constraint: {item!r}")
+            for item in self.expected_repo_outcomes:
+                if not item.expected_action.strip():
+                    raise ValueError(f"{self.instance_id} has an invalid expected repo outcome: {item!r}")
             return
 
         if self.task_mode == TaskMode.GENERATIVE_TASK:

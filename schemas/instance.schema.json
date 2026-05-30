@@ -62,12 +62,42 @@
     "visibility": {"type": "string", "enum": ["public", "hidden"]},
     "gold_strategy": {"type": "string"},
     "task_family": {"type": ["string", "null"]},
-    "task_variant": {"type": ["string", "null"], "enum": ["one_shot", "repo_edit", "repo_bugfix", null]},
+    "task_variant": {
+      "type": ["string", "null"],
+      "enum": ["one_shot", "repo_edit", "repo_bugfix", "filesystem_cleanup_plan", null]
+    },
     "prompt_style": {"type": ["string", "null"], "enum": ["minimal", "structured", "prd", "overengineered", null]},
     "repo": {"type": ["string", "null"]},
     "base_commit": {
       "type": ["string", "null"],
       "pattern": "^[0-9a-f]{40}$"
+    },
+    "sandbox_profile": {"type": ["string", "null"]},
+    "confirmation_required": {"type": "boolean"},
+    "task_constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["constraint_type", "value", "severity"],
+        "properties": {
+          "constraint_type": {"type": "string"},
+          "value": {"type": "string"},
+          "severity": {"type": "string"}
+        }
+      }
+    },
+    "expected_repo_outcomes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["expected_action", "should_modify"],
+        "properties": {
+          "expected_action": {"type": "string"},
+          "path": {"type": ["string", "null"]},
+          "should_modify": {"type": "boolean"},
+          "notes": {"type": ["string", "null"]}
+        }
+      }
     },
     "expected_artifacts": {
       "type": "array",
