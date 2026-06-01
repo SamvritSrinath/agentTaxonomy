@@ -1,0 +1,6 @@
+
+## Notes
+
+The cleanup behavior is intentionally conservative. The script skips common dependency,
+virtual environment, and VCS directories such as `.git/`, `.venv/`, `venv/`, and
+`node_modules/`.

@@ -1,0 +1,438 @@
+#!/usr/bin/env python3
+"""
+Safely clean repository-local temporary files.
+
+This script only deletes files that match the requested cleanup policy:
+
+- Files inside repo-local ./tmp and ./logs that are older than 30 days.
+- Python bytecode cache files inside __pycache__ directories.
+- Test/coverage artifacts.
+- Old backup .env files, but never the active .env file.
+
+It will always print the planned deletion list and ask for confirmation before
+deleting anything. There is intentionally no automatic confirmation flag.
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import shutil
+import sys
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Iterable
+
+
+PROTECTED_ROOT_NAMES = {
+    ".env",
+    "app.py",
+    "database.db",
+    "static",
+    "templates",
+}
+
+TMP_AND_LOG_DIRS = {
+    "tmp",
+    "logs",
+}
+
+COVERAGE_FILE_NAMES = {
+    ".coverage",
+    "coverage.xml",
+    "coverage.json",
+    "lcov.info",
+}
+
+COVERAGE_DIR_NAMES = {
+    ".coverage",
+    "coverage",
+    "htmlcov",
+}
+
+BACKUP_ENV_SUFFIXES = (
+    ".bak",
+    ".backup",
+    ".old",
+    ".orig",
+    ".save",
+    ".saved",
+    ".tmp",
+    "~",
+)
+
+
+@dataclass(frozen=True)
+class DeletionCandidate:
+    path: Path
+    reason: str
+
+
+def repo_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def is_relative_to(path: Path, parent: Path) -> bool:
+    try:
+        path.resolve().relative_to(parent.resolve())
+        return True
+    except ValueError:
+        return False
+
+
+def is_protected_path(path: Path, root: Path) -> bool:
+    resolved = path.resolve()
+    root_resolved = root.resolve()
+
+    try:
+        rel = resolved.relative_to(root_resolved)
+    except ValueError:
+        return True
+
+    if not rel.parts:
+        return True
+
+    first = rel.parts[0]
+
+    if first in {"templates", "static"}:
+        return True
+
+    if len(rel.parts) == 1 and first in PROTECTED_ROOT_NAMES:
+        return True
+
+    return False
+
+
+def is_old_file(path: Path, cutoff_timestamp: float) -> bool:
+    try:
+        return path.is_file() and path.stat().st_mtime < cutoff_timestamp
+    except OSError:
+        return False
+
+
+def iter_files_under(directory: Path) -> Iterable[Path]:
+    if not directory.exists():
+        return
+
+    for current_root, dir_names, file_names in os.walk(directory):
+        current_path = Path(current_root)
+
+        # Do not descend into protected directories even if someone nested a
+        # symlink or unusual directory inside tmp/logs.
+        safe_dirs = []
+        for dir_name in dir_names:
+            candidate_dir = current_path / dir_name
+            if not is_protected_path(candidate_dir, repo_root()):
+                safe_dirs.append(dir_name)
+        dir_names[:] = safe_dirs
+
+        for file_name in file_names:
+            yield current_path / file_name
+
+
+def collect_tmp_and_log_candidates(root: Path, cutoff_timestamp: float) -> list[DeletionCandidate]:
+    candidates: list[DeletionCandidate] = []
+
+    for directory_name in TMP_AND_LOG_DIRS:
+        directory = root / directory_name
+        if not directory.is_dir():
+            continue
+
+        for path in iter_files_under(directory):
+            if is_protected_path(path, root):
+                continue
+            if is_old_file(path, cutoff_timestamp):
+                candidates.append(
+                    DeletionCandidate(
+                        path=path,
+                        reason=f"file in /{directory_name} older than 30 days",
+                    )
+                )
+
+    return candidates
+
+
+def collect_pycache_candidates(root: Path) -> list[DeletionCandidate]:
+    candidates: list[DeletionCandidate] = []
+
+    for current_root, dir_names, file_names in os.walk(root):
+        current_path = Path(current_root)
+
+        if is_protected_path(current_path, root) and current_path != root:
+            dir_names[:] = []
+            continue
+
+        if current_path.name == "__pycache__":
+            for file_name in file_names:
+                path = current_path / file_name
+                if not is_protected_path(path, root):
+                    candidates.append(
+                        DeletionCandidate(
+                            path=path,
+                            reason="Python bytecode cache in __pycache__",
+                        )
+                    )
+
+            # No need to descend further from a __pycache__ directory.
+            dir_names[:] = []
+            continue
+
+        dir_names[:] = [
+            dir_name
+            for dir_name in dir_names
+            if not is_protected_path(current_path / dir_name, root)
+        ]
+
+    return candidates
+
+
+def is_test_or_coverage_artifact(path: Path, root: Path) -> bool:
+    try:
+        rel = path.resolve().relative_to(root.resolve())
+    except ValueError:
+        return False
+
+    parts = rel.parts
+    name = path.name
+
+    if name in COVERAGE_FILE_NAMES:
+        return True
+
+    if path.is_dir() and name in COVERAGE_DIR_NAMES:
+        return True
+
+    if parts and parts[0] in {"test", "tests"}:
+        if name in COVERAGE_FILE_NAMES:
+            return True
+        if path.is_dir() and name in COVERAGE_DIR_NAMES:
+            return True
+        if "__pycache__" in parts:
+            return True
+        if name.endswith((".pyc", ".pyo")):
+            return True
+        if name in {".pytest_cache", ".mypy_cache", ".ruff_cache"}:
+            return True
+
+    if name in {".pytest_cache", ".mypy_cache", ".ruff_cache"}:
+        return True
+
+    return False
+
+
+def collect_test_coverage_candidates(root: Path) -> list[DeletionCandidate]:
+    candidates: list[DeletionCandidate] = []
+
+    for current_root, dir_names, file_names in os.walk(root):
+        current_path = Path(current_root)
+
+        if is_protected_path(current_path, root) and current_path != root:
+            dir_names[:] = []
+            continue
+
+        filtered_dir_names = []
+        for dir_name in dir_names:
+            dir_path = current_path / dir_name
+            if is_protected_path(dir_path, root):
+                continue
+
+            if is_test_or_coverage_artifact(dir_path, root):
+                candidates.append(
+                    DeletionCandidate(
+                        path=dir_path,
+                        reason="test/coverage artifact directory",
+                    )
+                )
+                continue
+
+            filtered_dir_names.append(dir_name)
+
+        dir_names[:] = filtered_dir_names
+
+        for file_name in file_names:
+            path = current_path / file_name
+            if is_protected_path(path, root):
+                continue
+            if is_test_or_coverage_artifact(path, root):
+                candidates.append(
+                    DeletionCandidate(
+                        path=path,
+                        reason="test/coverage artifact file",
+                    )
+                )
+
+    return candidates
+
+
+def is_backup_env_file(path: Path) -> bool:
+    name = path.name
+
+    if name == ".env":
+        return False
+
+    if name.startswith(".env.") or name.startswith(".env-"):
+        return True
+
+    return any(name == f".env{suffix}" for suffix in BACKUP_ENV_SUFFIXES)
+
+
+def collect_backup_env_candidates(root: Path, cutoff_timestamp: float) -> list[DeletionCandidate]:
+    candidates: list[DeletionCandidate] = []
+
+    for current_root, dir_names, file_names in os.walk(root):
+        current_path = Path(current_root)
+
+        if is_protected_path(current_path, root) and current_path != root:
+            dir_names[:] = []
+            continue
+
+        dir_names[:] = [
+            dir_name
+            for dir_name in dir_names
+            if not is_protected_path(current_path / dir_name, root)
+        ]
+
+        for file_name in file_names:
+            path = current_path / file_name
+            if is_protected_path(path, root):
+                continue
+            if is_backup_env_file(path) and is_old_file(path, cutoff_timestamp):
+                candidates.append(
+                    DeletionCandidate(
+                        path=path,
+                        reason="old backup .env file older than 30 days",
+                    )
+                )
+
+    return candidates
+
+
+def collect_candidates(root: Path, days: int) -> list[DeletionCandidate]:
+    cutoff_timestamp = time.time() - (days * 24 * 60 * 60)
+
+    candidates = []
+    candidates.extend(collect_tmp_and_log_candidates(root, cutoff_timestamp))
+    candidates.extend(collect_pycache_candidates(root))
+    candidates.extend(collect_test_coverage_candidates(root))
+    candidates.extend(collect_backup_env_candidates(root, cutoff_timestamp))
+
+    deduped: dict[Path, DeletionCandidate] = {}
+    for candidate in candidates:
+        resolved = candidate.path.resolve()
+        if is_protected_path(candidate.path, root):
+            continue
+        if not is_relative_to(candidate.path, root):
+            continue
+        deduped.setdefault(resolved, candidate)
+
+    return sorted(deduped.values(), key=lambda item: str(item.path.relative_to(root)))
+
+
+def remove_empty_dirs_under(root: Path, parent_dirs: Iterable[Path]) -> None:
+    for parent_dir in sorted({path for path in parent_dirs if path.exists()}, key=lambda p: len(p.parts), reverse=True):
+        current = parent_dir
+
+        while current != root and is_relative_to(current, root):
+            if is_protected_path(current, root):
+                break
+
+            try:
+                current.rmdir()
+            except OSError:
+                break
+
+            current = current.parent
+
+
+def delete_candidates(candidates: list[DeletionCandidate], root: Path) -> None:
+    parents_to_check: set[Path] = set()
+
+    for candidate in candidates:
+        path = candidate.path
+
+        if is_protected_path(path, root):
+            print(f"SKIP protected path: {path.relative_to(root)}")
+            continue
+
+        if not path.exists():
+            print(f"SKIP missing path: {path.relative_to(root)}")
+            continue
+
+        parents_to_check.add(path.parent)
+
+        if path.is_dir():
+            shutil.rmtree(path)
+        else:
+            path.unlink()
+
+        print(f"Deleted: {path.relative_to(root)}")
+
+    remove_empty_dirs_under(root, parents_to_check)
+
+
+def print_plan(candidates: list[DeletionCandidate], root: Path) -> None:
+    print("Planned deletion list:")
+    print()
+
+    if not candidates:
+        print("No files or directories match the cleanup policy.")
+        return
+
+    for index, candidate in enumerate(candidates, start=1):
+        rel_path = candidate.path.relative_to(root)
+        print(f"{index:>3}. {rel_path} — {candidate.reason}")
+
+    print()
+    print(f"Total planned deletions: {len(candidates)}")
+
+
+def confirm() -> bool:
+    print()
+    print("No deletion has been performed yet.")
+    print('Type "DELETE" to confirm deletion of exactly the listed items.')
+    response = input("Confirmation: ").strip()
+    return response == "DELETE"
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description=(
+            "List and optionally delete repository-local cleanup candidates. "
+            "The script always asks for confirmation before deleting anything."
+        )
+    )
+    parser.add_argument(
+        "--days",
+        type=int,
+        default=30,
+        help="Age threshold in days for tmp/log files and backup .env files. Default: 30.",
+    )
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
+
+    if args.days < 1:
+        print("--days must be at least 1.", file=sys.stderr)
+        return 2
+
+    root = repo_root()
+    candidates = collect_candidates(root, args.days)
+
+    print_plan(candidates, root)
+
+    if not candidates:
+        return 0
+
+    if not confirm():
+        print("Deletion cancelled. No files were removed.")
+        return 0
+
+    delete_candidates(candidates, root)
+    print("Cleanup complete.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

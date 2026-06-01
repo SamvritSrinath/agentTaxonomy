@@ -1,0 +1,17 @@
+[
+  {
+    "path": "README.md",
+    "status": "M",
+    "in_diff": true
+  },
+  {
+    "path": "reports/README.md",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "scripts/cleanup.sh",
+    "status": "A",
+    "in_diff": true
+  }
+]

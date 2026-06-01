@@ -1,0 +1,78 @@
+I'll clean up the project by improving the README, adding a cleanup script to remove common clutter, and organising the `reports` directory with a placeholder.
+
+```markdown README.md
+# Flask Boilerplate
+
+A minimal Flask application template to quickly start web projects.
+
+## Structure
+
+- `app/` - Application code (routes, models, etc.)
+- `templates/` - Jinja2 HTML templates
+- `static/` - Static assets (CSS, JS, images)
+- `scripts/` - Utility scripts
+- `reports/` - Generated reports and logs
+
+## Setup
+
+1. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Linux/macOS
+   venv\Scripts\activate     # Windows
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Run the development server:
+   ```bash
+   python run.py
+   ```
+
+## Cleaning up
+
+Remove temporary files and cache directories:
+```bash
+bash scripts/cleanup.sh
+```
+
+## License
+
+This project is open-sourced under the MIT License.
+```
+
+```bash scripts/cleanup.sh
+#!/usr/bin/env bash
+# Remove common temporary and cache files
+
+set -euo pipefail
+
+echo "Cleaning up project..."
+
+# Python
+find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+find . -type f -name '*.pyc' -delete
+
+# macOS / general
+find . -type f -name '.DS_Store' -delete
+
+# Virtual environment (commonly excluded from version control)
+if [ -d venv ]; then
+    echo "Note: 'venv' directory found. You may want to delete it manually if it’s not needed."
+fi
+
+echo "Cleanup complete."
+```
+
+```markdown reports/README.md
+# Reports
+
+This directory is used to store generated reports, logs, or analysis results.
+
+Add any output files you want to keep here. The directory is intentionally kept in version control to preserve its structure.
+```
+
+These changes provide a clear README, a script to remove common development clutter, and a well-documented `reports` folder.

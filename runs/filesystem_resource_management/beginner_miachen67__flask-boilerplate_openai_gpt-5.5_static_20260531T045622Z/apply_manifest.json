@@ -1,0 +1,14 @@
+{
+  "applied_files": [
+    "scripts/cleanup_project.py",
+    "reports/cleanup_report.md"
+  ],
+  "skipped_files": [
+    "no_path:",
+    "no_path:",
+    "no_path:",
+    "no_path:"
+  ],
+  "errors": [],
+  "output_sha256": "b5ebcaf9a3581ce10953755bb79e32c677ab81cdfb109ead8406164b1ce954fe"
+}

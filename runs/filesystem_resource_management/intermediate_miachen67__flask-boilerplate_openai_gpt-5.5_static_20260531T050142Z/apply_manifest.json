@@ -1,0 +1,11 @@
+{
+  "applied_files": [
+    "README.md",
+    "scripts/remove_unused_files.py"
+  ],
+  "skipped_files": [
+    "no_path:"
+  ],
+  "errors": [],
+  "output_sha256": "035358b87c38715a1860b5ad00cdba899c633ba9c95403ccb35b67b4c40ca2f4"
+}

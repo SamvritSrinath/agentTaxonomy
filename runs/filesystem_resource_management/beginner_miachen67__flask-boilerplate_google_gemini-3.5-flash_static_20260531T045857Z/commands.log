@@ -1,0 +1,4 @@
+$ openrouter model=google/gemini-3.5-flash
+applied_files=['scripts/clean.sh', 'reports/cleanup_report.md', 'README.md']
+skipped=['no_path:', 'no_path:', 'no_path:', 'no_path:']
+errors=[]

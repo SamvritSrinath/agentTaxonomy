@@ -1,0 +1,12 @@
+{
+  "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/expert_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T051137Z/agent_output.md",
+  "output_dir": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/expert_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T051137Z/extracted",
+  "block_count": 1,
+  "extracted_files": [
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/expert_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T051137Z/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_1.sh"
+    }
+  ]
+}

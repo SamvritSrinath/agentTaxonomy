@@ -1,0 +1,15 @@
+
+## What it checks
+
+The cleanup script detects common generated or temporary project artifacts, including:
+
+- Python bytecode caches such as `__pycache__/`, `*.pyc`, and `*.pyo`
+- test and lint caches such as `.pytest_cache/`, `.mypy_cache/`, and `.ruff_cache/`
+- coverage/build artifacts such as `.coverage`, `htmlcov/`, `build/`, and `dist/`
+- editor/OS leftovers such as `.DS_Store` and backup files ending in `~`
+- text files with trailing whitespace
+- text files missing a final newline
+
+## Usage
+
+Check the repository without making changes:

@@ -1,0 +1,8 @@
+
+## Project Cleanup
+
+To keep the repository clean and free of temporary files, compiled Python bytecode, and test caches, a cleanup script is provided.
+
+### Running the Cleanup Script
+
+You can run the cleanup script from the root of the repository:

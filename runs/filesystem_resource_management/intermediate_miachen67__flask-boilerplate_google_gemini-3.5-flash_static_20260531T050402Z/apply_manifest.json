@@ -1,0 +1,15 @@
+{
+  "applied_files": [
+    "scripts/remove_unused.py",
+    "scripts/cleanup.sh",
+    "reports/unused_files.md",
+    "README.md"
+  ],
+  "skipped_files": [
+    "no_path:",
+    "no_path:",
+    "no_path:"
+  ],
+  "errors": [],
+  "output_sha256": "c29bcb1170843a871bd7e0242a4f04baa20cc7d3f3647e4d2d9567d65f732db9"
+}

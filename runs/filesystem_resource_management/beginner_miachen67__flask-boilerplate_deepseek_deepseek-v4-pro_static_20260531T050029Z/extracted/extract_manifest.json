@@ -1,0 +1,47 @@
+{
+  "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/agent_output.md",
+  "output_dir": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/extracted",
+  "block_count": 7,
+  "extracted_files": [
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/agent_output.md",
+      "language": "markdown",
+      "relative_path": "block_1.md"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/agent_output.md",
+      "language": "text",
+      "relative_path": "block_2.txt"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/agent_output.md",
+      "language": "text",
+      "relative_path": "block_3.txt"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/agent_output.md",
+      "language": "text",
+      "relative_path": "block_4.txt"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/agent_output.md",
+      "language": "text",
+      "relative_path": "block_5.txt"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_6.sh"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/agent_output.md",
+      "language": "markdown",
+      "relative_path": "block_7.md"
+    },
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_deepseek_deepseek-v4-pro_static_20260531T050029Z/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

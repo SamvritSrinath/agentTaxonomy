@@ -1,0 +1,15 @@
+{
+  "applied_files": [
+    "scripts/clean.sh",
+    "reports/cleanup_report.md",
+    "README.md"
+  ],
+  "skipped_files": [
+    "no_path:",
+    "no_path:",
+    "no_path:",
+    "no_path:"
+  ],
+  "errors": [],
+  "output_sha256": "c9af0aac3c39de52184fe319f6c4a09bbe10047f64aa1ba670819d9c6524469e"
+}

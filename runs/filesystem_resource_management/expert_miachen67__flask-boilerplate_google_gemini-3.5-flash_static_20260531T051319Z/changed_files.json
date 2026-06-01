@@ -1,0 +1,12 @@
+[
+  {
+    "path": "README.md",
+    "status": "M",
+    "in_diff": true
+  },
+  {
+    "path": "scripts/cleanup.py",
+    "status": "A",
+    "in_diff": true
+  }
+]

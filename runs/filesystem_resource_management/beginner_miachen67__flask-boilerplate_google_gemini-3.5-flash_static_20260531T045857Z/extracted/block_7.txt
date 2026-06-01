@@ -1,0 +1,8 @@
+
+This script will safely remove:
+- Python compiled bytecode (`__pycache__`, `*.pyc`, `*.pyo`, `*.pyd`)
+- Test and coverage artifacts (`.pytest_cache`, `.coverage`, `htmlcov`)
+- Build and distribution artifacts (`build/`, `dist/`, `*.egg-info`)
+- System junk and log files (`.DS_Store`, `*.log`)
+
+For more details, see the [Cleanup Report](reports/cleanup_report.md).

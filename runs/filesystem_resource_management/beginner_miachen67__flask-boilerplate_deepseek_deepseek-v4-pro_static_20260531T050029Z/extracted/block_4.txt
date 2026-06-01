@@ -1,0 +1,4 @@
+
+## Cleaning up
+
+Remove temporary files and cache directories:

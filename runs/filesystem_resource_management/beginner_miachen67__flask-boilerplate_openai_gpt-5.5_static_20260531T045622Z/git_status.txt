@@ -1,0 +1,2 @@
+ A reports/cleanup_report.md
+ A scripts/cleanup_project.py

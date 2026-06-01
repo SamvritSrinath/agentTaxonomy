@@ -1,0 +1,7 @@
+[
+  {
+    "path": "scripts/cleanup_old_files.py",
+    "status": "A",
+    "in_diff": true
+  }
+]

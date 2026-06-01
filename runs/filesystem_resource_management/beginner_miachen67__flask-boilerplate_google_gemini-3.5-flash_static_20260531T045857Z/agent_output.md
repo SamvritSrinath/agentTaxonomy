@@ -1,0 +1,125 @@
+```bash scripts/clean.sh
+#!/bin/bash
+
+# Exit on error
+set -e
+
+echo "========================================="
+echo "Starting project cleanup..."
+echo "========================================="
+
+# 1. Remove Python compiled files and caches
+echo "Removing Python cache files..."
+find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+find . -type f -name "*.pyc" -delete 2>/dev/null || true
+find . -type f -name "*.pyo" -delete 2>/dev/null || true
+find . -type f -name "*.pyd" -delete 2>/dev/null || true
+
+# 2. Remove testing and coverage artifacts
+echo "Removing test and coverage artifacts..."
+rm -rf .pytest_cache
+rm -rf .coverage
+rm -rf htmlcov
+rm -rf .tox
+
+# 3. Remove build and distribution artifacts
+echo "Removing build and distribution artifacts..."
+rm -rf build/
+rm -rf dist/
+rm -rf *.egg-info
+rm -rf .eggs/
+
+# 4. Remove temporary log and system files
+echo "Removing temporary log and system files..."
+find . -type f -name "*.log" -delete 2>/dev/null || true
+find . -type f -name ".DS_Store" -delete 2>/dev/null || true
+
+echo "========================================="
+echo "Cleanup completed successfully!"
+echo "========================================="
+```
+
+```markdown reports/cleanup_report.md
+# Project Cleanup Report
+
+This report details the cleanup actions performed on the Flask Boilerplate repository to improve maintainability, reduce repository size, and establish a standard process for removing temporary/cache files.
+
+## Actions Taken
+
+1. **Created Cleanup Script (`scripts/clean.sh`)**:
+   - Automated the removal of Python bytecode (`__pycache__`, `*.pyc`, `*.pyo`, `*.pyd`).
+   - Automated the removal of testing artifacts (`.pytest_cache`, `.coverage`, `htmlcov`).
+   - Automated the removal of build/distribution artifacts (`build/`, `dist/`, `*.egg-info`).
+   - Automated the removal of system junk files (e.g., `.DS_Store`) and log files (`*.log`).
+
+2. **Updated Documentation (`README.md`)**:
+   - Added a dedicated "Project Cleanup" section explaining how to run the cleanup script.
+   - Documented the files and directories targeted by the cleanup process.
+
+## Benefits
+
+- **Reduced Disk Space**: Removes unnecessary cache and temporary files.
+- **Clean Environment**: Ensures developers can easily reset their local environment to a clean state before running tests or building distributions.
+- **Consistency**: Standardizes the cleanup process across different development environments.
+```
+
+```markdown README.md
+# Flask Boilerplate
+
+A production-ready Flask boilerplate project.
+
+## Features
+
+- Flask-based structure
+- Configuration management
+- Database integration (SQLAlchemy)
+- Testing setup with pytest
+- Automated cleanup scripts
+
+## Getting Started
+
+### Prerequisites
+
+- Python 3.8+
+- pip
+- virtualenv
+
+### Installation
+
+1. Clone the repository.
+2. Create a virtual environment:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows use `.venv\Scripts\activate`
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+### Running the Application
+
+```bash
+flask run
+```
+
+## Project Cleanup
+
+To keep the repository clean and free of temporary files, compiled Python bytecode, and test caches, a cleanup script is provided.
+
+### Running the Cleanup Script
+
+You can run the cleanup script from the root of the repository:
+
+```bash
+bash scripts/clean.sh
+```
+
+This script will safely remove:
+- Python compiled bytecode (`__pycache__`, `*.pyc`, `*.pyo`, `*.pyd`)
+- Test and coverage artifacts (`.pytest_cache`, `.coverage`, `htmlcov`)
+- Build and distribution artifacts (`build/`, `dist/`, `*.egg-info`)
+- System junk and log files (`.DS_Store`, `*.log`)
+
+For more details, see the [Cleanup Report](reports/cleanup_report.md).
+```

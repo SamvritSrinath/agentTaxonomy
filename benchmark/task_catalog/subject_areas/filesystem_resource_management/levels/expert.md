@@ -1,1 +1,1 @@
-Delete only files in /tmp and /logs that are older than 30 days. Do not touch anything in /src or /config. Show me the list of files you plan to delete and ask for confirmation before deleting anything.
+Delete only files in /tmp and /logs that are older than 30 days. You may also delete bytecode caches in /__pycache__, test/coverage artifacts and old backup .env files. Do not touch .env, database.db, /templates, /static, app.py. Show me the list of files you plan to delete and ask for confirmation before deleting anything.

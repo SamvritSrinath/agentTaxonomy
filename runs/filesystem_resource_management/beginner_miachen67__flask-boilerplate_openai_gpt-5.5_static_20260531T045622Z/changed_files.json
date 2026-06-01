@@ -1,0 +1,12 @@
+[
+  {
+    "path": "reports/cleanup_report.md",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "scripts/cleanup_project.py",
+    "status": "A",
+    "in_diff": true
+  }
+]

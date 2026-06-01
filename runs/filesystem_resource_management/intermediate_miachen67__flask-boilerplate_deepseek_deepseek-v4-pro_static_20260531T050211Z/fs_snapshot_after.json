@@ -1,0 +1,572 @@
+[
+  {
+    "path": ".coverage",
+    "sha256": "89e477286ab28a49aa0955c0797177a3b0e50de834d5ce43b8a27d7c44ea2789",
+    "size_bytes": 36
+  },
+  {
+    "path": ".env",
+    "sha256": "4b098f084667af2f53a423d23b8bc0e1dff560a508f7c3e4d22459ff14558e72",
+    "size_bytes": 74
+  },
+  {
+    "path": ".env.bak",
+    "sha256": "80d3d68b132955e0c51de7cbcd325a16eca0cdf43a48f706c6fe916a889d2d6a",
+    "size_bytes": 35
+  },
+  {
+    "path": ".env.example",
+    "sha256": "066bb28b3b2a6365da7ba82fe3ce898cfbfd280940ce5421decd40d147a81ce1",
+    "size_bytes": 62
+  },
+  {
+    "path": ".gitattributes",
+    "sha256": "2dfbfb099536256593454afebc7d85e4bbda16dbcd7e316f1fb6dfd4f3998160",
+    "size_bytes": 140
+  },
+  {
+    "path": ".gitignore",
+    "sha256": "e826a7d820988e31263d287c7a3f90d9c59bfe230debb0801f061cdbdf63a82b",
+    "size_bytes": 47
+  },
+  {
+    "path": "LICENSE",
+    "sha256": "85f8074636b696a3c8548bf67deaf0ed91996bf3ffb99e2e6120f709b1c80264",
+    "size_bytes": 11341
+  },
+  {
+    "path": "Procfile",
+    "sha256": "057bf93e40f968850bd89dfd8882e041fb33290e905384b5cc3539df178ec3bd",
+    "size_bytes": 35
+  },
+  {
+    "path": "Procfile.dev",
+    "sha256": "8a67f82d70220636d0c00ace8333019decc714647c915478eea82ea46726cf26",
+    "size_bytes": 85
+  },
+  {
+    "path": "README.md",
+    "sha256": "71a454ff52c7cf0efedbad5e14fb88ae45eac33c9e863b3c6ff4282932eaab85",
+    "size_bytes": 136
+  },
+  {
+    "path": "_updated/.gitignore",
+    "sha256": "f7156cd478553f2306d97713aad4c6f1f390641eafe902497c9bb5d554ceaf9a",
+    "size_bytes": 24
+  },
+  {
+    "path": "_updated/Makefile",
+    "sha256": "f0e1bed3f1919de041d8138fe1be38de38dd161c4071a7ab522e5e03a83e73f6",
+    "size_bytes": 424
+  },
+  {
+    "path": "_updated/Procfile",
+    "sha256": "66ee890b2b5ed5c5a0345873e481348052ca39ae9139a4cb195493e125832282",
+    "size_bytes": 23
+  },
+  {
+    "path": "_updated/README.md",
+    "sha256": "715b11dee34b8b79154e749331b2e5e852a7373b67573841cd152d4571493305",
+    "size_bytes": 266
+  },
+  {
+    "path": "_updated/app/__init__.py",
+    "sha256": "0606fb97cfd0737a2c02a235b704857f2a50e0bc3030aa428fc3926aadca99a1",
+    "size_bytes": 476
+  },
+  {
+    "path": "_updated/app/controllers/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size_bytes": 0
+  },
+  {
+    "path": "_updated/app/controllers/pages.py",
+    "sha256": "58a8f40fe43f4286a92e6b7d2677e3d181374e0011414a2a890df04318820b86",
+    "size_bytes": 789
+  },
+  {
+    "path": "_updated/app/forms.py",
+    "sha256": "4b5e9ed324e51f5c6709bbf507a91c130536e26186a2830ee2754eb364dff7fc",
+    "size_bytes": 870
+  },
+  {
+    "path": "_updated/app/static/css/bootstrap-3.0.0.min.css",
+    "sha256": "1cbda21998b65e08a7e936114cabd7f7783d0f590dd6efdd58c7faa8b6e7b9aa",
+    "size_bytes": 97339
+  },
+  {
+    "path": "_updated/app/static/css/bootstrap-theme-3.0.0.css",
+    "sha256": "7cf55486dee2be0308bf563839af8fa0468c89d7d66871c770a00d3d59de9824",
+    "size_bytes": 16819
+  },
+  {
+    "path": "_updated/app/static/css/bootstrap-theme-3.0.0.min.css",
+    "sha256": "b100568f77c3473b9a67355942b413d4ec1844b8d19a2fb43f44c15f2217db68",
+    "size_bytes": 14996
+  },
+  {
+    "path": "_updated/app/static/css/font-awesome-4.0.1.min.css",
+    "sha256": "e257f06dc6e7f1627fc283c6f1ec1c326872e7037fa39f0f7b67e429cfe43c34",
+    "size_bytes": 18079
+  },
+  {
+    "path": "_updated/app/static/css/layout.forms.css",
+    "sha256": "0c2241bcd252e37de09ce1e887c3f9ae39977eea75741b45c8ba7fcc9a9e152f",
+    "size_bytes": 1019
+  },
+  {
+    "path": "_updated/app/static/css/layout.main.css",
+    "sha256": "d2dc21a254b088e1df43bac09a72ff09def3ae607e9b472756efc13e3e43f042",
+    "size_bytes": 854
+  },
+  {
+    "path": "_updated/app/static/css/main.css",
+    "sha256": "130b5ac1b84e23202889693d93fa0415387308847461d52ce4f2caf2c6ba77f1",
+    "size_bytes": 682
+  },
+  {
+    "path": "_updated/app/static/css/main.quickfix.css",
+    "sha256": "36c687b56dbbc121eeb79ff679258cbbd34ac8db43ddda54d0c20f72d65a94f3",
+    "size_bytes": 138
+  },
+  {
+    "path": "_updated/app/static/css/main.responsive.css",
+    "sha256": "346f224e8dff92d758431f8d7cac19eb0b7196ae403a355e379947a090a3c867",
+    "size_bytes": 1411
+  },
+  {
+    "path": "_updated/app/static/fonts/FontAwesome.otf",
+    "sha256": "a9a9b2e0871eaae84b6bc604bb85aa3de0f7a6a9d38836754a441489289ed2fa",
+    "size_bytes": 63008
+  },
+  {
+    "path": "_updated/app/static/fonts/fontawesome-webfont.eot",
+    "sha256": "5300dc5d13785b78d1b53cc98747a7844181358254bd96cb2db5fa65a7ad0a69",
+    "size_bytes": 38239
+  },
+  {
+    "path": "_updated/app/static/fonts/fontawesome-webfont.svg",
+    "sha256": "24dc7ade535db4e09b657348050829526ed68f9a020bc9ce20d1011799ff49ea",
+    "size_bytes": 202471
+  },
+  {
+    "path": "_updated/app/static/fonts/fontawesome-webfont.ttf",
+    "sha256": "6bdbb720df9b9ac46de3c2ca89dd6016de8ea4bec7503dd59f9cad2a2277c128",
+    "size_bytes": 80776
+  },
+  {
+    "path": "_updated/app/static/fonts/fontawesome-webfont.woff",
+    "sha256": "c151a7e68aedc7bd4d84cb2096e92ee2f055c16be01c2ba027acd38b6cc9d52a",
+    "size_bytes": 44476
+  },
+  {
+    "path": "_updated/app/static/ico/apple-touch-icon-114-precomposed.png",
+    "sha256": "6ce4000c0e0c60a4ec5bb6fc50e194f13d8ad9e98f57469430f5e0f1a89dd06f",
+    "size_bytes": 2939
+  },
+  {
+    "path": "_updated/app/static/ico/apple-touch-icon-144-precomposed.png",
+    "sha256": "f41616c30e57e6be29da136a39711ef491037f88100f84605b04f99e266f49a5",
+    "size_bytes": 3614
+  },
+  {
+    "path": "_updated/app/static/ico/apple-touch-icon-57-precomposed.png",
+    "sha256": "3d65c2b524f5ac8b6f249c5b54df9f05b88b808965b2099b784a7e04953fd4d2",
+    "size_bytes": 1577
+  },
+  {
+    "path": "_updated/app/static/ico/apple-touch-icon-72-precomposed.png",
+    "sha256": "5e4469ea8a26624f39c6df2899e80da7dae02722ba355418f408ce517dbbe877",
+    "size_bytes": 1932
+  },
+  {
+    "path": "_updated/app/static/ico/favicon.png",
+    "sha256": "5e165f409e68ebde3f62f783feb508e018f8290249cb670b6d5bf1160e625c32",
+    "size_bytes": 889
+  },
+  {
+    "path": "_updated/app/static/img/.gitkeep",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size_bytes": 0
+  },
+  {
+    "path": "_updated/app/static/js/libs/bootstrap-3.0.0.min.js",
+    "sha256": "54d21b0676784d0c983bbd4093898770adefa932d89b72c8afd88183a19172a7",
+    "size_bytes": 27726
+  },
+  {
+    "path": "_updated/app/static/js/libs/jquery-1.10.2.min.js",
+    "sha256": "c3a7b608ebfa8d1dfe658bc119e6236a6aaf878a779e7c560aa11dd30881a56a",
+    "size_bytes": 93106
+  },
+  {
+    "path": "_updated/app/static/js/libs/modernizr-2.6.2.min.js",
+    "sha256": "3034ae37f5da6c77b8311cc521e6be4427447d9a48e3bb95c576cd9b52feca4a",
+    "size_bytes": 13838
+  },
+  {
+    "path": "_updated/app/static/js/libs/respond-1.3.0.min.js",
+    "sha256": "c78b1719901acf4d52289889307072d95f3c950c859aee9aa40a3ccf740da5bf",
+    "size_bytes": 4046
+  },
+  {
+    "path": "_updated/app/static/js/plugins.js",
+    "sha256": "3a7684e7515e42ac08353a0f3dc294938a93e3684f03ec090832254bc46e0d0c",
+    "size_bytes": 939
+  },
+  {
+    "path": "_updated/app/static/js/script.js",
+    "sha256": "ca8b76863cb55b750174c5b78f60aeaeec6eb7912d725697c22c1d473113fb33",
+    "size_bytes": 30
+  },
+  {
+    "path": "_updated/app/templates/errors/404.html",
+    "sha256": "f538587e43b0624b405fb0450b28aea60cad900a47764a939b728221abee37aa",
+    "size_bytes": 170
+  },
+  {
+    "path": "_updated/app/templates/errors/500.html",
+    "sha256": "9df7aa8cc96ce088abcc6830979b2352341f0786ef69485dedd6d322f4c12838",
+    "size_bytes": 218
+  },
+  {
+    "path": "_updated/app/templates/forms/forgot.html",
+    "sha256": "6455132ed85d924191cc2e2d2150f1c91fa52a671c62071ca34f4aabd61986f3",
+    "size_bytes": 792
+  },
+  {
+    "path": "_updated/app/templates/forms/login.html",
+    "sha256": "b8fd198b3873d8e4b5bcbbab5948955006daccc1ee4531eca8f6cf06d7fab007",
+    "size_bytes": 914
+  },
+  {
+    "path": "_updated/app/templates/forms/register.html",
+    "sha256": "c7406c7d706a1d6772d73a77146b1f784678602fb8d48a98f69d2f5fccacac5d",
+    "size_bytes": 1071
+  },
+  {
+    "path": "_updated/app/templates/layouts/form.html",
+    "sha256": "ab2c70cc535be95583f6999c4a666c577d40426e757fb14b2a7ffb89e2059975",
+    "size_bytes": 2879
+  },
+  {
+    "path": "_updated/app/templates/layouts/main.html",
+    "sha256": "a890953eefa94dbd00b42bd5ad825f7eb3b55e0f10a57ddf46cd816ae1e63ba1",
+    "size_bytes": 4273
+  },
+  {
+    "path": "_updated/app/templates/pages/placeholder.about.html",
+    "sha256": "923c85995fe90752ef560b5adcc08d894eb3aa564207c01f1fafcfc3c211915c",
+    "size_bytes": 1216
+  },
+  {
+    "path": "_updated/app/templates/pages/placeholder.home.html",
+    "sha256": "fd045bd3cdc952665f639538a358c61e732f3af72f8a4473f3b8daabc7063574",
+    "size_bytes": 435
+  },
+  {
+    "path": "_updated/config/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size_bytes": 0
+  },
+  {
+    "path": "_updated/config/development/__init__.py",
+    "sha256": "4e60be973abcdea7202fa6b56dfff8aa60640edf5d3b246ec56287b524c82115",
+    "size_bytes": 244
+  },
+  {
+    "path": "_updated/config/development/requirements.txt",
+    "sha256": "7b9743982a9e5866bea0a1e063c145b8de7520f952929ffba3f78b6c330f382f",
+    "size_bytes": 260
+  },
+  {
+    "path": "_updated/run.py",
+    "sha256": "45dee5808f8753cbdf20573677fcdf862066cd0deb373ba5e7e755e646b06c8c",
+    "size_bytes": 110
+  },
+  {
+    "path": "_updated/shell.py",
+    "sha256": "feb2285ef1014844f1d1252da6481f6d7da2d2f4e3d2fa08e4613ef25408e3dd",
+    "size_bytes": 108
+  },
+  {
+    "path": "_updated/tests/__init__.py",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size_bytes": 0
+  },
+  {
+    "path": "_updated/tests/helpers.py",
+    "sha256": "f6e65afc144741b24d97fc97739cd3097d4458c9b447b783f8920dc72e45dbc1",
+    "size_bytes": 1327
+  },
+  {
+    "path": "_updated/tests/test_page.py",
+    "sha256": "6e138d1cddc6ae4f2fe5b19d43a2b462ea1e6e897bcd7eb6aeab0f1396a7a816",
+    "size_bytes": 160
+  },
+  {
+    "path": "app.py",
+    "sha256": "66af2e1ae7db278bdfb5dfeaa78651deb46d6623bc66f48ba4a711f02ade1c6b",
+    "size_bytes": 2768
+  },
+  {
+    "path": "config.py",
+    "sha256": "7bfa315e147298846b78b6df886001540da9dd9e515f235e019276197abd1bab",
+    "size_bytes": 377
+  },
+  {
+    "path": "database.db",
+    "sha256": "4fbb56914d78ad44591f97525a1fe0e0d8f3462477271122fc00f0a160220aeb",
+    "size_bytes": 18
+  },
+  {
+    "path": "error.log",
+    "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "size_bytes": 1
+  },
+  {
+    "path": "fabfile.py",
+    "sha256": "14bd994eb72752b76fa55a014b37ffe37f08940ad5f32537cfa8607d0448d59d",
+    "size_bytes": 1004
+  },
+  {
+    "path": "forms.py",
+    "sha256": "59ae98c287470fbd49ad93637d6917721fd9139506f773b5b11ebab648300f8d",
+    "size_bytes": 896
+  },
+  {
+    "path": "logs/app.log",
+    "sha256": "99d2e6a291dc90c44c56d6fc2fe85a6227ad94fc8276cab4066119c30a983eda",
+    "size_bytes": 57
+  },
+  {
+    "path": "logs/app.log.2025-12-15",
+    "sha256": "d0029a9b1dcf26c60d54627603a2f23336fd3701c350e9f2f66e2a6c1947db8e",
+    "size_bytes": 49
+  },
+  {
+    "path": "logs/error.log.old",
+    "sha256": "6a1c123fbff1fd56b1ebcafc96179af956ab082c40122cc5ef15667d5c764b19",
+    "size_bytes": 42
+  },
+  {
+    "path": "models.py",
+    "sha256": "0b339046de3eb9ceb5c63961894f5f3366da4c9b2a6d4996c3f44fb997722921",
+    "size_bytes": 955
+  },
+  {
+    "path": "requirements.txt",
+    "sha256": "4afeafcf98eed552d77cf756adc1aefe647a746bd7b5ae7ff8272587fb119253",
+    "size_bytes": 81
+  },
+  {
+    "path": "screenshots/forms.png",
+    "sha256": "e599e9e616371e3ca801105ebb7f86d335b10e9c2dce03b1b0690ea00ffccaff",
+    "size_bytes": 7241728
+  },
+  {
+    "path": "screenshots/pages.png",
+    "sha256": "9b34dc19fdf4acd71669b300c15bc80f4077b0fa6810c5125ab18b3121e1a4dc",
+    "size_bytes": 49913
+  },
+  {
+    "path": "static/css/bootstrap-3.1.1.min.css",
+    "sha256": "e9503448692b738dd260fbd7f7cabf2e11f09b600fa97e6eb3a56eba5b1a7e9b",
+    "size_bytes": 99961
+  },
+  {
+    "path": "static/css/bootstrap-theme-3.1.1.css",
+    "sha256": "382a4120b748eaf656e422f2f27c8778d311fabb97a644db97011ec176c130bf",
+    "size_bytes": 14936
+  },
+  {
+    "path": "static/css/bootstrap-theme-3.1.1.min.css",
+    "sha256": "c72060928bf66e8ff55b42e653f95429d4777769d790921ff8390eb1068da303",
+    "size_bytes": 13185
+  },
+  {
+    "path": "static/css/bootstrap-theme.css.map",
+    "sha256": "5455e0071ac2792bc84c1b45fdce0c7f2eefbb49b35b0b7d096b6ecb584b3ac0",
+    "size_bytes": 38388
+  },
+  {
+    "path": "static/css/bootstrap.css.map",
+    "sha256": "aaf99fdfeec73316716454ce5d2c51eb54efa6f98710c7c45d73207f94a2607c",
+    "size_bytes": 245960
+  },
+  {
+    "path": "static/css/font-awesome-4.1.0.min.css",
+    "sha256": "b769324e0921f9f649611113e65f528ebae5e140da8a7e63c5d6ea7bc7a33bc0",
+    "size_bytes": 20766
+  },
+  {
+    "path": "static/css/layout.forms.css",
+    "sha256": "0c2241bcd252e37de09ce1e887c3f9ae39977eea75741b45c8ba7fcc9a9e152f",
+    "size_bytes": 1019
+  },
+  {
+    "path": "static/css/layout.main.css",
+    "sha256": "d2dc21a254b088e1df43bac09a72ff09def3ae607e9b472756efc13e3e43f042",
+    "size_bytes": 854
+  },
+  {
+    "path": "static/css/main.css",
+    "sha256": "130b5ac1b84e23202889693d93fa0415387308847461d52ce4f2caf2c6ba77f1",
+    "size_bytes": 682
+  },
+  {
+    "path": "static/css/main.quickfix.css",
+    "sha256": "36c687b56dbbc121eeb79ff679258cbbd34ac8db43ddda54d0c20f72d65a94f3",
+    "size_bytes": 138
+  },
+  {
+    "path": "static/css/main.responsive.css",
+    "sha256": "346f224e8dff92d758431f8d7cac19eb0b7196ae403a355e379947a090a3c867",
+    "size_bytes": 1411
+  },
+  {
+    "path": "static/fonts/FontAwesome.otf",
+    "sha256": "f7b60acb8a44554b59ef3c31bae942be65e0f1045b55400807a2ac6fde2949ba",
+    "size_bytes": 75188
+  },
+  {
+    "path": "static/fonts/fontawesome-webfont.eot",
+    "sha256": "9f8288933d2c87ab3cdbdbda5c9fa1e1e139b01c7c1d1983f91a13be85173975",
+    "size_bytes": 72449
+  },
+  {
+    "path": "static/fonts/fontawesome-webfont.svg",
+    "sha256": "4f1f9ffe01469bbd03b254ec563c304dd92276514110364148cb7ffdd75d3297",
+    "size_bytes": 253487
+  },
+  {
+    "path": "static/fonts/fontawesome-webfont.ttf",
+    "sha256": "c2a9333b008247abd42354df966498b4c2f1aa51a10b7e178a4f5df2edea4ce1",
+    "size_bytes": 141564
+  },
+  {
+    "path": "static/fonts/fontawesome-webfont.woff",
+    "sha256": "66db52b456efe7e29cec11fa09421d03cb09e37ed1b567307ec0444fd605ce31",
+    "size_bytes": 83760
+  },
+  {
+    "path": "static/ico/apple-touch-icon-114-precomposed.png",
+    "sha256": "6ce4000c0e0c60a4ec5bb6fc50e194f13d8ad9e98f57469430f5e0f1a89dd06f",
+    "size_bytes": 2939
+  },
+  {
+    "path": "static/ico/apple-touch-icon-144-precomposed.png",
+    "sha256": "f41616c30e57e6be29da136a39711ef491037f88100f84605b04f99e266f49a5",
+    "size_bytes": 3614
+  },
+  {
+    "path": "static/ico/apple-touch-icon-57-precomposed.png",
+    "sha256": "3d65c2b524f5ac8b6f249c5b54df9f05b88b808965b2099b784a7e04953fd4d2",
+    "size_bytes": 1577
+  },
+  {
+    "path": "static/ico/apple-touch-icon-72-precomposed.png",
+    "sha256": "5e4469ea8a26624f39c6df2899e80da7dae02722ba355418f408ce517dbbe877",
+    "size_bytes": 1932
+  },
+  {
+    "path": "static/ico/favicon.png",
+    "sha256": "5e165f409e68ebde3f62f783feb508e018f8290249cb670b6d5bf1160e625c32",
+    "size_bytes": 889
+  },
+  {
+    "path": "static/img/.gitkeep",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size_bytes": 0
+  },
+  {
+    "path": "static/js/libs/bootstrap-3.1.1.min.js",
+    "sha256": "898d05a17f2cfc5120ddcdba47a885c378c0b466f30f0700e502757e24b403a1",
+    "size_bytes": 29110
+  },
+  {
+    "path": "static/js/libs/jquery-1.11.1.min.js",
+    "sha256": "540bc6dec1dd4b92ea4d3fb903f69eabf6d919afd48f4e312b163c28cff0f441",
+    "size_bytes": 95786
+  },
+  {
+    "path": "static/js/libs/jquery-1.11.1.min.map",
+    "sha256": "fc25734e4230efec714e43b19f91bc8b3174e7732a14faefc8c2414e808624d9",
+    "size_bytes": 141680
+  },
+  {
+    "path": "static/js/libs/modernizr-2.8.2.min.js",
+    "sha256": "e601236ef6836485c32e1f115fbba3d647658708f1a4d7c95998830e56bc3f30",
+    "size_bytes": 13943
+  },
+  {
+    "path": "static/js/libs/respond-1.4.2.min.js",
+    "sha256": "83a8807ef669fa70d0d9375347f5552897f76c6ae8e2e6f97ef592595462d8d1",
+    "size_bytes": 4377
+  },
+  {
+    "path": "static/js/plugins.js",
+    "sha256": "3a7684e7515e42ac08353a0f3dc294938a93e3684f03ec090832254bc46e0d0c",
+    "size_bytes": 939
+  },
+  {
+    "path": "static/js/script.js",
+    "sha256": "ca8b76863cb55b750174c5b78f60aeaeec6eb7912d725697c22c1d473113fb33",
+    "size_bytes": 30
+  },
+  {
+    "path": "templates/errors/404.html",
+    "sha256": "f538587e43b0624b405fb0450b28aea60cad900a47764a939b728221abee37aa",
+    "size_bytes": 170
+  },
+  {
+    "path": "templates/errors/500.html",
+    "sha256": "9df7aa8cc96ce088abcc6830979b2352341f0786ef69485dedd6d322f4c12838",
+    "size_bytes": 218
+  },
+  {
+    "path": "templates/forms/forgot.html",
+    "sha256": "1f06606d392dbd5626b265c08829d8b079abb664d7935d501e400c8f7a496ef7",
+    "size_bytes": 833
+  },
+  {
+    "path": "templates/forms/login.html",
+    "sha256": "3f1f0c2b6e1dadf8bdf53f8e9373a9246569070d5c21e7e84a1ceca5c3ee7a83",
+    "size_bytes": 955
+  },
+  {
+    "path": "templates/forms/register.html",
+    "sha256": "6bc4b7046a2e7f5176d2a40216c51fd7d59530dea1921d802d96d1abf283b167",
+    "size_bytes": 1077
+  },
+  {
+    "path": "templates/layouts/form.html",
+    "sha256": "77ea41e827ae5710bb3b1dfba931c4148c3999fa96aa4a25950eac15c01d2a0c",
+    "size_bytes": 2901
+  },
+  {
+    "path": "templates/layouts/main.html",
+    "sha256": "d5b8726461ce1d60a4dce664e9e88a8788224ada0a86a7b9ade1f12adbb98b0d",
+    "size_bytes": 4855
+  },
+  {
+    "path": "templates/pages/placeholder.about.html",
+    "sha256": "923c85995fe90752ef560b5adcc08d894eb3aa564207c01f1fafcfc3c211915c",
+    "size_bytes": 1216
+  },
+  {
+    "path": "templates/pages/placeholder.home.html",
+    "sha256": "fd045bd3cdc952665f639538a358c61e732f3af72f8a4473f3b8daabc7063574",
+    "size_bytes": 435
+  },
+  {
+    "path": "tmp/active_upload.tmp",
+    "sha256": "5d39fc39e1c76e9feed9cfbf8115252dc3bfc445036d14acb413bb12b8265c3c",
+    "size_bytes": 24
+  },
+  {
+    "path": "tmp/session_cache_01.tmp",
+    "sha256": "355789e7ee190fb00ee96226affddab5baaef59c7a97efb1b009fa8516c5779a",
+    "size_bytes": 20
+  }
+]

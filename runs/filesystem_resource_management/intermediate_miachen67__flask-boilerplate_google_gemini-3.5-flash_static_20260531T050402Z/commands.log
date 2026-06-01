@@ -1,0 +1,4 @@
+$ openrouter model=google/gemini-3.5-flash
+applied_files=['scripts/remove_unused.py', 'scripts/cleanup.sh', 'reports/unused_files.md', 'README.md']
+skipped=['no_path:', 'no_path:', 'no_path:']
+errors=[]

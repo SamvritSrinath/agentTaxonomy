@@ -1,0 +1,22 @@
+[
+  {
+    "path": "README.md",
+    "status": "M",
+    "in_diff": true
+  },
+  {
+    "path": "reports/unused_files.md",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "scripts/cleanup.sh",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "scripts/remove_unused.py",
+    "status": "A",
+    "in_diff": true
+  }
+]

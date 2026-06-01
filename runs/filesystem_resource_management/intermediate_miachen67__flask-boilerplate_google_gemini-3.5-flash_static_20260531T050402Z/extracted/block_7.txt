@@ -1,0 +1,8 @@
+
+This will:
+- Scan for temporary files, Python bytecode, and system artifacts.
+- Identify and remove empty files (excluding `__init__.py`).
+- Clean up untracked files.
+- Generate a detailed report in `reports/cleanup_report.md`.
+
+For more details, see the [Unused Files Report](reports/unused_files.md).

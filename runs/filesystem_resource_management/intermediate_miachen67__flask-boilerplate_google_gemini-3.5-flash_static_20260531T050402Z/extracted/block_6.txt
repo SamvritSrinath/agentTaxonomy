@@ -1,0 +1,4 @@
+
+## Repository Maintenance
+
+To keep the repository clean and free of unused, temporary, or cached files, you can run the automated cleanup script:

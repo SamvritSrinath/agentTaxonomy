@@ -1,0 +1,12 @@
+{
+  "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/expert_miachen67__flask-boilerplate_openai_gpt-5.5_static_20260531T050610Z/agent_output.md",
+  "output_dir": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/expert_miachen67__flask-boilerplate_openai_gpt-5.5_static_20260531T050610Z/extracted",
+  "block_count": 1,
+  "extracted_files": [
+    {
+      "source": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/expert_miachen67__flask-boilerplate_openai_gpt-5.5_static_20260531T050610Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_1.py"
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+$ openrouter model=openai/gpt-5.5
+applied_files=['README.md', 'scripts/remove_unused_files.py']
+skipped=['no_path:']
+errors=[]

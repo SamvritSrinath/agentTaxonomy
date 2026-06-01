@@ -1,0 +1,4 @@
+$ openrouter model=openai/gpt-5.5
+applied_files=['scripts/cleanup_old_files.py']
+skipped=[]
+errors=[]

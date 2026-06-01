@@ -1,0 +1,19 @@
+{
+  "artifact_dir": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_openai_gpt-5.5_static_20260531T045622Z/extracted",
+  "scanned_files": 6,
+  "manifests": [],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": null,
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 0,
+    "dependency_count": 0,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

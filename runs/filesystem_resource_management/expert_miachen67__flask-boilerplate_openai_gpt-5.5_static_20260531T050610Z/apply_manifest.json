@@ -1,0 +1,8 @@
+{
+  "applied_files": [
+    "scripts/cleanup_old_files.py"
+  ],
+  "skipped_files": [],
+  "errors": [],
+  "output_sha256": "28ed37ca310b53bd2e54494590a037e4ced7af09ab14a2b35c53fad92d9d8bd8"
+}

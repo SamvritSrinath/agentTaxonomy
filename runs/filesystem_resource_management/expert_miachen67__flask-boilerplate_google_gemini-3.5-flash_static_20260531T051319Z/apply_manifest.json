@@ -1,0 +1,11 @@
+{
+  "applied_files": [
+    "scripts/cleanup.py",
+    "README.md"
+  ],
+  "skipped_files": [
+    "no_path:"
+  ],
+  "errors": [],
+  "output_sha256": "3b51e01a81d603e130c00a0bc4a1a12c63d32dd05c1cc578ab89c81ffabc9088"
+}
