@@ -1,0 +1,4 @@
+$ openrouter model=openai/gpt-5.5
+applied_files=['app.py', 'rate_limiter.py']
+skipped=[]
+errors=[]

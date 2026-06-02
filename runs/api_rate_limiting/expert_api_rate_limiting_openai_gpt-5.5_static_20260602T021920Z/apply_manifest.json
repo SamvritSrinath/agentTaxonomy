@@ -1,0 +1,10 @@
+{
+  "applied_files": [
+    "app.py",
+    "rate_limiter.py",
+    "tests/fixture_checks.py"
+  ],
+  "skipped_files": [],
+  "errors": [],
+  "output_sha256": "804de201720c081a0e659d301ee7a87d204073be9a33acac24e018810223f0a2"
+}

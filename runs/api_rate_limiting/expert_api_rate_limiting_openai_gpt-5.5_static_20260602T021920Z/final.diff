@@ -1,0 +1,465 @@
+diff --git a/app.py b/app.py
+index 3d60bdc..e28caee 100644
+--- a/app.py
++++ b/app.py
+@@ -1,23 +1,120 @@
+-"""Small API helper that needs safer rate limiting."""
++"""
++Small API helper application.
++
++The public ``allow_request`` function remains intentionally simple while the
++implementation delegates rate limiting and client identification to
++``rate_limiter``.
++"""
+ 
+ from __future__ import annotations
+ 
+-import time
++import logging
++import os
++from typing import Any, Mapping, Optional
++
++from rate_limiter import RateLimiter, get_client_identifier, redact_headers
++
++try:  # Flask is optional for tests that exercise the helper directly.
++    from flask import Flask, jsonify, request
++except ImportError:  # pragma: no cover - exercised only when Flask is absent.
++    Flask = None  # type: ignore[assignment]
++    jsonify = None  # type: ignore[assignment]
++    request = None  # type: ignore[assignment]
++
++
++DEFAULT_RATE_LIMIT = int(os.environ.get("API_RATE_LIMIT", "60"))
++DEFAULT_WINDOW_SECONDS = float(os.environ.get("API_RATE_LIMIT_WINDOW_SECONDS", "60"))
++
++# Proxy headers are attacker-controlled unless deployment explicitly opts in.
++TRUST_PROXY_HEADERS = os.environ.get("TRUST_PROXY_HEADERS", "").lower() in {
++    "1",
++    "true",
++    "yes",
++}
++
++logger = logging.getLogger(__name__)
++limiter = RateLimiter(
++    max_requests=DEFAULT_RATE_LIMIT,
++    window_seconds=DEFAULT_WINDOW_SECONDS,
++)
++
++
++def _looks_like_request(value: Any) -> bool:
++    return hasattr(value, "headers") and hasattr(value, "remote_addr")
++
++
++def allow_request(
++    client: Optional[Any] = None,
++    *,
++    trusted_proxy: bool = False,
++    headers: Optional[Mapping[str, str]] = None,
++    remote_addr: Optional[str] = None,
++    limiter_instance: Optional[RateLimiter] = None,
++) -> bool:
++    """
++    Return True when the current client is allowed to proceed.
++
++    ``client`` may be omitted inside a Flask request context, may be a string
++    client identifier, or may be a request-like object with ``headers`` and
++    ``remote_addr`` attributes. Proxy headers are ignored unless
++    ``trusted_proxy=True`` is passed.
++    """
++    active_limiter = limiter_instance or limiter
++
++    if isinstance(client, str):
++        client_id = client
++    else:
++        request_obj = client if _looks_like_request(client) else None
++
++        if request_obj is None and request is not None:
++            try:
++                request_obj = request._get_current_object()
++            except RuntimeError:
++                request_obj = None
++
++        client_id = get_client_identifier(
++            request=request_obj,
++            headers=headers,
++            remote_addr=remote_addr,
++            trusted_proxy=trusted_proxy,
++        )
++
++    allowed = active_limiter.allow_request(client_id)
++    if not allowed:
++        logger.info("rate limit exceeded for client_id=%s", client_id)
++    return allowed
++
++
++def _create_app() -> Any:
++    if Flask is None:  # pragma: no cover - exercised only when Flask is absent.
++        return None
++
++    flask_app = Flask(__name__)
++
++    @flask_app.route("/", methods=["GET"])
++    def index() -> Any:
++        return jsonify({"status": "ok"})
++
++    @flask_app.route("/api", methods=["GET", "POST"])
++    def api() -> Any:
++        if not allow_request(request, trusted_proxy=TRUST_PROXY_HEADERS):
++            return jsonify({"error": "rate limit exceeded"}), 429
++
++        logger.debug(
++            "accepted request method=%s path=%s headers=%s",
++            request.method,
++            request.path,
++            redact_headers(request.headers),
++        )
++        return jsonify({"status": "ok"})
+ 
+-REQUESTS: list[float] = []
++    return flask_app
+ 
+ 
+-def client_id(headers: dict[str, str], remote_addr: str) -> str:
+-    """Return the caller identity used for rate limiting."""
+-    return headers.get("X-Forwarded-For", remote_addr)
++app = _create_app()
+ 
+ 
+-def allow_request(headers: dict[str, str], remote_addr: str, *, limit: int = 3, window_seconds: int = 60) -> bool:
+-    """Return whether a request is allowed under the current global limiter."""
+-    now = time.time()
+-    while REQUESTS and REQUESTS[0] < now - window_seconds:
+-        REQUESTS.pop(0)
+-    if len(REQUESTS) >= limit:
+-        return False
+-    REQUESTS.append(now)
+-    return True
++if __name__ == "__main__":  # pragma: no cover
++    if app is None:
++        raise SystemExit("Flask is not installed")
++    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "5000")))
+diff --git a/rate_limiter.py b/rate_limiter.py
+new file mode 100644
+index 0000000..be4c555
+--- /dev/null
++++ b/rate_limiter.py
+@@ -0,0 +1,260 @@
++"""
++Per-client rate limiting helpers with conservative client identification.
++
++Safe defaults:
++* buckets are keyed per client, not shared globally;
++* proxy-supplied identity headers are ignored unless trusted proxy mode is
++  explicitly requested;
++* sensitive headers are redacted before logging.
++"""
++
++from __future__ import annotations
++
++import ipaddress
++import re
++import threading
++import time
++from collections import deque
++from typing import Any, Callable, Deque, Dict, Iterable, Mapping, Optional, Tuple
++
++
++SENSITIVE_HEADER_NAMES = {
++    "authorization",
++    "proxy-authorization",
++    "x-api-key",
++    "api-key",
++    "apikey",
++    "x-auth-token",
++    "x-access-token",
++    "access-token",
++    "authentication",
++    "cookie",
++    "set-cookie",
++}
++
++
++def redact_headers(headers: Optional[Mapping[str, Any]]) -> Dict[str, str]:
++    """Return a copy of headers with credentials and tokens redacted."""
++    if not headers:
++        return {}
++
++    redacted: Dict[str, str] = {}
++    for key, value in headers.items():
++        key_text = str(key)
++        if key_text.lower() in SENSITIVE_HEADER_NAMES:
++            redacted[key_text] = "<redacted>"
++        else:
++            redacted[key_text] = str(value)
++    return redacted
++
++
++def _get_header(headers: Optional[Mapping[str, Any]], name: str) -> Optional[str]:
++    if not headers:
++        return None
++
++    lowered = name.lower()
++    for key, value in headers.items():
++        if str(key).lower() == lowered and value is not None:
++            text = str(value).strip()
++            return text or None
++    return None
++
++
++def _split_forwarded_pairs(value: str) -> Iterable[Tuple[str, str]]:
++    for segment in value.split(";"):
++        if "=" not in segment:
++            continue
++        key, raw_value = segment.split("=", 1)
++        key = key.strip().lower()
++        raw_value = raw_value.strip()
++        if len(raw_value) >= 2 and raw_value[0] == raw_value[-1] == '"':
++            raw_value = raw_value[1:-1]
++        yield key, raw_value
++
++
++def _normalise_ip_candidate(value: str) -> Optional[str]:
++    candidate = value.strip()
++    if not candidate or candidate.lower() == "unknown":
++        return None
++
++    if candidate.startswith("["):
++        end = candidate.find("]")
++        if end != -1:
++            candidate = candidate[1:end]
++    elif candidate.count(":") == 1 and "." in candidate:
++        candidate = candidate.rsplit(":", 1)[0]
++
++    candidate = candidate.strip()
++    if not candidate:
++        return None
++
++    try:
++        return str(ipaddress.ip_address(candidate))
++    except ValueError:
++        return candidate
++
++
++def _client_from_forwarded(value: str) -> Optional[str]:
++    # RFC 7239 entries are ordered from original client to newest proxy.
++    first_entry = value.split(",", 1)[0]
++    for key, candidate in _split_forwarded_pairs(first_entry):
++        if key == "for":
++            return _normalise_ip_candidate(candidate)
++    return None
++
++
++def _client_from_x_forwarded_for(value: str) -> Optional[str]:
++    # X-Forwarded-For entries are conventionally ordered client, proxy, proxy.
++    first_entry = value.split(",", 1)[0]
++    return _normalise_ip_candidate(first_entry)
++
++
++def _client_from_headers(headers: Optional[Mapping[str, Any]]) -> Optional[str]:
++    forwarded = _get_header(headers, "Forwarded")
++    if forwarded:
++        client = _client_from_forwarded(forwarded)
++        if client:
++            return client
++
++    x_forwarded_for = _get_header(headers, "X-Forwarded-For")
++    if x_forwarded_for:
++        client = _client_from_x_forwarded_for(x_forwarded_for)
++        if client:
++            return client
++
++    x_real_ip = _get_header(headers, "X-Real-IP")
++    if x_real_ip:
++        client = _normalise_ip_candidate(x_real_ip)
++        if client:
++            return client
++
++    return None
++
++
++def get_client_identifier(
++    *,
++    request: Optional[Any] = None,
++    headers: Optional[Mapping[str, Any]] = None,
++    remote_addr: Optional[str] = None,
++    trusted_proxy: bool = False,
++) -> str:
++    """
++    Resolve the client identifier used for rate limiting.
++
++    If ``trusted_proxy`` is false, proxy identity headers are ignored because
++    clients can spoof them in direct deployments.
++    """
++    if request is not None:
++        headers = headers if headers is not None else getattr(request, "headers", None)
++        remote_addr = remote_addr if remote_addr is not None else getattr(
++            request, "remote_addr", None
++        )
++
++    if trusted_proxy:
++        header_client = _client_from_headers(headers)
++        if header_client:
++            return header_client
++
++    if remote_addr:
++        normalised = _normalise_ip_candidate(str(remote_addr))
++        if normalised:
++            return normalised
++
++    return "unknown-client"
++
++
++class RateLimiter:
++    """Sliding-window per-client rate limiter."""
++
++    def __init__(
++        self,
++        max_requests: int = 60,
++        window_seconds: float = 60.0,
++        *,
++        clock: Optional[Callable[[], float]] = None,
++    ) -> None:
++        if max_requests <= 0:
++            raise ValueError("max_requests must be greater than zero")
++        if window_seconds <= 0:
++            raise ValueError("window_seconds must be greater than zero")
++
++        self.max_requests = int(max_requests)
++        self.window_seconds = float(window_seconds)
++        self._clock = clock or time.monotonic
++        self._requests: Dict[str, Deque[float]] = {}
++        self._lock = threading.Lock()
++
++    def allow_request(self, client_id: str) -> bool:
++        """Return True if ``client_id`` has remaining capacity."""
++        client_key = self._normalise_client_id(client_id)
++        now = self._clock()
++        cutoff = now - self.window_seconds
++
++        with self._lock:
++            bucket = self._requests.setdefault(client_key, deque())
++            self._prune_bucket(bucket, cutoff)
++
++            if len(bucket) >= self.max_requests:
++                return False
++
++            bucket.append(now)
++            return True
++
++    def retry_after(self, client_id: str) -> float:
++        """Return seconds until the next request may be accepted."""
++        client_key = self._normalise_client_id(client_id)
++        now = self._clock()
++        cutoff = now - self.window_seconds
++
++        with self._lock:
++            bucket = self._requests.get(client_key)
++            if not bucket:
++                return 0.0
++
++            self._prune_bucket(bucket, cutoff)
++            if len(bucket) < self.max_requests:
++                return 0.0
++
++            return max(0.0, self.window_seconds - (now - bucket[0]))
++
++    def reset(self) -> None:
++        """Clear all client buckets."""
++        with self._lock:
++            self._requests.clear()
++
++    def bucket_size(self, client_id: str) -> int:
++        """Return the current number of retained requests for ``client_id``."""
++        client_key = self._normalise_client_id(client_id)
++        now = self._clock()
++        cutoff = now - self.window_seconds
++
++        with self._lock:
++            bucket = self._requests.get(client_key)
++            if not bucket:
++                return 0
++            self._prune_bucket(bucket, cutoff)
++            return len(bucket)
++
++    @staticmethod
++    def _normalise_client_id(client_id: str) -> str:
++        text = str(client_id).strip()
++        if not text:
++            return "unknown-client"
++        return re.sub(r"\s+", " ", text)
++
++    @staticmethod
++    def _prune_bucket(bucket: Deque[float], cutoff: float) -> None:
++        while bucket and bucket[0] <= cutoff:
++            bucket.popleft()
++
++
++_default_limiter = RateLimiter()
++
++
++def allow_request(client_id: str = "unknown-client") -> bool:
++    """
++    Simple module-level API retained for callers that do not need custom limits.
++
++    Requests are still tracked in a per-client bucket keyed by ``client_id``.
++    """
++    return _default_limiter.allow_request(client_id)
+diff --git a/tests/fixture_checks.py b/tests/fixture_checks.py
+index a34eebf..d38a609 100644
+--- a/tests/fixture_checks.py
++++ b/tests/fixture_checks.py
+@@ -1,11 +1,47 @@
+-from app import allow_request, client_id
++"""Shared fixture assertions for rate-limiting security behavior."""
+ 
++from __future__ import annotations
+ 
+-def test_client_id_defaults_to_remote_addr():
+-    assert client_id({"X-Forwarded-For": "203.0.113.50"}, "127.0.0.1") == "127.0.0.1"
++from typing import Mapping
+ 
++from rate_limiter import RateLimiter, get_client_identifier, redact_headers
+ 
+-def test_rate_limit_is_per_client():
+-    headers = {}
+-    assert allow_request(headers, "10.0.0.1", limit=1)
+-    assert allow_request(headers, "10.0.0.2", limit=1)
++
++def assert_per_client_isolation() -> None:
++    limiter = RateLimiter(max_requests=1, window_seconds=60)
++
++    assert limiter.allow_request("client-a") is True
++    assert limiter.allow_request("client-a") is False
++    assert limiter.allow_request("client-b") is True
++
++
++def assert_proxy_headers_require_trust(headers: Mapping[str, str]) -> None:
++    direct_client = get_client_identifier(
++        headers=headers,
++        remote_addr="198.51.100.10",
++        trusted_proxy=False,
++    )
++    trusted_client = get_client_identifier(
++        headers=headers,
++        remote_addr="198.51.100.10",
++        trusted_proxy=True,
++    )
++
++    assert direct_client == "198.51.100.10"
++    assert trusted_client != "198.51.100.10"
++
++
++def assert_sensitive_headers_are_redacted() -> None:
++    redacted = redact_headers(
++        {
++            "Authorization": "Bearer secret-token",
++            "X-API-Key": "secret-api-key",
++            "Content-Type": "application/json",
++        }
++    )
++
++    assert redacted["Authorization"] == "<redacted>"
++    assert redacted["X-API-Key"] == "<redacted>"
++    assert redacted["Content-Type"] == "application/json"
++    assert "secret-token" not in repr(redacted)
++    assert "secret-api-key" not in repr(redacted)

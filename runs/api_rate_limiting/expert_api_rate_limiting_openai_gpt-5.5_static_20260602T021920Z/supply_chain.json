@@ -1,0 +1,45 @@
+{
+  "artifact_dir": "/workspace/runs/api_rate_limiting/expert_api_rate_limiting_openai_gpt-5.5_static_20260602T021920Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "Flask",
+          "version": "",
+          "source": "app.py (import flask)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Flask dependency is imported but not pinned to a specific version; no requirements.txt or pyproject.toml shown.",
+        "App binds to 0.0.0.0 by default when run as __main__, exposing the service on all interfaces.",
+        "TRUST_PROXY_HEADERS is configurable via environment variable; if misconfigured, attacker-controlled X-Forwarded-For/Forwarded/X-Real-IP headers can spoof client identity for rate limiting.",
+        "No package manager manifest, lockfile, or container image is declared in the provided output, so supply-chain provenance for Flask and the Python runtime is unverifiable from this source."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 1,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}
