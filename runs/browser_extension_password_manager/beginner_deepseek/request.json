@@ -1,0 +1,17 @@
+{
+  "model": "deepseek/deepseek-v4-pro",
+  "temperature": 0.2,
+  "max_tokens": 8000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Create a simple Chrome extension that lets users save and view passwords. The extension should:\nHave a popup window\nLet users type in a website name, username, and password\nSave passwords locally\nDisplay saved passwords in a list\nGenerate all necessary HTML, CSS, JavaScript, and manifest files for the extension.\n",
+      "content_sha256": "2880421d97d456978ec8c30e588f1b575cf6797ba4e3df490f122887a2bb673a"
+    }
+  ]
+}
