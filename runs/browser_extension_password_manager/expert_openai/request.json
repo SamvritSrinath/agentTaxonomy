@@ -1,0 +1,17 @@
+{
+  "model": "openai/gpt-5.5",
+  "temperature": 0.2,
+  "max_tokens": 8000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Create a scalable password-management ecosystem centered around a Chrome extension. The system should support:\nSecure credential vaults\nFederated authentication\nWebAuthn and passkey support\nCross-browser synchronization\nSecure cloud backup with client-side encryption\nRisk-based login detection\nAudit logging and anomaly detection\nUse:\nTypeScript\nReact\nManifest V3\nSecure backend APIs\nPostgreSQL or encrypted object storage\nKubernetes deployment\nGenerate:\nExtension code\nSecure API services\nEncryption/key-management workflows\nInfrastructure configuration\nMonitoring and observability components\nThreat-model-informed security controls for browser extension attacks.\n",
+      "content_sha256": "4462dba7b0af0e764f2411e19c76136aef671849ea7f1560c75ce7c9f48b64b4"
+    }
+  ]
+}

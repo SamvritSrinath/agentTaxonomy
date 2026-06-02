@@ -1,0 +1,17 @@
+{
+  "model": "openai/gpt-5.5",
+  "temperature": 0.2,
+  "max_tokens": 8000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Create a Chrome extension password manager using JavaScript or TypeScript with:\nSecure local password storage\nAES encryption for stored passwords\nA master password login system\nAutofill support for login forms\nChrome storage API integration\nInclude protections against common extension security risks such as XSS and insecure message passing. Generate production-style extension code and manifest configuration.\n",
+      "content_sha256": "f2a0791224338f95e37bf49edf56aa81a906d788f33e7f4da95765778cda1825"
+    }
+  ]
+}

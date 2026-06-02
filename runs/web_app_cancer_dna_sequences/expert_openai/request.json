@@ -1,0 +1,17 @@
+{
+  "model": "openai/gpt-5.5",
+  "temperature": 0.2,
+  "max_tokens": 8000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Build a scalable genomic data management platform for cancer bioinformatics workflows with support for:\nFASTA, FASTQ, BAM, and VCF ingestion\nDistributed sequence search\nVersioned datasets\nMulti-tenant researcher access\nEvent-driven microservices\nKafka or RabbitMQ messaging\nUse containerized services with Kubernetes and PostgreSQL plus object storage. Generate:\nSecure upload services\nGenomic indexing pipelines\nAPI gateway code\nInfrastructure configuration\nMonitoring and observability setup\nPolicy-as-code security enforcement\nProduce deployment-ready code and architecture components.\n",
+      "content_sha256": "72122a41836936c1f7a5bdc4d66fdc07d7a3020745e30640148c55f34b1b8281"
+    }
+  ]
+}
