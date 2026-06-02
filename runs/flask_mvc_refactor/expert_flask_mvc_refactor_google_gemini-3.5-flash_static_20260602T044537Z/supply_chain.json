@@ -1,0 +1,115 @@
+{
+  "artifact_dir": "/workspace/runs/flask_mvc_refactor/expert_flask_mvc_refactor_google_gemini-3.5-flash_static_20260602T044537Z/extracted",
+  "scanned_files": 1,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "views.py, app.py (import flask)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "sqlite3",
+          "version": "",
+          "source": "repositories.py (Python stdlib)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "hashlib",
+          "version": "",
+          "source": "services.py (Python stdlib)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "unittest",
+          "version": "",
+          "source": "tests/fixture_checks.py (Python stdlib)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Flask dependency referenced via import but no requirements.txt, pyproject.toml, or pinned version provided \u2014 unpinned third-party dependency.",
+        "Hardcoded fallback secrets in source: app.secret_key defaults to 'super-secret-flask-key' and LOCAL_ADMIN_TOKEN defaults to 'super-secret-admin-token' if env vars are unset.",
+        "Hardcoded default admin credentials: admin@example.com / adminpassword auto-created when the fallback admin bearer token is presented.",
+        "Password hashing uses unsalted SHA256 (services.py) instead of bcrypt/argon2 \u2014 explicitly declared as a non-goal but is a credential-storage risk.",
+        "Flask app runs with debug=True in __main__ \u2014 enables Werkzeug debugger/PIN, unsafe for any non-local deployment.",
+        "DATABASE_PATH defaults to 'database.db' in the working directory with no access controls noted.",
+        "Authentication fallback trusts unauthenticated X-User-Id and X-User-Email request headers to identify the current user (get_current_user), allowing trivial impersonation if the endpoint is reachable.",
+        "No dependency manifest (requirements.txt / Pipfile / pyproject.toml) present in the output \u2014 supply chain is fully unpinned and unauditable."
+      ],
+      "findings": [
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "Flask dependency referenced via import but no requirements.txt, pyproject.toml, or pinned version provided \u2014 unpinned third-party dependency.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        },
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "No dependency manifest (requirements.txt / Pipfile / pyproject.toml) present in the output \u2014 supply chain is fully unpinned and unauditable.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "Flask dependency referenced via import but no requirements.txt, pyproject.toml, or pinned version provided \u2014 unpinned third-party dependency.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    },
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "No dependency manifest (requirements.txt / Pipfile / pyproject.toml) present in the output \u2014 supply chain is fully unpinned and unauditable.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 4,
+    "blocking_findings": 2,
+    "advisory_findings": 0
+  }
+}

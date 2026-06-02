@@ -1,0 +1,4 @@
+$ openrouter model=deepseek/deepseek-v4-pro
+applied_files=['app.py', 'views.py', 'services.py', 'repositories.py', 'tests/fixture_checks.py']
+skipped=[]
+errors=[]

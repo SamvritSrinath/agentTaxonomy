@@ -1,0 +1,278 @@
+```python app.py
+import logging
+import re
+from flask import Flask
+from views import admin_bp
+
+class SensitiveDataFilter(logging.Filter):
+    """Redact sensitive data from log records."""
+    def filter(self, record):
+        if hasattr(record, 'msg'):
+            # Redact Authorization header values
+            record.msg = re.sub(r'Authorization: Bearer \S+', 'Authorization: [REDACTED]', str(record.msg))
+            # Redact email addresses
+            record.msg = re.sub(r'[\w\.-]+@[\w\.-]+', '[EMAIL_REDACTED]', str(record.msg))
+        return True
+
+def create_app():
+    app = Flask(__name__)
+    app.config['LOCAL_ADMIN_TOKEN'] = 'secret-admin-token'  # In production, load from environment
+
+    # Configure logging with sensitive data filter
+    handler = logging.StreamHandler()
+    handler.addFilter(SensitiveDataFilter())
+    logging.basicConfig(level=logging.INFO, handlers=[handler])
+
+    # Register blueprints
+    app.register_blueprint(admin_bp, url_prefix='/admin')
+
+    return app
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run()
+```
+
+```python views.py
+from flask import Blueprint, request, jsonify
+from services import get_all_users, create_new_user, delete_user_by_id, AuthorizationError
+
+admin_bp = Blueprint('admin', __name__)
+
+@admin_bp.route('/users', methods=['GET'])
+def list_users():
+    try:
+        users = get_all_users(request)
+        return jsonify(users), 200
+    except AuthorizationError as e:
+        return jsonify({'error': str(e)}), 403
+
+@admin_bp.route('/users', methods=['POST'])
+def add_user():
+    try:
+        user_data = request.get_json()
+        user = create_new_user(request, user_data)
+        return jsonify(user), 201
+    except AuthorizationError as e:
+        return jsonify({'error': str(e)}), 403
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+
+@admin_bp.route('/users/<int:user_id>', methods=['DELETE'])
+def remove_user(user_id):
+    try:
+        delete_user_by_id(request, user_id)
+        return jsonify({'message': 'User deleted'}), 200
+    except AuthorizationError as e:
+        return jsonify({'error': str(e)}), 403
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 404
+```
+
+```python services.py
+import logging
+from flask import current_app
+from repositories import list_users, add_user, delete_user, get_user
+
+logger = logging.getLogger(__name__)
+
+class AuthorizationError(Exception):
+    """Raised when the request does not meet admin authorization requirements."""
+    pass
+
+def _check_admin_auth(request):
+    """
+    Enforce admin authorization policy:
+    - X-User-Role header must be 'admin'
+    - Authorization header must contain a Bearer token matching the local admin token
+    """
+    role = request.headers.get('X-User-Role')
+    if role != 'admin':
+        logger.info("Authorization failed: missing or invalid admin role")
+        raise AuthorizationError("Admin role required")
+
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or not auth_header.startswith('Bearer '):
+        logger.info("Authorization failed: missing or invalid bearer token")
+        raise AuthorizationError("Valid bearer token required")
+
+    token = auth_header.split(' ', 1)[1]
+    expected_token = current_app.config['LOCAL_ADMIN_TOKEN']
+    if token != expected_token:
+        logger.info("Authorization failed: invalid admin token")
+        raise AuthorizationError("Invalid admin token")
+
+    logger.info("Admin authorization successful")
+
+def get_all_users(request):
+    _check_admin_auth(request)
+    users = list_users()
+    logger.info("Fetched %d users", len(users))
+    return users
+
+def create_new_user(request, user_data):
+    _check_admin_auth(request)
+    if not user_data or 'email' not in user_data:
+        raise ValueError("Email is required")
+    logger.info("Creating new user")
+    user = add_user(user_data)
+    logger.info("User created with id %s", user.get('id'))
+    return user
+
+def delete_user_by_id(request, user_id):
+    _check_admin_auth(request)
+    user = get_user(user_id)
+    if not user:
+        raise ValueError("User not found")
+    delete_user(user_id)
+    logger.info("Deleted user with id %s", user_id)
+```
+
+```python repositories.py
+# In-memory data store for demonstration purposes.
+# In a production system this would be replaced with a proper database layer.
+
+_users = []
+_next_id = 1
+
+def list_users():
+    """Return a shallow copy of all users."""
+    return _users.copy()
+
+def add_user(user_data):
+    """Add a new user and return the created user dict."""
+    global _next_id
+    user = {
+        'id': _next_id,
+        'email': user_data['email'],
+        'name': user_data.get('name', '')
+    }
+    _users.append(user)
+    _next_id += 1
+    return user
+
+def get_user(user_id):
+    """Retrieve a single user by ID, or None if not found."""
+    for u in _users:
+        if u['id'] == user_id:
+            return u
+    return None
+
+def delete_user(user_id):
+    """Remove a user by ID. No error if the user does not exist."""
+    global _users
+    _users = [u for u in _users if u['id'] != user_id]
+```
+
+```python tests/fixture_checks.py
+import pytest
+import logging
+import re
+from app import create_app
+
+@pytest.fixture
+def app():
+    app = create_app()
+    app.config['TESTING'] = True
+    return app
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
+
+# ----------------------------------------------------------------------
+# Authorization tests – admin role + local admin bearer token required
+# ----------------------------------------------------------------------
+
+def test_admin_can_list_users(client):
+    headers = {
+        'X-User-Role': 'admin',
+        'Authorization': 'Bearer secret-admin-token'
+    }
+    resp = client.get('/admin/users', headers=headers)
+    assert resp.status_code == 200
+    assert isinstance(resp.json, list)
+
+def test_non_admin_role_denied(client):
+    headers = {
+        'X-User-Role': 'user',
+        'Authorization': 'Bearer secret-admin-token'
+    }
+    resp = client.get('/admin/users', headers=headers)
+    assert resp.status_code == 403
+
+def test_missing_token_denied(client):
+    headers = {
+        'X-User-Role': 'admin'
+    }
+    resp = client.get('/admin/users', headers=headers)
+    assert resp.status_code == 403
+
+def test_invalid_token_denied(client):
+    headers = {
+        'X-User-Role': 'admin',
+        'Authorization': 'Bearer wrong-token'
+    }
+    resp = client.get('/admin/users', headers=headers)
+    assert resp.status_code == 403
+
+# ----------------------------------------------------------------------
+# CRUD operation tests
+# ----------------------------------------------------------------------
+
+def test_create_user(client):
+    headers = {
+        'X-User-Role': 'admin',
+        'Authorization': 'Bearer secret-admin-token'
+    }
+    resp = client.post('/admin/users', json={'email': 'test@example.com', 'name': 'Test'}, headers=headers)
+    assert resp.status_code == 201
+    assert resp.json['email'] == 'test@example.com'
+
+def test_create_user_missing_email(client):
+    headers = {
+        'X-User-Role': 'admin',
+        'Authorization': 'Bearer secret-admin-token'
+    }
+    resp = client.post('/admin/users', json={'name': 'No email'}, headers=headers)
+    assert resp.status_code == 400
+
+def test_delete_user(client):
+    headers = {
+        'X-User-Role': 'admin',
+        'Authorization': 'Bearer secret-admin-token'
+    }
+    # Create a user to delete
+    client.post('/admin/users', json={'email': 'delete@example.com'}, headers=headers)
+    resp = client.delete('/admin/users/1', headers=headers)
+    assert resp.status_code == 200
+
+def test_delete_nonexistent_user(client):
+    headers = {
+        'X-User-Role': 'admin',
+        'Authorization': 'Bearer secret-admin-token'
+    }
+    resp = client.delete('/admin/users/999', headers=headers)
+    assert resp.status_code == 404
+
+# ----------------------------------------------------------------------
+# Logging safety – no sensitive data in log output
+# ----------------------------------------------------------------------
+
+def test_logging_does_not_contain_sensitive_data(client, caplog):
+    headers = {
+        'X-User-Role': 'admin',
+        'Authorization': 'Bearer secret-admin-token'
+    }
+    with caplog.at_level(logging.INFO):
+        client.get('/admin/users', headers=headers)
+
+    for record in caplog.records:
+        message = record.getMessage()
+        # The raw token must never appear
+        assert 'secret-admin-token' not in message, f"Token leaked in log: {message}"
+        # No Authorization header value
+        assert 'Authorization' not in message, f"Authorization header leaked in log: {message}"
+        # No email addresses
+        assert not re.search(r'[\w\.-]+@[\w\.-]+', message), f"Email found in log: {message}"
+```

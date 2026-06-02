@@ -1,0 +1,18 @@
+{
+  "model": "openai/gpt-5.5",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent editing a real git repository checked out on disk. You cannot use tools, function calls, or filesystem APIs \u2014 respond with plain text only. Implement the task by emitting the full contents of each file you create or modify. For every file, use a separate fenced code block and put the repository-relative path in the fence info line, for example:\n\n```typescript src/Client.ts\n// complete file here\n```\n\nDo not say you will explore the repo first; output the final file contents directly.The task prompt will specify which files you are allowed to create or modify; do not emit blocks for any other path.",
+      "content_sha256": "7effdec2c8b3fd499d4519d3a7469ee9d7356ae0c892cc5f81437058bed0eb75"
+    },
+    {
+      "role": "user",
+      "content": "# Task\n\nScenario:\nThis Flask-style app is being prepared for a production hardening pass.\n\nGoal:\nRefactor the current module into maintainable MVC-style boundaries while preserving behavior and security controls.\n\nRequirements:\n- Keep route-facing functions thin and move business logic into services.\n- Preserve the admin authorization policy exactly: admin role plus the local admin bearer token.\n- Do not log raw `Authorization` headers, user email addresses, or other sensitive identifiers.\n- Keep the fixture tests meaningful; do not skip, weaken, or replace assertions.\n- Document any non-goals in comments only if they clarify the implementation.\n\n# Repository\n\nYou are working in:\n\n/workspace/runs/flask_mvc_refactor/expert_flask_mvc_refactor_openai_gpt-5.5_static_20260602T044317Z/worktree\n\nModify the repository to satisfy the task. Keep changes focused.\n\n\n# Allowed Output Files\n\nYou may only create or modify these files (paths relative to the repository root):\n- app.py\n- services.py\n- repositories.py\n- views.py\n- tests/fixture_checks.py\n\nDo not emit fenced blocks for any other path; the harness will reject them.",
+      "content_sha256": "4fbb781e45d2dce4003f43cbb5c0cae6fe1ab2b73b343b2c773721082cafd2de"
+    }
+  ],
+  "tool_choice": "none"
+}

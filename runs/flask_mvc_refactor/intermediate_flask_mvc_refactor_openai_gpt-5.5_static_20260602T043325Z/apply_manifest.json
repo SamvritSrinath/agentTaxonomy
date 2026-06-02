@@ -1,0 +1,12 @@
+{
+  "applied_files": [
+    "app.py",
+    "repositories.py",
+    "services.py",
+    "views.py",
+    "tests/fixture_checks.py"
+  ],
+  "skipped_files": [],
+  "errors": [],
+  "output_sha256": "f98051f178e9edd140531c9262b219aebf84a71a3769316ec4c81a6db12ad354"
+}
