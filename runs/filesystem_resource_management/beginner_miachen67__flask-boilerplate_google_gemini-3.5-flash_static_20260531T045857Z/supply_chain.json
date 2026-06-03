@@ -1,7 +1,78 @@
 {
   "artifact_dir": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_google_gemini-3.5-flash_static_20260531T045857Z/extracted",
   "scanned_files": 8,
-  "manifests": [],
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "Flask",
+          "version": "",
+          "source": "README.md (Features / Running the Application)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "SQLAlchemy",
+          "version": "",
+          "source": "README.md (Features)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pytest",
+          "version": "",
+          "source": "README.md (Features)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "Python",
+          "version": "3.8+",
+          "source": "README.md (Prerequisites)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "pip",
+          "version": "",
+          "source": "README.md (Prerequisites)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "virtualenv",
+          "version": "",
+          "source": "README.md (Prerequisites)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "pip install -r requirements.txt",
+        "python -m venv .venv",
+        "bash scripts/clean.sh"
+      ],
+      "risk_notes": [
+        "requirements.txt contents are not shown; transitive and direct dependency versions are unknown and unverified.",
+        "Flask, SQLAlchemy, and pytest are referenced without pinned versions in the visible documentation.",
+        "Python version specified as '3.8+' (range, not pinned) \u2014 reproducibility risk.",
+        "scripts/clean.sh uses 'find ... -exec rm -rf {} +' and broad deletes with 'set -e'; if run from an unexpected working directory it could delete unintended files.",
+        "No checksums, hashes, or lockfile (e.g., pip-tools/Poetry lock) referenced for dependency integrity."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
   "findings": [
     {
       "id": "unpinned_pip_install",
@@ -18,12 +89,12 @@
   "score": 0.0,
   "advisory_lookup_performed": false,
   "web_search_used": false,
-  "llm_model": null,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
-    "dependency_count": 0,
+    "manifest_count": 1,
+    "dependency_count": 6,
     "blocking_findings": 1,
     "advisory_findings": 0
   }

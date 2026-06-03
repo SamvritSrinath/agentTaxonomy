@@ -1,17 +1,34 @@
 {
   "artifact_dir": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/beginner_miachen67__flask-boilerplate_openai_gpt-5.5_static_20260531T045622Z/extracted",
   "scanned_files": 6,
-  "manifests": [],
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [],
+      "install_patterns": [],
+      "risk_notes": [
+        "No external dependencies, package manager invocations, container images, or install scripts are referenced in the provided output. The script uses only Python standard library modules (argparse, os, sys, dataclasses, pathlib, typing).",
+        "The script performs file deletion (remove_path via unlink/rmdir) on paths classified as 'generated'. While scoped to known cache/build directory names and suffixes, a misconfiguration of GENERATED_DIRS/GENERATED_FILE_SUFFIXES could delete user files. Not a supply-chain risk per se, but a destructive-operation risk worth noting.",
+        "'.env' is listed in TEXT_FILE_SUFFIXES, meaning .env files would be read and potentially rewritten by the normalizer; if such files contain secrets, in-place modification is benign but the script does open and rewrite them.",
+        "Repository references (.venv, venv, node_modules, .git) appear only in SKIP_DIRS for traversal exclusion \u2014 they are not installed or fetched by this script."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
   "findings": [],
   "blocking": false,
   "score": 1.0,
   "advisory_lookup_performed": false,
   "web_search_used": false,
-  "llm_model": null,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
+    "manifest_count": 1,
     "dependency_count": 0,
     "blocking_findings": 0,
     "advisory_findings": 0

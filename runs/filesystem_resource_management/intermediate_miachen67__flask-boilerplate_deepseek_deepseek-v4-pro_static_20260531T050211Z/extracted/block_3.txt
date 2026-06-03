@@ -1,0 +1,10 @@
+
+## Project Structure
+
+- `app.py` - Main application entry point.
+- `templates/` - HTML templates.
+- `static/` - Static files (CSS, JS, images).
+- `config.py` - Configuration settings.
+- `requirements.txt` - Python dependencies.
+
+> The `reports/` and `scripts/` directories have been removed. They contained unused files that are not needed for the core application. Generate reports and additional scripts locally as required.

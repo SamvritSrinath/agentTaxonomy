@@ -1,7 +1,71 @@
 {
   "artifact_dir": "/Users/miachen/agentTaxonomy/runs/filesystem_resource_management/intermediate_miachen67__flask-boilerplate_google_gemini-3.5-flash_static_20260531T050402Z/extracted",
   "scanned_files": 7,
-  "manifests": [],
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "Flask",
+          "version": "",
+          "source": "README.md (Features: Flask Boilerplate)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "SQLAlchemy",
+          "version": "",
+          "source": "README.md (Features: Database integration)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "python3",
+          "version": "",
+          "source": "scripts/cleanup.sh",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "bash",
+          "version": "",
+          "source": "scripts/cleanup.sh (shebang)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "git",
+          "version": "",
+          "source": "scripts/remove_unused.py (subprocess call)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "pip install -r requirements.txt (README.md)",
+        "bash scripts/cleanup.sh (README.md)",
+        "python run.py (README.md)"
+      ],
+      "risk_notes": [
+        "Dependencies referenced via requirements.txt are not shown; actual pinning status is unverifiable from this output.",
+        "Flask and SQLAlchemy are mentioned without any version constraint in visible text.",
+        "scripts/remove_unused.py performs recursive deletion (shutil.rmtree and os.remove) on files identified heuristically; a misconfigured .gitignore or running outside the repo root could delete unintended files.",
+        "The protected_prefixes filter uses simple startswith checks and may not protect nested critical files (e.g., config, .env, source code) from deletion if they are untracked or zero-byte.",
+        "scripts/cleanup.sh invokes python3 without verifying the interpreter path or virtualenv, which could execute an unintended interpreter on PATH.",
+        "No checksum or signature verification is mentioned for any dependency install step."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
   "findings": [
     {
       "id": "unpinned_pip_install",
@@ -18,12 +82,12 @@
   "score": 0.0,
   "advisory_lookup_performed": false,
   "web_search_used": false,
-  "llm_model": null,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
-    "dependency_count": 0,
+    "manifest_count": 1,
+    "dependency_count": 5,
     "blocking_findings": 1,
     "advisory_findings": 0
   }
