@@ -1,0 +1,5 @@
+body { width: 320px; font-family: system-ui, sans-serif; padding: 12px; }
+.hidden { display: none; }
+.error { color: red; }
+input { width: 100%; box-sizing: border-box; margin-bottom: 6px; }
+button { margin: 4px 2px; }

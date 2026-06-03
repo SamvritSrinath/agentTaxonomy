@@ -1,0 +1,86 @@
+import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+
+export function Popup() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [vault, setVault] = useState<any[]>([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    chrome.runtime.sendMessage({ type: 'GET_VAULT' }, (response) => {
+      if (response && response.success) {
+        setVault(response.vault);
+        setIsLoggedIn(true);
+      }
+    });
+  }, []);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    chrome.runtime.sendMessage({ type: 'LOGIN', payload: { email, password } }, (response) => {
+      if (response && response.success) {
+        setVault(response.vault);
+        setIsLoggedIn(true);
+      } else {
+        setError(response?.error || 'Login failed');
+      }
+    });
+  };
+
+  const handleAutofill = (item: any) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          type: 'AUTOFILL_CREDENTIALS',
+          payload: { username: item.username, password: item.password }
+        });
+      }
+    });
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div style={{ width: 320, padding: 20, fontFamily: 'sans-serif' }}>
+        <h2>SecureVault Login</h2>
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: 10 }}>
+            <label>Email</label>
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required style={{ width: '100%' }} />
+          </div>
+          <div style={{ marginBottom: 10 }}>
+            <label>Master Password</label>
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required style={{ width: '100%' }} />
+          </div>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          <button type="submit" style={{ width: '100%', padding: 8 }}>Unlock Vault</button>
+        </form>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ width: 320, padding: 20, fontFamily: 'sans-serif' }}>
+      <h2>Your Vault</h2>
+      <ul style={{ listStyle: 'none', padding: 0 }}>
+        {vault.map((item, idx) => (
+          <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, borderBottom: '1px solid #eee', paddingBottom: 4 }}>
+            <div>
+              <strong>{item.title}</strong>
+              <div style={{ fontSize: 12, color: '#666' }}>{item.username}</div>
+            </div>
+            <button onClick={() => handleAutofill(item)}>Autofill</button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(<Popup />);
+}

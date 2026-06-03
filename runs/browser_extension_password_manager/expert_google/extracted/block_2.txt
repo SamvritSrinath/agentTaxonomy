@@ -1,0 +1,30 @@
+secure-vault/
+├── extension/
+│   ├── manifest.json
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── webpack.config.js
+│   └── src/
+│       ├── background.ts
+│       ├── content.ts
+│       ├── popup.tsx
+│       └── utils/
+│           └── crypto.ts
+├── backend/
+│   ├── package.json
+│   ├── tsconfig.json
+│   └── src/
+│       ├── server.ts
+│       ├── controllers/
+│       │   ├── auth.controller.ts
+│       │   └── vault.controller.ts
+│       ├── services/
+│       │   ├── risk.service.ts
+│       │   └── webauthn.service.ts
+│       └── middleware/
+│           └── audit.middleware.ts
+└── infrastructure/
+    ├── db/
+    │   └── schema.sql
+    └── k8s/
+        └── deployment.yaml

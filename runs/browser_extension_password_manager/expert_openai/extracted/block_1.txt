@@ -1,0 +1,58 @@
+password-manager/
+  package.json
+  pnpm-workspace.yaml
+  tsconfig.base.json
+
+  packages/
+    crypto/
+      package.json
+      src/index.ts
+      src/index.test.ts
+
+  apps/
+    extension/
+      package.json
+      vite.config.ts
+      index.html
+      manifest.json
+      src/
+        background.ts
+        contentScript.ts
+        popup/
+          App.tsx
+          main.tsx
+        vaultClient.ts
+        auth.ts
+        types.ts
+
+    api/
+      package.json
+      Dockerfile
+      prisma/
+        schema.prisma
+      src/
+        server.ts
+        db.ts
+        env.ts
+        auth.ts
+        risk.ts
+        audit.ts
+        routes/
+          auth.ts
+          vault.ts
+          webauthn.ts
+          audit.ts
+        tests/
+          risk.test.ts
+
+  infra/
+    k8s/
+      namespace.yaml
+      api-deployment.yaml
+      api-service.yaml
+      postgres.yaml
+      ingress.yaml
+      network-policy.yaml
+      service-monitor.yaml
+      prometheus-rules.yaml
+      sealed-secret-example.yaml

@@ -1,0 +1,3 @@
+Wait, let's keep the height flexible or fixed at 500px. 500px is perfect for a password manager popup.
+
+Let's write the rest of the CSS:

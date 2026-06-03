@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Secure Password Manager",
+  "version": "0.1.0",
+  "description": "Client-side encrypted password vault with secure cloud sync.",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Password Manager"
+  },
+  "background": {
+    "service_worker": "src/background.ts",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*/*"],
+      "js": ["src/contentScript.ts"],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "identity"
+  ],
+  "host_permissions": [
+    "https://api.example.com/*",
+    "https://app.example.com/*"
+  ],
+  "externally_connectable": {
+    "matches": ["https://app.example.com/*"]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none';"
+  }
+}

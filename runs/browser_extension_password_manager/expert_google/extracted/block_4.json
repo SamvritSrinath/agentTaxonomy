@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "SecureVault",
+  "version": "1.0.0",
+  "description": "Zero-Knowledge, Scalable Password Manager with Passkey support.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://api.securevault.internal;"
+  }
+}

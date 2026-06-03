@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Manager</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h2>🔑 Password Manager</h2>
+    
+    <!-- Input Form -->
+    <form id="password-form">
+      <div class="input-group">
+        <label for="website">Website / App</label>
+        <input type="text" id="website" placeholder="e.g., github.com" required />
+      </div>
+      <div class="input-group">
+        <label for="username">Username / Email</label>
+        <input type="text" id="username" placeholder="e.g., user@example.com" required />
+      </div>
+      <div class="input-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn-save">Save Password</button>
+    </form>
+
+    <hr />
+
+    <!-- Search Bar -->
+    <input type="text" id="search" placeholder="🔍 Search saved passwords..." />
+
+    <!-- Saved Passwords List -->
+    <h3>Saved Credentials</h3>
+    <div id="password-list" class="password-list">
+      <p class="empty-state">No passwords saved yet.</p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+import React, { useState } from "react";
+import { newVaultRecord, VaultRecord } from "@pm/crypto";
+import type { VaultState } from "../types";
+
+export function App() {
+  const [masterSecret, setMasterSecret] = useState("");
+  const [vault, setVault] = useState<VaultState>({ records: [], version: 0 });
+  const [status, setStatus] = useState("");
+
+  async function send<T>(message: unknown): Promise<T> {
+    const response = await chrome.runtime.sendMessage(message);
+    if (response?.error) throw new Error(response.error);
+    return response as T;
+  }
+
+  async function login() {
+    setStatus("Authenticating...");
+    await send({ type: "AUTH_LOGIN" });
+    setStatus("Authenticated");
+  }
+
+  async function pull() {
+    setStatus("Pulling vault...");
+    const state = await send<VaultState>({ type: "SYNC_PULL", masterSecret });
+    setVault(state);
+    setStatus(`Loaded ${state.records.length} records`);
+  }
+
+  async function push(state = vault) {
+    setStatus("Syncing vault...");
+    const next = await send<VaultState>({
+      type: "SYNC_PUSH",
+      masterSecret,
+      state
+    });
+    setVault(next);
+    setStatus("Synced");
+  }
+
+  async function addDemoRecord() {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const origin = tab.url ? new URL(tab.url).origin : "https://example.com";
+
+    const record = newVaultRecord({
+      origin,
+      username: "user@example.com",
+      password: crypto.randomUUID() + crypto.randomUUID()
+    });
+
+    const next = {
+      records: [...vault.records, record],
+      version: vault.version
+    };
+
+    setVault(next);
+    await push(next);
+  }
+
+  async function fill(record: VaultRecord) {
+    await send({ type: "FILL_CREDENTIAL", record });
+    setStatus("Filled");
+  }
+
+  return (
+    <main style={{ width: 360, padding: 16, fontFamily: "system-ui" }}>
+      <h2>Password Manager</h2>
+
+      <button onClick={login}>Federated Login</button>
+
+      <div style={{ marginTop: 12 }}>
+        <input
+          type="password"
+          placeholder="Master secret"
+          value={masterSecret}
+          onChange={e => setMasterSecret(e.target.value)}
+          style={{ width: "100%" }}
+        />
+      </div>
+
+      <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+        <button disabled={!masterSecret} onClick={pull}>Pull</button>
+        <button disabled={!masterSecret} onClick={() => push()}>Push</button>
+        <button disabled={!masterSecret} onClick={addDemoRecord}>Add</button>
+      </div>
+
+      <p>{status}</p>
+
+      <ul>
+        {vault.records.map(record => (
+          <li key={record.id}>
+            <b>{record.origin}</b>
+            <br />
+            {record.username}
+            <br />
+            <button onClick={() => fill(record)}>Fill</button>
+          </li>
+        ))}
+      </ul>
+    </main>
+  );
+}

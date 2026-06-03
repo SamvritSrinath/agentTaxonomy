@@ -1,0 +1,17 @@
+chrome-password-manager/
+  manifest.json
+  package.json
+  tsconfig.json
+  popup.html
+  styles.css
+  scripts/
+    copy-static.mjs
+  src/
+    background.ts
+    content.ts
+    crypto.ts
+    popup.ts
+    storage.ts
+    types.ts
+  test/
+    crypto.test.ts

@@ -1,0 +1,25 @@
+# docker-compose.yml
+version: "3.8"
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: vaultdb
+      POSTGRES_PASSWORD: secret
+  redis:
+    image: redis:7
+  auth-service:
+    build: ./services/auth
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - redis
+  vault-service:
+    build: ./services/vault
+    ports:
+      - "3001:3000"
+  audit-service:
+    build: ./services/audit
+    ports:
+      - "3002:3000"

@@ -1,0 +1,58 @@
+body {
+  width: 300px;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+}
+
+.container h1 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+
+.form input {
+  width: 100%;
+  margin-bottom: 5px;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.form button {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+.entry {
+  border: 1px solid #ccc;
+  padding: 8px;
+  margin-bottom: 5px;
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+.entry div {
+  margin-bottom: 2px;
+}
+
+button.delete-btn {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 3px 6px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+button.toggle-password {
+  background: none;
+  border: none;
+  color: #2196F3;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 5px;
+}
+
+.plain-password {
+  width: auto;
+  margin-left: 5px;
+}

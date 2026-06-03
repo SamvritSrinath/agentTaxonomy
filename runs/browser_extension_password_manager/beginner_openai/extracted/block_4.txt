@@ -1,0 +1,175 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 360px;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #222;
+}
+
+.container {
+  padding: 16px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #1f2937;
+}
+
+h2 {
+  margin: 18px 0 10px;
+  font-size: 17px;
+  color: #1f2937;
+}
+
+.warning {
+  margin: 0 0 14px;
+  padding: 8px;
+  border-radius: 6px;
+  background: #fff3cd;
+  color: #664d03;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+}
+
+input {
+  width: 100%;
+  padding: 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.save-btn {
+  margin-top: 6px;
+  padding: 10px;
+  background: #2563eb;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #1d4ed8;
+}
+
+.status {
+  min-height: 18px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #15803d;
+}
+
+.empty-state {
+  padding: 12px;
+  border-radius: 6px;
+  background: white;
+  color: #6b7280;
+  font-size: 13px;
+  text-align: center;
+}
+
+.password-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.password-item {
+  margin-bottom: 10px;
+  padding: 12px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+}
+
+.password-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.website {
+  font-weight: 700;
+  color: #111827;
+  word-break: break-word;
+}
+
+.created-at {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.field-row {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.field-label {
+  font-weight: 700;
+  color: #374151;
+}
+
+.password-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.password-row input {
+  flex: 1;
+  padding: 7px;
+  font-size: 13px;
+}
+
+.small-btn {
+  padding: 7px 8px;
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.small-btn:hover {
+  background: #d1d5db;
+}
+
+.delete-btn {
+  padding: 7px 8px;
+  background: #dc2626;
+  color: white;
+}
+
+.delete-btn:hover {
+  background: #b91c1c;
+}

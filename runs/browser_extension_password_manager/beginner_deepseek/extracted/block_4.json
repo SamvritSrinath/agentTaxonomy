@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Password Saver",
+  "version": "1.0",
+  "description": "A simple extension to save and view passwords locally.",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Password Saver"
+  }
+}

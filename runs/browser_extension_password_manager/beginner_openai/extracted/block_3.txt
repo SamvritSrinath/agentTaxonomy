@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Local Password Saver</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Password Saver</h1>
+
+    <p class="warning">
+      Demo only: saved passwords are stored locally in plaintext.
+    </p>
+
+    <form id="passwordForm">
+      <label for="website">Website</label>
+      <input
+        type="text"
+        id="website"
+        placeholder="example.com"
+        autocomplete="off"
+        required
+      />
+
+      <label for="username">Username</label>
+      <input
+        type="text"
+        id="username"
+        placeholder="your username"
+        autocomplete="off"
+        required
+      />
+
+      <label for="password">Password</label>
+      <input
+        type="password"
+        id="password"
+        placeholder="your password"
+        autocomplete="new-password"
+        required
+      />
+
+      <button type="submit" class="save-btn">Save Password</button>
+    </form>
+
+    <div id="status" class="status" aria-live="polite"></div>
+
+    <h2>Saved Passwords</h2>
+
+    <div id="emptyState" class="empty-state">
+      No saved passwords yet.
+    </div>
+
+    <ul id="passwordList" class="password-list"></ul>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

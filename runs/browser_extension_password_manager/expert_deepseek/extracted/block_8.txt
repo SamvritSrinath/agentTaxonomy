@@ -1,0 +1,21 @@
+// popup/App.tsx
+import React, { useState } from 'react';
+import { KeyManager } from '../lib/key-manager';
+import { VaultView } from './components/VaultView';
+import { LoginForm } from './components/LoginForm';
+
+export default function App() {
+  const [km, setKm] = useState<KeyManager>(new KeyManager());
+  const [lock, setLock] = useState(true);
+
+  const handleUnlock = async (password: string, salt: Uint8Array) => {
+    await km.unlock(password, salt);
+    setLock(false);
+  };
+
+  return (
+    <div>
+      {lock ? <LoginForm onUnlock={handleUnlock} /> : <VaultView keyManager={km} />}
+    </div>
+  );
+}

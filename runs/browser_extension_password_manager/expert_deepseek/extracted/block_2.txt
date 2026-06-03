@@ -1,0 +1,30 @@
+extension/
+├── public/
+│   ├── manifest.json
+│   ├── icons/
+│   └── popup.html
+├── src/
+│   ├── background/
+│   │   ├── index.ts          # service worker
+│   │   └── sync.ts           # periodic vault sync
+│   ├── content/
+│   │   └── autofill.ts       # content script
+│   ├── popup/
+│   │   ├── index.tsx         # React entry
+│   │   ├── App.tsx
+│   │   ├── components/       # Login, Vault, CredentialForm, etc.
+│   │   └── hooks/
+│   ├── lib/
+│   │   ├── crypto.ts         # AES‑GCM, PBKDF2, key unwrap
+│   │   ├── key-manager.ts    # deriveMasterKey, lock/unlock
+│   │   ├── webauthn.ts       # WebAuthn registration/authentication
+│   │   ├── vault.ts          # local vault state, merge logic
+│   │   ├── api-client.ts     # fetch wrapper, JWT handling
+│   │   └── logging.ts        # structured logging to backend
+│   └── types/
+│       └── index.ts
+├── tests/                    # Jest + React Testing Library
+├── webpack.config.js
+├── tsconfig.json
+├── package.json
+└── .eslintrc.json

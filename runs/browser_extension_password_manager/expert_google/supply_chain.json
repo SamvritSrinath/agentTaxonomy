@@ -1,0 +1,19 @@
+{
+  "artifact_dir": "/workspaces/agentTaxonomy/runs/browser_extension_password_manager/expert_google/extracted",
+  "scanned_files": 4,
+  "manifests": [],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": null,
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 0,
+    "dependency_count": 0,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

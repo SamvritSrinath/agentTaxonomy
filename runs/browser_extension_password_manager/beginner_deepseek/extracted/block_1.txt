@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Password Saver</h1>
+    <div class="form">
+      <input type="text" id="website" placeholder="Website" />
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password" />
+      <button id="saveBtn">Save</button>
+    </div>
+    <h2>Saved Passwords</h2>
+    <div id="passwordList"></div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

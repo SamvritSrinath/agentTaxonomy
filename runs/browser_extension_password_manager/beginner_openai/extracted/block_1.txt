@@ -1,0 +1,5 @@
+local-password-saver/
+├── manifest.json
+├── popup.html
+├── popup.css
+└── popup.js

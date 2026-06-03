@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Secure Password Manager",
+  "version": "1.0.0",
+  "description": "AES-encrypted password vault with autofill.",
+  "permissions": ["storage", "activeTab", "scripting"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Password Manager"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
+}
