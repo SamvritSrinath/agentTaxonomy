@@ -1,0 +1,268 @@
+```python app.py
+from __future__ import annotations
+
+import logging
+from typing import Optional
+
+from flask import Flask
+
+from repositories import InMemoryReportRepository, ORDERS, USERS
+from routes import register_routes
+from services import ReportService
+
+logger = logging.getLogger(__name__)
+
+
+def create_app(
+    repository: Optional[InMemoryReportRepository] = None,
+    service: Optional[ReportService] = None,
+) -> Flask:
+    app = Flask(__name__)
+
+    report_repository = repository or InMemoryReportRepository()
+    report_service = service or ReportService(report_repository)
+
+    register_routes(app, report_service)
+
+    return app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+```
+
+```python repositories.py
+from __future__ import annotations
+
+from copy import deepcopy
+from typing import Any, Dict, List, Optional
+
+
+USERS: Dict[int, Dict[str, Any]] = {
+    1: {
+        "id": 1,
+        "name": "Alice",
+        "email": "alice@example.com",
+        "role": "user",
+    },
+    2: {
+        "id": 2,
+        "name": "Bob",
+        "email": "bob@example.com",
+        "role": "admin",
+    },
+    3: {
+        "id": 3,
+        "name": "Charlie",
+        "email": "charlie@example.com",
+        "role": "user",
+    },
+}
+
+ORDERS: List[Dict[str, Any]] = [
+    {
+        "id": 1001,
+        "user_id": 1,
+        "total": 49.99,
+        "status": "paid",
+    },
+    {
+        "id": 1002,
+        "user_id": 1,
+        "total": 25.50,
+        "status": "paid",
+    },
+    {
+        "id": 1003,
+        "user_id": 2,
+        "total": 100.00,
+        "status": "paid",
+    },
+]
+
+
+class InMemoryReportRepository:
+    """Repository boundary for the app's current in-memory data store.
+
+    The route and service layers should not reach directly into USERS or ORDERS.
+    Keeping access behind this class makes it straightforward to replace the
+    storage backend later without changing route code.
+    """
+
+    def __init__(
+        self,
+        users: Optional[Dict[int, Dict[str, Any]]] = None,
+        orders: Optional[List[Dict[str, Any]]] = None,
+    ) -> None:
+        self._users = users if users is not None else USERS
+        self._orders = orders if orders is not None else ORDERS
+
+    def get_user(self, user_id: int) -> Optional[Dict[str, Any]]:
+        user = self._users.get(user_id)
+        return deepcopy(user) if user is not None else None
+
+    def list_users(self) -> List[Dict[str, Any]]:
+        return deepcopy(list(self._users.values()))
+
+    def list_orders(self) -> List[Dict[str, Any]]:
+        return deepcopy(self._orders)
+
+    def list_orders_for_user(self, user_id: int) -> List[Dict[str, Any]]:
+        return deepcopy(
+            [order for order in self._orders if order.get("user_id") == user_id]
+        )
+```
+
+```python services.py
+from __future__ import annotations
+
+from typing import Any, Dict, Optional
+
+from repositories import InMemoryReportRepository
+
+
+class ReportService:
+    """Application service for user summaries and admin reporting."""
+
+    def __init__(self, repository: InMemoryReportRepository) -> None:
+        self._repository = repository
+
+    def get_user(self, user_id: int) -> Optional[Dict[str, Any]]:
+        return self._repository.get_user(user_id)
+
+    def build_user_summary(self, user_id: int) -> Optional[Dict[str, Any]]:
+        user = self._repository.get_user(user_id)
+        if user is None:
+            return None
+
+        orders = self._repository.list_orders_for_user(user_id)
+        total_spent = sum(float(order.get("total", 0)) for order in orders)
+
+        return {
+            "id": user["id"],
+            "name": user["name"],
+            "email": user["email"],
+            "role": user["role"],
+            "order_count": len(orders),
+            "total_spent": round(total_spent, 2),
+        }
+
+    def build_admin_report(self) -> Dict[str, Any]:
+        users = self._repository.list_users()
+        orders = self._repository.list_orders()
+
+        total_revenue = sum(float(order.get("total", 0)) for order in orders)
+        admin_count = sum(1 for user in users if user.get("role") == "admin")
+
+        return {
+            "total_users": len(users),
+            "admin_users": admin_count,
+            "total_orders": len(orders),
+            "total_revenue": round(total_revenue, 2),
+        }
+```
+
+```python routes.py
+from __future__ import annotations
+
+import logging
+import os
+from functools import wraps
+from typing import Any, Callable, Optional, TypeVar, cast
+
+from flask import Flask, Response, jsonify, request
+
+from services import ReportService
+
+logger = logging.getLogger(__name__)
+
+F = TypeVar("F", bound=Callable[..., Any])
+
+DEFAULT_ADMIN_TOKEN = "secret-admin-token"
+
+
+def _configured_admin_token(app: Flask) -> str:
+    return cast(
+        str,
+        app.config.get(
+            "ADMIN_TOKEN",
+            os.environ.get("ADMIN_TOKEN", DEFAULT_ADMIN_TOKEN),
+        ),
+    )
+
+
+def _request_admin_token() -> Optional[str]:
+    auth_header = request.headers.get("Authorization", "")
+
+    if auth_header.lower().startswith("bearer "):
+        return auth_header[7:].strip()
+
+    return request.headers.get("X-Admin-Token")
+
+
+def _request_role() -> Optional[str]:
+    return (
+        request.headers.get("X-User-Role")
+        or request.headers.get("X-Role")
+        or request.args.get("role")
+    )
+
+
+def _is_admin_role() -> bool:
+    role = _request_role()
+    return role is not None and role.lower() == "admin"
+
+
+def require_admin_role_and_token(view: F) -> F:
+    """Protect admin routes with both a role check and a token check.
+
+    This deliberately does not log raw Authorization headers, bearer tokens, or
+    user email addresses.
+    """
+
+    @wraps(view)
+    def wrapped(*args: Any, **kwargs: Any) -> Response:
+        if not _is_admin_role():
+            logger.warning("Denied admin report request: non-admin role")
+            return jsonify({"error": "forbidden"}), 403
+
+        expected_token = _configured_admin_token(request.app if hasattr(request, "app") else request.environ["flask.app"])  # type: ignore[index]
+        provided_token = _request_admin_token()
+
+        if not provided_token or provided_token != expected_token:
+            logger.warning("Denied admin report request: invalid admin token")
+            return jsonify({"error": "unauthorized"}), 401
+
+        return view(*args, **kwargs)
+
+    return cast(F, wrapped)
+
+
+def register_routes(app: Flask, service: ReportService) -> None:
+    @app.route("/users/<int:user_id>/summary", methods=["GET"])
+    @app.route("/user/<int:user_id>/summary", methods=["GET"])
+    def user_summary(user_id: int) -> Response:
+        logger.info("Building user summary", extra={"user_id": user_id})
+
+        summary = service.build_user_summary(user_id)
+        if summary is None:
+            return jsonify({"error": "user not found"}), 404
+
+        return jsonify(summary)
+
+    @app.route("/admin/report", methods=["GET"])
+    @require_admin_role_and_token
+    def admin_report() -> Response:
+        logger.info("Building admin report")
+        return jsonify(service.build_admin_report())
+
+    @app.before_request
+    def _attach_app_to_request_context() -> None:
+        # Flask's request proxy does not expose the app directly. The decorator
+        # above needs the configured ADMIN_TOKEN while remaining easy to unit
+        # test, so attach the app object to the WSGI environ for this request.
+        request.environ["flask.app"] = app
+```

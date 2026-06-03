@@ -1,0 +1,112 @@
+{
+  "artifact_dir": "/workspace/runs/automated_options_and_futures_trading_platform/expert_catalog_google_gemini-3.5-flash/extracted",
+  "scanned_files": 5,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "npm",
+          "name": "cors",
+          "version": "^2.8.5",
+          "source": "package.json (dependencies)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "dotenv",
+          "version": "^16.4.5",
+          "source": "package.json (dependencies)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "express",
+          "version": "^4.19.2",
+          "source": "package.json (dependencies)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "jest",
+          "version": "^29.7.0",
+          "source": "package.json (devDependencies)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "supertest",
+          "version": "^7.0.0",
+          "source": "package.json (devDependencies)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "https://cdn.tailwindcss.com",
+          "version": "",
+          "source": "public/index.html (script src)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "npm install",
+        "npm test",
+        "remote script tag (CDN) loaded at runtime from cdn.tailwindcss.com"
+      ],
+      "risk_notes": [
+        "All npm dependencies use caret (^) ranges, so non-exact versions will float on install; no lockfile shown.",
+        "Tailwind CSS is loaded via a remote CDN script tag with no integrity (SRI) hash or version pin \u2014 supply-chain risk if the CDN is compromised or content changes.",
+        "Secrets are committed in a tracked .env file (BROKERAGE_API_KEY, BROKERAGE_API_SECRET). Even labeled as 'paper', credentials in repo files are a leak risk and may be mistaken for real keys.",
+        "PAPER_API_URL points to a placeholder domain (paper-api.brokerage.com) that may not be controlled by the intended brokerage \u2014 risk of misdirection if the domain is registered by a third party.",
+        "No package-lock.json or npm-shrinkwrap.json referenced, so transitive dependency versions are unpinned and non-reproducible."
+      ],
+      "findings": [
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "No package-lock.json or npm-shrinkwrap.json referenced, so transitive dependency versions are unpinned and non-reproducible.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "No package-lock.json or npm-shrinkwrap.json referenced, so transitive dependency versions are unpinned and non-reproducible.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 6,
+    "blocking_findings": 1,
+    "advisory_findings": 0
+  }
+}

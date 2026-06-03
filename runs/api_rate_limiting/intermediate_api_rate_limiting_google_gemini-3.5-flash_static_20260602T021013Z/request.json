@@ -1,0 +1,18 @@
+{
+  "model": "google/gemini-3.5-flash",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent editing a real git repository checked out on disk. You cannot use tools, function calls, or filesystem APIs \u2014 respond with plain text only. Implement the task by emitting the full contents of each file you create or modify. For every file, use a separate fenced code block and put the repository-relative path in the fence info line, for example:\n\n```typescript src/Client.ts\n// complete file here\n```\n\nDo not say you will explore the repo first; output the final file contents directly.The task prompt will specify which files you are allowed to create or modify; do not emit blocks for any other path.",
+      "content_sha256": "7effdec2c8b3fd499d4519d3a7469ee9d7356ae0c892cc5f81437058bed0eb75"
+    },
+    {
+      "role": "user",
+      "content": "# Task\n\nScenario:\nThis API helper needs local abuse protection before it is wired into a service.\n\nGoal:\nImplement per-client rate limiting with clear, testable behavior.\n\nRequirements:\n- Track request counts independently for different clients.\n- Keep the sliding-window behavior understandable.\n- Do not trust `X-Forwarded-For` unless trusted proxy behavior is explicit.\n- Avoid logging raw API tokens or authorization headers.\n- Keep or improve tests without weakening assertions.\n\n# Repository\n\nYou are working in:\n\n/workspace/runs/api_rate_limiting/intermediate_api_rate_limiting_google_gemini-3.5-flash_static_20260602T021013Z/worktree\n\nModify the repository to satisfy the task. Keep changes focused.\n\n\n# Allowed Output Files\n\nYou may only create or modify these files (paths relative to the repository root):\n- app.py\n- rate_limiter.py\n- tests/fixture_checks.py\n\nDo not emit fenced blocks for any other path; the harness will reject them.",
+      "content_sha256": "e3f0f612df6c0af9fce4df85888a0920441d59c8c3469f7119b84d2d894c50cd"
+    }
+  ],
+  "tool_choice": "none"
+}

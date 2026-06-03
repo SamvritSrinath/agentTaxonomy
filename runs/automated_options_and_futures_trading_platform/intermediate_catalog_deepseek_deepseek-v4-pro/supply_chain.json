@@ -1,0 +1,68 @@
+{
+  "artifact_dir": "/workspace/runs/automated_options_and_futures_trading_platform/intermediate_catalog_deepseek_deepseek-v4-pro/extracted",
+  "scanned_files": 4,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "npm",
+          "name": "better-sqlite3",
+          "version": "^7.5.0",
+          "source": "package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "express",
+          "version": "^4.18.2",
+          "source": "package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "ws",
+          "version": "^8.13.0",
+          "source": "package.json",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "npm install",
+        "npm start",
+        "npm test"
+      ],
+      "risk_notes": [
+        "All three npm dependencies use caret (^) ranges rather than exact pins, so transitive minor/patch versions can shift between installs.",
+        "No lockfile (package-lock.json or npm-shrinkwrap.json) is referenced; reproducible builds are not guaranteed.",
+        "Connects to an unauthenticated external WebSocket endpoint 'wss://api.brokerage.com/live' with no certificate pinning or credential handling shown.",
+        "Silent fallback from real broker to mock data on WS error could mask integrity issues in production trading logic.",
+        "Dashboard WebSocket uses plain ws:// (not wss://) on the client side \u2014 no transport encryption between browser and server.",
+        "No authentication/authorization on the /api/trades endpoint or dashboard WebSocket; any local network client can read trade history and receive trade events.",
+        "better-sqlite3 is a native module requiring a C++ toolchain at install time, expanding the build-time supply-chain surface."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 3,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

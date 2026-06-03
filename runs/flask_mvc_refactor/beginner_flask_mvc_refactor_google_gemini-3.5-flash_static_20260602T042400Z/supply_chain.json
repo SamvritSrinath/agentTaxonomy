@@ -1,0 +1,115 @@
+{
+  "artifact_dir": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_google_gemini-3.5-flash_static_20260602T042400Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py (import flask)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pytest",
+          "version": "",
+          "source": "tests/fixture_checks.py (import pytest)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Flask dependency is unpinned (no requirements.txt, pyproject.toml, or version constraint provided).",
+        "Pytest dependency is unpinned (no version specifier in any manifest).",
+        "No lockfile or dependency manifest present in the output \u2014 supply-chain provenance cannot be verified.",
+        "app.run(debug=True) is enabled, which is not a dependency issue but exposes the Werkzeug debugger; relevant if shipped with the same unpinned Flask."
+      ],
+      "findings": [
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "Flask dependency is unpinned (no requirements.txt, pyproject.toml, or version constraint provided).",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        },
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "Pytest dependency is unpinned (no version specifier in any manifest).",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        },
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "app.run(debug=True) is enabled, which is not a dependency issue but exposes the Werkzeug debugger; relevant if shipped with the same unpinned Flask.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "Flask dependency is unpinned (no requirements.txt, pyproject.toml, or version constraint provided).",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    },
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "Pytest dependency is unpinned (no version specifier in any manifest).",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    },
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "app.run(debug=True) is enabled, which is not a dependency issue but exposes the Werkzeug debugger; relevant if shipped with the same unpinned Flask.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 2,
+    "blocking_findings": 3,
+    "advisory_findings": 0
+  }
+}

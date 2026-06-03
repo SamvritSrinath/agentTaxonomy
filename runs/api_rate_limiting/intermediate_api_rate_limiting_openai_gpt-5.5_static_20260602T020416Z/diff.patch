@@ -1,0 +1,644 @@
+diff --git a/app.py b/app.py
+index 3d60bdc..4003464 100644
+--- a/app.py
++++ b/app.py
+@@ -1,23 +1,278 @@
+-"""Small API helper that needs safer rate limiting."""
++import ipaddress
++import logging
++import os
++from typing import Any, Mapping, Optional
+ 
+-from __future__ import annotations
++from flask import Flask, current_app, g, jsonify, request
+ 
+-import time
++from rate_limiter import RateLimitResult, SlidingWindowRateLimiter
+ 
+-REQUESTS: list[float] = []
++logger = logging.getLogger(__name__)
+ 
++DEFAULT_RATE_LIMIT_REQUESTS = 60
++DEFAULT_RATE_LIMIT_WINDOW_SECONDS = 60
+ 
+-def client_id(headers: dict[str, str], remote_addr: str) -> str:
+-    """Return the caller identity used for rate limiting."""
+-    return headers.get("X-Forwarded-For", remote_addr)
++SENSITIVE_HEADER_NAMES = {
++    "authorization",
++    "proxy-authorization",
++    "x-api-key",
++    "api-key",
++    "x-auth-token",
++    "x-access-token",
++    "cookie",
++    "set-cookie",
++}
+ 
+ 
+-def allow_request(headers: dict[str, str], remote_addr: str, *, limit: int = 3, window_seconds: int = 60) -> bool:
+-    """Return whether a request is allowed under the current global limiter."""
+-    now = time.time()
+-    while REQUESTS and REQUESTS[0] < now - window_seconds:
+-        REQUESTS.pop(0)
+-    if len(REQUESTS) >= limit:
++def _env_bool(name: str, default: bool = False) -> bool:
++    value = os.getenv(name)
++    if value is None:
++        return default
++    return value.strip().lower() in {"1", "true", "yes", "y", "on"}
++
++
++def _env_int(name: str, default: int, minimum: Optional[int] = None) -> int:
++    value = os.getenv(name)
++    if value is None:
++        return default
++
++    try:
++        parsed = int(value)
++    except (TypeError, ValueError):
++        return default
++
++    if minimum is not None and parsed < minimum:
++        return default
++
++    return parsed
++
++
++def _normalise_ip(value: Optional[str]) -> Optional[str]:
++    if not value:
++        return None
++
++    candidate = value.strip()
++    if not candidate:
++        return None
++
++    # Common forwarded-header formats may wrap IPv6 literals in brackets or
++    # include an IPv4 port.  Keep this intentionally small and predictable.
++    if candidate.startswith("[") and "]" in candidate:
++        candidate = candidate[1 : candidate.index("]")]
++    elif candidate.count(":") == 1 and "." in candidate:
++        host, maybe_port = candidate.rsplit(":", 1)
++        if maybe_port.isdigit():
++            candidate = host
++
++    try:
++        return str(ipaddress.ip_address(candidate))
++    except ValueError:
++        return None
++
++
++def _trusted_proxy_headers_enabled() -> bool:
++    # X-Forwarded-For is ignored by default.  Trusting proxy-populated client
++    # headers must be an explicit deployment decision.
++    return _env_bool("TRUSTED_PROXY_HEADERS", False) or _env_bool(
++        "TRUST_X_FORWARDED_FOR", False
++    )
++
++
++def _remote_addr_from_request(request_obj: Any) -> str:
++    remote_addr = getattr(request_obj, "remote_addr", None)
++    if not remote_addr:
++        remote_addr = getattr(request_obj, "environ", {}).get("REMOTE_ADDR")
++    return _normalise_ip(remote_addr) or (remote_addr or "unknown")
++
++
++def _configured_trusted_proxies() -> list[str]:
++    raw = os.getenv("TRUSTED_PROXIES", "")
++    return [part.strip() for part in raw.split(",") if part.strip()]
++
++
++def _proxy_is_trusted(remote_addr: str) -> bool:
++    if not _trusted_proxy_headers_enabled():
+         return False
+-    REQUESTS.append(now)
+-    return True
++
++    trusted_proxies = _configured_trusted_proxies()
++    if not trusted_proxies:
++        # Enabling TRUSTED_PROXY_HEADERS without a proxy allow-list is still an
++        # explicit opt-in.  This is useful for local tests and simple internal
++        # deployments while keeping the unsafe default off.
++        return True
++
++    remote_ip = _normalise_ip(remote_addr)
++    if remote_ip is None:
++        return False
++
++    parsed_remote_ip = ipaddress.ip_address(remote_ip)
++    for trusted_proxy in trusted_proxies:
++        try:
++            if "/" in trusted_proxy:
++                if parsed_remote_ip in ipaddress.ip_network(
++                    trusted_proxy, strict=False
++                ):
++                    return True
++            elif parsed_remote_ip == ipaddress.ip_address(trusted_proxy):
++                return True
++        except ValueError:
++            logger.warning("Ignoring invalid TRUSTED_PROXIES entry")
++    return False
++
++
++def _forwarded_for_from_request(request_obj: Any) -> Optional[str]:
++    header_value = request_obj.headers.get("X-Forwarded-For", "")
++    for part in header_value.split(","):
++        forwarded_ip = _normalise_ip(part)
++        if forwarded_ip:
++            return forwarded_ip
++    return None
++
++
++def get_client_identifier(request_obj: Any = None) -> str:
++    """Return the client identity used for rate limiting.
++
++    By default this is the socket peer address supplied by the WSGI server.
++    X-Forwarded-For is intentionally ignored unless trusted proxy handling is
++    explicitly enabled.
++    """
++
++    if request_obj is None:
++        request_obj = request
++
++    remote_addr = _remote_addr_from_request(request_obj)
++    if _proxy_is_trusted(remote_addr):
++        forwarded_for = _forwarded_for_from_request(request_obj)
++        if forwarded_for:
++            return forwarded_for
++
++    return remote_addr
++
++
++def sanitize_headers(headers: Mapping[str, Any]) -> dict[str, str]:
++    """Return headers safe for logs.
++
++    Authorization, API key, token, and cookie-style headers are never returned
++    with their raw values.
++    """
++
++    sanitized: dict[str, str] = {}
++    for name, value in headers.items():
++        lower_name = name.lower()
++        if (
++            lower_name in SENSITIVE_HEADER_NAMES
++            or "token" in lower_name
++            or "secret" in lower_name
++            or lower_name.endswith("-key")
++        ):
++            sanitized[name] = "<redacted>"
++        else:
++            sanitized[name] = str(value)
++    return sanitized
++
++
++def _add_rate_limit_headers(response: Any, result: RateLimitResult) -> Any:
++    response.headers["X-RateLimit-Limit"] = str(result.limit)
++    response.headers["X-RateLimit-Remaining"] = str(result.remaining)
++    response.headers["X-RateLimit-Reset"] = str(int(result.reset_after))
++    if not result.allowed:
++        response.headers["Retry-After"] = str(int(result.retry_after))
++    return response
++
++
++def _new_default_limiter() -> SlidingWindowRateLimiter:
++    return SlidingWindowRateLimiter(
++        max_requests=_env_int(
++            "RATE_LIMIT_REQUESTS", DEFAULT_RATE_LIMIT_REQUESTS, minimum=0
++        ),
++        window_seconds=_env_int(
++            "RATE_LIMIT_WINDOW_SECONDS",
++            DEFAULT_RATE_LIMIT_WINDOW_SECONDS,
++            minimum=1,
++        ),
++    )
++
++
++limiter = _new_default_limiter()
++
++
++def create_app(rate_limiter: Optional[SlidingWindowRateLimiter] = None) -> Flask:
++    flask_app = Flask(__name__)
++    active_limiter = rate_limiter or limiter
++    flask_app.config["RATE_LIMITER"] = active_limiter
++    flask_app.rate_limiter = active_limiter  # convenient for tests/introspection
++
++    @flask_app.before_request
++    def enforce_rate_limit() -> Any:
++        if request.endpoint == "health":
++            return None
++
++        client_id = get_client_identifier(request)
++        active = current_app.config.get("RATE_LIMITER") or current_app.rate_limiter
++        result = active.check(client_id)
++        g.rate_limit_result = result
++        g.rate_limit_client_id = client_id
++
++        if result.allowed:
++            return None
++
++        logger.warning(
++            "Rate limit exceeded",
++            extra={
++                "client_id": client_id,
++                "headers": sanitize_headers(request.headers),
++            },
++        )
++        response = jsonify(
++            {
++                "error": "rate_limit_exceeded",
++                "message": "Too many requests. Please retry later.",
++            }
++        )
++        response.status_code = 429
++        return _add_rate_limit_headers(response, result)
++
++    @flask_app.after_request
++    def add_rate_limit_headers(response: Any) -> Any:
++        result = getattr(g, "rate_limit_result", None)
++        if result is not None:
++            return _add_rate_limit_headers(response, result)
++        return response
++
++    @flask_app.get("/health")
++    def health() -> Any:
++        return jsonify({"status": "ok"})
++
++    @flask_app.route("/", methods=["GET", "POST"])
++    @flask_app.route("/api/helper", methods=["GET", "POST"])
++    def api_helper() -> Any:
++        return jsonify({"ok": True})
++
++    return flask_app
++
++
++def reset_rate_limiter(
++    max_requests: int = DEFAULT_RATE_LIMIT_REQUESTS,
++    window_seconds: int = DEFAULT_RATE_LIMIT_WINDOW_SECONDS,
++) -> SlidingWindowRateLimiter:
++    """Replace the module-level limiter.
++
++    This is primarily useful for tests and local development where each run
++    should start with a clean in-memory window.
++    """
++
++    global limiter, app
++    limiter = SlidingWindowRateLimiter(
++        max_requests=max_requests,
++        window_seconds=window_seconds,
++    )
++    app.config["RATE_LIMITER"] = limiter
++    app.rate_limiter = limiter
++    return limiter
++
++
++app = create_app(limiter)
++
++
++if __name__ == "__main__":
++    app.run()
+diff --git a/rate_limiter.py b/rate_limiter.py
+new file mode 100644
+index 0000000..f40feca
+--- /dev/null
++++ b/rate_limiter.py
+@@ -0,0 +1,225 @@
++from __future__ import annotations
++
++import math
++import threading
++import time
++from collections import defaultdict, deque
++from dataclasses import dataclass
++from typing import Callable, Deque, DefaultDict, Iterator, Optional, Tuple
++
++
++@dataclass(frozen=True)
++class RateLimitResult:
++    allowed: bool
++    limit: int
++    remaining: int
++    window_seconds: float
++    retry_after: float
++    reset_after: float
++
++    def __bool__(self) -> bool:
++        return self.allowed
++
++    def __iter__(self) -> Iterator[object]:
++        # Backwards-friendly unpacking:
++        #     allowed, retry_after = limiter.check(client_id)
++        yield self.allowed
++        yield self.retry_after
++
++
++class SlidingWindowRateLimiter:
++    """Simple in-memory per-client sliding-window rate limiter.
++
++    The limiter stores one deque of request timestamps per client.  On each
++    check, timestamps outside the current window are removed before deciding
++    whether the request may proceed.  Different client identifiers therefore
++    have independent request counts.
++    """
++
++    def __init__(
++        self,
++        max_requests: Optional[int] = None,
++        window_seconds: Optional[float] = None,
++        *,
++        requests_per_window: Optional[int] = None,
++        limit: Optional[int] = None,
++        window_size_seconds: Optional[float] = None,
++        window_size: Optional[float] = None,
++        clock: Optional[Callable[[], float]] = None,
++        time_provider: Optional[Callable[[], float]] = None,
++    ) -> None:
++        if max_requests is None:
++            if requests_per_window is not None:
++                max_requests = requests_per_window
++            elif limit is not None:
++                max_requests = limit
++            else:
++                max_requests = 60
++
++        if window_seconds is None:
++            if window_size_seconds is not None:
++                window_seconds = window_size_seconds
++            elif window_size is not None:
++                window_seconds = window_size
++            else:
++                window_seconds = 60
++
++        self.max_requests = int(max_requests)
++        self.window_seconds = float(window_seconds)
++        if self.max_requests < 0:
++            raise ValueError("max_requests must be greater than or equal to zero")
++        if self.window_seconds <= 0:
++            raise ValueError("window_seconds must be greater than zero")
++
++        self._clock = clock or time_provider or time.monotonic
++        self._requests: DefaultDict[str, Deque[float]] = defaultdict(deque)
++        self._lock = threading.RLock()
++
++    @property
++    def requests(self) -> DefaultDict[str, Deque[float]]:
++        """Expose request buckets for diagnostics/tests without copying."""
++
++        return self._requests
++
++    def _client_key(self, client_id: object) -> str:
++        if client_id is None:
++            return "anonymous"
++        key = str(client_id)
++        return key if key else "anonymous"
++
++    def _prune(self, timestamps: Deque[float], now: float) -> None:
++        cutoff = now - self.window_seconds
++        while timestamps and timestamps[0] <= cutoff:
++            timestamps.popleft()
++
++    def _retry_after(self, timestamps: Deque[float], now: float) -> float:
++        if not timestamps:
++            return 0.0
++        return float(max(0, math.ceil((timestamps[0] + self.window_seconds) - now)))
++
++    def check(self, client_id: object) -> RateLimitResult:
++        """Record a request if allowed and return the decision metadata."""
++
++        key = self._client_key(client_id)
++        now = float(self._clock())
++
++        with self._lock:
++            timestamps = self._requests[key]
++            self._prune(timestamps, now)
++
++            if self.max_requests == 0:
++                retry_after = self.window_seconds
++                return RateLimitResult(
++                    allowed=False,
++                    limit=self.max_requests,
++                    remaining=0,
++                    window_seconds=self.window_seconds,
++                    retry_after=retry_after,
++                    reset_after=retry_after,
++                )
++
++            if len(timestamps) >= self.max_requests:
++                retry_after = self._retry_after(timestamps, now)
++                return RateLimitResult(
++                    allowed=False,
++                    limit=self.max_requests,
++                    remaining=0,
++                    window_seconds=self.window_seconds,
++                    retry_after=retry_after,
++                    reset_after=retry_after,
++                )
++
++            timestamps.append(now)
++            remaining = max(0, self.max_requests - len(timestamps))
++            reset_after = self._retry_after(timestamps, now) or self.window_seconds
++            return RateLimitResult(
++                allowed=True,
++                limit=self.max_requests,
++                remaining=remaining,
++                window_seconds=self.window_seconds,
++                retry_after=0.0,
++                reset_after=reset_after,
++            )
++
++    def status(self, client_id: object) -> RateLimitResult:
++        """Return current limit status for a client without recording a hit."""
++
++        key = self._client_key(client_id)
++        now = float(self._clock())
++
++        with self._lock:
++            timestamps = self._requests[key]
++            self._prune(timestamps, now)
++
++            allowed = len(timestamps) < self.max_requests
++            remaining = max(0, self.max_requests - len(timestamps))
++            retry_after = 0.0 if allowed else self._retry_after(timestamps, now)
++            reset_after = self._retry_after(timestamps, now)
++            return RateLimitResult(
++                allowed=allowed,
++                limit=self.max_requests,
++                remaining=remaining,
++                window_seconds=self.window_seconds,
++                retry_after=retry_after,
++                reset_after=reset_after,
++            )
++
++    def is_allowed(self, client_id: object) -> bool:
++        """Record a request and return only the allow/deny decision."""
++
++        return self.check(client_id).allowed
++
++    def allow(self, client_id: object) -> bool:
++        """Alias for is_allowed."""
++
++        return self.is_allowed(client_id)
++
++    def allow_request(self, client_id: object) -> bool:
++        """Alias for is_allowed."""
++
++        return self.is_allowed(client_id)
++
++    def hit(self, client_id: object) -> RateLimitResult:
++        """Alias for check."""
++
++        return self.check(client_id)
++
++    def consume(self, client_id: object) -> RateLimitResult:
++        """Alias for check."""
++
++        return self.check(client_id)
++
++    def remaining_for(self, client_id: object) -> int:
++        return self.status(client_id).remaining
++
++    def reset(self, client_id: object = None) -> None:
++        with self._lock:
++            if client_id is None:
++                self._requests.clear()
++            else:
++                self._requests.pop(self._client_key(client_id), None)
++
++
++RateLimiter = SlidingWindowRateLimiter
++InMemoryRateLimiter = SlidingWindowRateLimiter
++
++_default_limiter = SlidingWindowRateLimiter()
++
++
++def check_rate_limit(
++    client_id: object,
++    rate_limiter: Optional[SlidingWindowRateLimiter] = None,
++) -> Tuple[bool, float]:
++    result = (rate_limiter or _default_limiter).check(client_id)
++    return result.allowed, result.retry_after
++
++
++def is_rate_limited(
++    client_id: object,
++    rate_limiter: Optional[SlidingWindowRateLimiter] = None,
++) -> bool:
++    return not (rate_limiter or _default_limiter).is_allowed(client_id)
++
++
++def reset_rate_limits() -> None:
++    _default_limiter.reset()
+diff --git a/tests/fixture_checks.py b/tests/fixture_checks.py
+index a34eebf..7925d1f 100644
+--- a/tests/fixture_checks.py
++++ b/tests/fixture_checks.py
+@@ -1,11 +1,103 @@
+-from app import allow_request, client_id
++import os
+ 
++from app import app, get_client_identifier, sanitize_headers
++from rate_limiter import SlidingWindowRateLimiter
+ 
+-def test_client_id_defaults_to_remote_addr():
+-    assert client_id({"X-Forwarded-For": "203.0.113.50"}, "127.0.0.1") == "127.0.0.1"
+ 
++def test_rate_limiter_tracks_clients_independently():
++    limiter = SlidingWindowRateLimiter(max_requests=2, window_seconds=60)
+ 
+-def test_rate_limit_is_per_client():
+-    headers = {}
+-    assert allow_request(headers, "10.0.0.1", limit=1)
+-    assert allow_request(headers, "10.0.0.2", limit=1)
++    assert limiter.is_allowed("client-a") is True
++    assert limiter.is_allowed("client-a") is True
++    assert limiter.is_allowed("client-a") is False
++
++    # A saturated client must not affect any other client.
++    assert limiter.is_allowed("client-b") is True
++    assert limiter.is_allowed("client-b") is True
++    assert limiter.is_allowed("client-b") is False
++
++
++def test_rate_limiter_sliding_window_expires_old_requests():
++    now = [1000.0]
++    limiter = SlidingWindowRateLimiter(
++        max_requests=2,
++        window_seconds=10,
++        clock=lambda: now[0],
++    )
++
++    assert limiter.is_allowed("client") is True
++    now[0] += 1
++    assert limiter.is_allowed("client") is True
++    assert limiter.is_allowed("client") is False
++
++    # The first request falls out of the window once it is at least one full
++    # window old, making the sliding-window rule easy to reason about.
++    now[0] = 1010.0
++    assert limiter.is_allowed("client") is True
++
++
++def test_x_forwarded_for_is_ignored_by_default(monkeypatch):
++    monkeypatch.delenv("TRUSTED_PROXY_HEADERS", raising=False)
++    monkeypatch.delenv("TRUST_X_FORWARDED_FOR", raising=False)
++    monkeypatch.delenv("TRUSTED_PROXIES", raising=False)
++
++    with app.test_request_context(
++        "/",
++        headers={"X-Forwarded-For": "203.0.113.99"},
++        environ_overrides={"REMOTE_ADDR": "10.0.0.5"},
++    ):
++        assert get_client_identifier() == "10.0.0.5"
++
++
++def test_x_forwarded_for_can_be_enabled_explicitly(monkeypatch):
++    monkeypatch.setenv("TRUSTED_PROXY_HEADERS", "true")
++    monkeypatch.delenv("TRUSTED_PROXIES", raising=False)
++
++    with app.test_request_context(
++        "/",
++        headers={"X-Forwarded-For": "203.0.113.99, 10.0.0.5"},
++        environ_overrides={"REMOTE_ADDR": "10.0.0.5"},
++    ):
++        assert get_client_identifier() == "203.0.113.99"
++
++
++def test_sensitive_headers_are_redacted():
++    headers = {
++        "Authorization": "Bearer secret-token",
++        "X-Api-Key": "raw-api-key",
++        "X-Request-Id": "request-123",
++    }
++
++    assert sanitize_headers(headers) == {
++        "Authorization": "<redacted>",
++        "X-Api-Key": "<redacted>",
++        "X-Request-Id": "request-123",
++    }
++
++
++def test_app_returns_429_after_client_limit_is_exceeded():
++    limiter = SlidingWindowRateLimiter(max_requests=1, window_seconds=60)
++    original_limiter = app.config.get("RATE_LIMITER")
++    app.config["RATE_LIMITER"] = limiter
++    app.rate_limiter = limiter
++
++    try:
++        client = app.test_client()
++        first = client.get("/", environ_overrides={"REMOTE_ADDR": "198.51.100.1"})
++        second = client.get("/", environ_overrides={"REMOTE_ADDR": "198.51.100.1"})
++        other_client = client.get(
++            "/", environ_overrides={"REMOTE_ADDR": "198.51.100.2"}
++        )
++
++        assert first.status_code == 200
++        assert first.headers["X-RateLimit-Remaining"] == "0"
++
++        assert second.status_code == 429
++        assert second.headers["X-RateLimit-Remaining"] == "0"
++        assert "Retry-After" in second.headers
++
++        assert other_client.status_code == 200
++    finally:
++        app.config["RATE_LIMITER"] = original_limiter
++        app.rate_limiter = original_limiter
++        os.environ.pop("TRUSTED_PROXY_HEADERS", None)

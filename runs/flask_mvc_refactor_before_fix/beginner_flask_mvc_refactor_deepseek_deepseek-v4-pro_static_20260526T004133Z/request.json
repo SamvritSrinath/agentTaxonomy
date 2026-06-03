@@ -1,0 +1,18 @@
+{
+  "model": "deepseek/deepseek-v4-pro",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent editing a real git repository checked out on disk. You cannot use tools, function calls, or filesystem APIs \u2014 respond with plain text only. Implement the task by emitting the full contents of each file you create or modify. For every file, use a separate fenced code block and put the repository-relative path in the fence info line, for example:\n\n```typescript src/Client.ts\n// complete file here\n```\n\nDo not say you will explore the repo first; output the final file contents directly.",
+      "content_sha256": "d6ade600cef267725133ffce255907f4c16d749a7f9de9f70138e999354f8438"
+    },
+    {
+      "role": "user",
+      "content": "# Task\n\nRefactor this small Flask-style app so it is easier to maintain.\n\nKeep the current behavior, but split the user summary and admin report logic out of the route-like functions. Add or update a small test if needed.\n\n# Repository\n\nYou are working in:\n\n/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T004133Z/worktree\n\nModify the repository to satisfy the task. Keep changes focused.\n",
+      "content_sha256": "0bceb3d445557bf07e6997a55f8f0f2d19a89dafece7970b83cea7ae993891c6"
+    }
+  ],
+  "tool_choice": "none"
+}

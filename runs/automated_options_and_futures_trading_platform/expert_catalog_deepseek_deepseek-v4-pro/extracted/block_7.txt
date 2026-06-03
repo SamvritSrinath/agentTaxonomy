@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Options/Futures Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h1>Options & Futures Monitoring (Paper Trading)</h1>
+    <div id="status">
+        <p>Circuit Breaker: <span id="cb-status">Active</span></p>
+        <p>Simulated Balance: $<span id="balance">---</span></p>
+    </div>
+    <div id="index-data">
+        <h2>Latest Index Quotes</h2>
+        <ul id="quotes-list">
+            <li>Loading...</li>
+        </ul>
+    </div>
+    <div id="trade-form">
+        <h2>Mock Trade</h2>
+        <textarea id="trade-payload" rows="4" cols="50" placeholder='{"symbol": "AAPL", "qty": 10, "side": "buy"}'></textarea>
+        <br/>
+        <button id="submit-trade">Submit (logged only)</button>
+        <p id="trade-response"></p>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>

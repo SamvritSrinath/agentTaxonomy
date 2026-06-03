@@ -1,0 +1,52 @@
+{
+  "artifact_dir": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260602T041852Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py, views.py",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pytest",
+          "version": "",
+          "source": "tests/fixture_checks.py",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "flask is imported but not pinned to a specific version; no requirements.txt or pyproject.toml is provided.",
+        "pytest is imported but not pinned; test dependency is undeclared in any manifest.",
+        "No lockfile or dependency manifest present, so transitive versions are unresolvable and builds are non-reproducible."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 2,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

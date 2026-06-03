@@ -1,0 +1,22 @@
+{
+  "source": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_openai_gpt-5.5_static_20260526T004411Z/agent_output.md",
+  "output_dir": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_openai_gpt-5.5_static_20260526T004411Z/extracted",
+  "block_count": 3,
+  "extracted_files": [
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_openai_gpt-5.5_static_20260526T004411Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_1.py"
+    },
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_openai_gpt-5.5_static_20260526T004411Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_2.py"
+    },
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_openai_gpt-5.5_static_20260526T004411Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_3.py"
+    }
+  ]
+}

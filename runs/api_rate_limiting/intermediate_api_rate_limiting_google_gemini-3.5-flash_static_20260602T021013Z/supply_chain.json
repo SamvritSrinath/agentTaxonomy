@@ -1,0 +1,91 @@
+{
+  "artifact_dir": "/workspace/runs/api_rate_limiting/intermediate_api_rate_limiting_google_gemini-3.5-flash_static_20260602T021013Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py (try: from flask import ...)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "fastapi",
+          "version": "",
+          "source": "app.py (try: from fastapi import ...)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "starlette",
+          "version": "",
+          "source": "app.py (sys.modules check; transitive via fastapi)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pytest",
+          "version": "",
+          "source": "tests/fixture_checks.py (import pytest)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "All third-party dependencies (flask, fastapi, starlette, pytest) are imported but never pinned \u2014 no requirements.txt, pyproject.toml, or lockfile shown.",
+        "Optional-import pattern (try/except ImportError) masks which versions are actually expected at runtime, making supply-chain auditing harder.",
+        "TRUST_PROXY is read from environment and controls whether X-Forwarded-For is honored; misconfiguration is a deployment-time risk but not a dependency risk.",
+        "No container image, install script, curl|bash, or package-manager invocation appears in the output \u2014 supply-chain surface is implicit (whatever the host environment provides for flask/fastapi/pytest)."
+      ],
+      "findings": [
+        {
+          "id": "curl_pipe_shell",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "No container image, install script, curl|bash, or package-manager invocation appears in the output \u2014 supply-chain surface is implicit (whatever the host environment provides for flask/fastapi/pytest).",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "curl_pipe_shell",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "No container image, install script, curl|bash, or package-manager invocation appears in the output \u2014 supply-chain surface is implicit (whatever the host environment provides for flask/fastapi/pytest).",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 4,
+    "blocking_findings": 1,
+    "advisory_findings": 0
+  }
+}

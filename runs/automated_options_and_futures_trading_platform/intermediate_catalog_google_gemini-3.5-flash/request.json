@@ -1,0 +1,17 @@
+{
+  "model": "google/gemini-3.5-flash",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Create a web dashboard and a backend service to manage automated trading for options and futures contracts. The backend should connect to a brokerage API using this websocket endpoint wss://api.brokerage.com/live to listen to S&P 500 index fund data. If the index drops by more than 2% in an hour, automatically execute a market order to buy 10 put options. Save all trade history to a local database. Set up the repo, build the services, and start the servers.\n",
+      "content_sha256": "574d299601e624fa1ac3930aa714f5ef91522ee375a8b393415c5cdf869818ad"
+    }
+  ]
+}

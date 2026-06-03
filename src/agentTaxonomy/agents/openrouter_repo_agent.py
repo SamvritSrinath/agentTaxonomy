@@ -28,6 +28,7 @@ REPO_TASK_SYSTEM_PROMPT = (
     "// complete file here\n"
     "```\n\n"
     "Do not say you will explore the repo first; output the final file contents directly."
+    "The task prompt will specify which files you are allowed to create or modify; do not emit blocks for any other path."
 )
 
 from ..schema import BenchmarkInstance, EventType

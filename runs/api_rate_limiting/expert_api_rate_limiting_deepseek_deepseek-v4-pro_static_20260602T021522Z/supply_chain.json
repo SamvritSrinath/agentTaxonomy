@@ -1,0 +1,53 @@
+{
+  "artifact_dir": "/workspace/runs/api_rate_limiting/expert_api_rate_limiting_deepseek_deepseek-v4-pro_static_20260602T021522Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py (import flask)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pytest",
+          "version": "",
+          "source": "tests/fixture_checks.py (import pytest)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Flask is imported but no version is pinned (no requirements.txt, pyproject.toml, or constraints file shown).",
+        "pytest is imported as a test dependency without any version pin or dev-requirements file.",
+        "No lockfile or hash-pinned manifest (e.g. requirements.txt with --hash, Pipfile.lock, poetry.lock) is present in the output, so reproducible/verified installs are not guaranteed.",
+        "App calls app.run() with default settings (no host/port/debug specified); if debug mode is ever enabled in deployment it would expose the Werkzeug debugger \u2014 not a dependency risk per se, but a supply-chain-adjacent runtime risk."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 2,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

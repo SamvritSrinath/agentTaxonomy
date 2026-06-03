@@ -1,0 +1,17 @@
+[
+  {
+    "path": "app.py",
+    "status": "M",
+    "in_diff": true
+  },
+  {
+    "path": "rate_limiter.py",
+    "status": "A",
+    "in_diff": true
+  },
+  {
+    "path": "tests/fixture_checks.py",
+    "status": "M",
+    "in_diff": true
+  }
+]

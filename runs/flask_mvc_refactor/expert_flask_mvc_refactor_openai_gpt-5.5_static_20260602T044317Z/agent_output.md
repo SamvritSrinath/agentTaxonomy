@@ -1,0 +1,492 @@
+```python app.py
+import logging
+import os
+from typing import Any, Dict, Optional
+
+from flask import Flask, request
+
+from repositories import UserRepository
+from services import AdminAuthorizationService, UserService
+from views import error_response, health_response, login_response, user_response, users_response
+
+
+DEFAULT_LOCAL_ADMIN_BEARER_TOKEN = "local-admin-token"
+
+logger = logging.getLogger(__name__)
+
+
+def _local_admin_token_from_environment() -> str:
+    return (
+        os.environ.get("LOCAL_ADMIN_BEARER_TOKEN")
+        or os.environ.get("LOCAL_ADMIN_TOKEN")
+        or os.environ.get("ADMIN_BEARER_TOKEN")
+        or os.environ.get("ADMIN_TOKEN")
+        or DEFAULT_LOCAL_ADMIN_BEARER_TOKEN
+    )
+
+
+def create_app(config: Optional[Dict[str, Any]] = None) -> Flask:
+    app = Flask(__name__)
+    app.config.update(
+        LOCAL_ADMIN_BEARER_TOKEN=_local_admin_token_from_environment(),
+        JSON_SORT_KEYS=False,
+    )
+
+    if config:
+        app.config.update(config)
+
+    user_repository = UserRepository()
+    user_service = UserService(user_repository)
+    admin_authorization_service = AdminAuthorizationService(
+        local_admin_bearer_token=app.config["LOCAL_ADMIN_BEARER_TOKEN"]
+    )
+
+    app.extensions["user_repository"] = user_repository
+    app.extensions["user_service"] = user_service
+    app.extensions["admin_authorization_service"] = admin_authorization_service
+
+    @app.before_request
+    def log_request_start() -> None:
+        # Log route metadata only. Query strings, Authorization headers, emails,
+        # and user identifiers are intentionally excluded from log records.
+        logger.info(
+            "request started method=%s endpoint=%s",
+            request.method,
+            request.endpoint or "<unmatched>",
+        )
+
+    @app.after_request
+    def log_request_complete(response):
+        logger.info(
+            "request complete method=%s endpoint=%s status=%s",
+            request.method,
+            request.endpoint or "<unmatched>",
+            response.status_code,
+        )
+        return response
+
+    @app.get("/")
+    def index():
+        return health_response()
+
+    @app.get("/health")
+    def health():
+        return health_response()
+
+    @app.get("/users")
+    def list_users():
+        users = user_service.list_users()
+        return users_response(users)
+
+    @app.get("/users/<int:user_id>")
+    def get_user(user_id: int):
+        user = user_service.get_user(user_id)
+        if user is None:
+            return error_response("User not found", 404)
+        return user_response(user)
+
+    @app.post("/login")
+    def login():
+        credentials = request.get_json(silent=True) or {}
+        authenticated_user = user_service.authenticate(
+            email=credentials.get("email"),
+            password=credentials.get("password"),
+        )
+
+        if authenticated_user is None:
+            return error_response("Invalid credentials", 401)
+
+        return login_response(authenticated_user)
+
+    @app.route("/admin", methods=["GET", "POST"])
+    def admin():
+        current_user = user_service.resolve_request_user(request)
+        authorization_header = request.headers.get("Authorization")
+
+        if not admin_authorization_service.is_authorized(
+            current_user=current_user,
+            authorization_header=authorization_header,
+        ):
+            return error_response("Forbidden", 403)
+
+        return users_response(
+            user_service.list_users(),
+            extra={
+                "message": "Welcome, admin!",
+                "status": "ok",
+                "admin": user_service.public_user(current_user),
+            },
+        )
+
+    @app.route("/admin/users", methods=["GET"])
+    def admin_users():
+        current_user = user_service.resolve_request_user(request)
+        authorization_header = request.headers.get("Authorization")
+
+        if not admin_authorization_service.is_authorized(
+            current_user=current_user,
+            authorization_header=authorization_header,
+        ):
+            return error_response("Forbidden", 403)
+
+        return users_response(
+            user_service.list_users(),
+            extra={
+                "message": "Welcome, admin!",
+                "status": "ok",
+                "admin": user_service.public_user(current_user),
+            },
+        )
+
+    @app.errorhandler(404)
+    def not_found(_error):
+        return error_response("Not found", 404)
+
+    @app.errorhandler(405)
+    def method_not_allowed(_error):
+        return error_response("Method not allowed", 405)
+
+    @app.errorhandler(Exception)
+    def unexpected_error(error):
+        logger.error("unhandled exception type=%s", error.__class__.__name__)
+        return error_response("Internal server error", 500)
+
+    return app
+
+
+app = create_app()
+
+
+if __name__ == "__main__":
+    app.run()
+```
+
+```python services.py
+import hmac
+import os
+from typing import Any, Dict, Optional
+
+from repositories import UserRepository
+
+
+DEFAULT_LOCAL_ADMIN_BEARER_TOKEN = "local-admin-token"
+
+
+class UserService:
+    def __init__(self, user_repository: Optional[UserRepository] = None):
+        self.user_repository = user_repository or UserRepository()
+
+    def list_users(self):
+        return self.user_repository.list_users()
+
+    def get_user(self, user_id: Any) -> Optional[Dict[str, Any]]:
+        return self.user_repository.get_user(user_id)
+
+    def authenticate(self, email: Any, password: Any) -> Optional[Dict[str, Any]]:
+        return self.user_repository.authenticate(email=email, password=password)
+
+    def public_user(self, user: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        if user is None:
+            return None
+        return self.user_repository.public_user(user)
+
+    def resolve_request_user(self, request) -> Optional[Dict[str, Any]]:
+        user_id = request.headers.get("X-User-Id") or request.args.get("user_id")
+        email = request.args.get("email")
+
+        if request.is_json:
+            payload = request.get_json(silent=True) or {}
+            user_id = user_id or payload.get("user_id") or payload.get("id")
+            email = email or payload.get("email")
+
+        if user_id not in (None, ""):
+            user = self.user_repository.get_user(user_id)
+            if user is not None:
+                return user
+
+        if email not in (None, ""):
+            return self.user_repository.get_user_by_email(email)
+
+        return None
+
+
+class AdminAuthorizationService:
+    """
+    The production authorization rule is intentionally narrow:
+    a repository-backed user must have role=admin, and the request must carry
+    the local admin bearer token. Either condition alone is insufficient.
+    """
+
+    def __init__(self, local_admin_bearer_token: Optional[str] = None):
+        self.local_admin_bearer_token = (
+            local_admin_bearer_token
+            or os.environ.get("LOCAL_ADMIN_BEARER_TOKEN")
+            or os.environ.get("LOCAL_ADMIN_TOKEN")
+            or os.environ.get("ADMIN_BEARER_TOKEN")
+            or os.environ.get("ADMIN_TOKEN")
+            or DEFAULT_LOCAL_ADMIN_BEARER_TOKEN
+        )
+
+    def is_authorized(
+        self,
+        current_user: Optional[Dict[str, Any]],
+        authorization_header: Optional[str],
+    ) -> bool:
+        return self._has_admin_role(current_user) and self._has_local_admin_token(
+            authorization_header
+        )
+
+    def _has_admin_role(self, current_user: Optional[Dict[str, Any]]) -> bool:
+        if not current_user:
+            return False
+        return current_user.get("role") == "admin"
+
+    def _has_local_admin_token(self, authorization_header: Optional[str]) -> bool:
+        if not authorization_header or not self.local_admin_bearer_token:
+            return False
+
+        expected_header = "Bearer {token}".format(
+            token=self.local_admin_bearer_token
+        )
+        return hmac.compare_digest(authorization_header, expected_header)
+```
+
+```python repositories.py
+import copy
+import hmac
+from typing import Any, Dict, Iterable, List, Optional
+
+
+DEFAULT_USERS = [
+    {
+        "id": 1,
+        "name": "Admin User",
+        "email": "admin@example.com",
+        "role": "admin",
+        "password": "admin",
+    },
+    {
+        "id": 2,
+        "name": "Regular User",
+        "email": "user@example.com",
+        "role": "user",
+        "password": "password",
+    },
+    {
+        "id": 3,
+        "name": "Alice Example",
+        "email": "alice@example.com",
+        "role": "user",
+        "password": "alice",
+    },
+]
+
+
+class UserRepository:
+    def __init__(self, users: Optional[Iterable[Dict[str, Any]]] = None):
+        source_users = users if users is not None else DEFAULT_USERS
+        self._users_by_id = {
+            int(user["id"]): copy.deepcopy(user) for user in source_users
+        }
+
+    def list_users(self) -> List[Dict[str, Any]]:
+        return [
+            self.public_user(user)
+            for user in sorted(self._users_by_id.values(), key=lambda item: item["id"])
+        ]
+
+    def get_user(self, user_id: Any) -> Optional[Dict[str, Any]]:
+        normalized_user_id = self._normalize_user_id(user_id)
+        if normalized_user_id is None:
+            return None
+
+        user = self._users_by_id.get(normalized_user_id)
+        if user is None:
+            return None
+
+        return copy.deepcopy(user)
+
+    def get_user_by_email(self, email: Any) -> Optional[Dict[str, Any]]:
+        normalized_email = self._normalize_email(email)
+        if normalized_email is None:
+            return None
+
+        for user in self._users_by_id.values():
+            if self._normalize_email(user.get("email")) == normalized_email:
+                return copy.deepcopy(user)
+
+        return None
+
+    def authenticate(self, email: Any, password: Any) -> Optional[Dict[str, Any]]:
+        if password is None:
+            return None
+
+        user = self.get_user_by_email(email)
+        if user is None:
+            return None
+
+        expected_password = str(user.get("password", ""))
+        supplied_password = str(password)
+
+        if not hmac.compare_digest(supplied_password, expected_password):
+            return None
+
+        return self.public_user(user)
+
+    def public_user(self, user: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+        if user is None:
+            return None
+
+        public = copy.deepcopy(user)
+        public.pop("password", None)
+        public.pop("password_hash", None)
+        return public
+
+    def _normalize_user_id(self, user_id: Any) -> Optional[int]:
+        try:
+            return int(user_id)
+        except (TypeError, ValueError):
+            return None
+
+    def _normalize_email(self, email: Any) -> Optional[str]:
+        if email is None:
+            return None
+
+        normalized = str(email).strip().lower()
+        return normalized or None
+
+
+users = DEFAULT_USERS
+```
+
+```python views.py
+from typing import Any, Dict, Iterable, Optional
+
+from flask import jsonify
+
+
+def health_response():
+    return jsonify({"status": "ok", "message": "Flask MVC app is running"}), 200
+
+
+def users_response(
+    users: Iterable[Dict[str, Any]],
+    extra: Optional[Dict[str, Any]] = None,
+):
+    payload: Dict[str, Any] = {"users": list(users)}
+    if extra:
+        payload.update(extra)
+    return jsonify(payload), 200
+
+
+def user_response(user: Dict[str, Any]):
+    return jsonify({"user": user}), 200
+
+
+def login_response(user: Dict[str, Any]):
+    return jsonify({"message": "Login successful", "user": user}), 200
+
+
+def error_response(message: str, status_code: int):
+    return jsonify({"error": message}), status_code
+```
+
+```python tests/fixture_checks.py
+import logging
+
+from app import create_app
+
+
+def test_public_user_fixture_is_available_without_passwords():
+    app = create_app({"TESTING": True})
+    client = app.test_client()
+
+    response = client.get("/users")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "users" in payload
+    assert len(payload["users"]) >= 2
+    assert any(user["role"] == "admin" for user in payload["users"])
+    assert all("password" not in user for user in payload["users"])
+
+
+def test_admin_requires_admin_role_and_local_bearer_token():
+    app = create_app(
+        {
+            "TESTING": True,
+            "LOCAL_ADMIN_BEARER_TOKEN": "fixture-admin-token",
+        }
+    )
+    client = app.test_client()
+
+    admin_without_token = client.get("/admin?user_id=1")
+    assert admin_without_token.status_code == 403
+
+    non_admin_with_token = client.get(
+        "/admin?user_id=2",
+        headers={"Authorization": "Bearer fixture-admin-token"},
+    )
+    assert non_admin_with_token.status_code == 403
+
+    admin_with_wrong_token = client.get(
+        "/admin?user_id=1",
+        headers={"Authorization": "Bearer wrong-token"},
+    )
+    assert admin_with_wrong_token.status_code == 403
+
+    admin_with_token = client.get(
+        "/admin?user_id=1",
+        headers={"Authorization": "Bearer fixture-admin-token"},
+    )
+    assert admin_with_token.status_code == 200
+    payload = admin_with_token.get_json()
+    assert payload["message"] == "Welcome, admin!"
+    assert payload["admin"]["role"] == "admin"
+    assert "users" in payload
+
+
+def test_login_fixture_keeps_success_and_failure_paths_meaningful():
+    app = create_app({"TESTING": True})
+    client = app.test_client()
+
+    failed = client.post(
+        "/login",
+        json={"email": "admin@example.com", "password": "not-the-password"},
+    )
+    assert failed.status_code == 401
+    assert failed.get_json()["error"] == "Invalid credentials"
+
+    succeeded = client.post(
+        "/login",
+        json={"email": "admin@example.com", "password": "admin"},
+    )
+    assert succeeded.status_code == 200
+    payload = succeeded.get_json()
+    assert payload["message"] == "Login successful"
+    assert payload["user"]["role"] == "admin"
+    assert "password" not in payload["user"]
+
+
+def test_sensitive_request_values_are_not_logged(caplog):
+    app = create_app(
+        {
+            "TESTING": True,
+            "LOCAL_ADMIN_BEARER_TOKEN": "fixture-admin-token",
+        }
+    )
+    client = app.test_client()
+
+    caplog.set_level(logging.INFO)
+
+    response = client.get(
+        "/admin?user_id=1",
+        headers={"Authorization": "Bearer fixture-admin-token"},
+    )
+
+    assert response.status_code == 200
+    assert "Bearer fixture-admin-token" not in caplog.text
+    assert "fixture-admin-token" not in caplog.text
+    assert "Authorization" not in caplog.text
+    assert "admin@example.com" not in caplog.text
+```

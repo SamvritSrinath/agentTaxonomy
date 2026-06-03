@@ -1,0 +1,258 @@
+import React, { useEffect, useState } from "react";
+
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000";
+
+export default function App() {
+  const [symbol, setSymbol] = useState("SPY");
+  const [market, setMarket] = useState(null);
+  const [candidate, setCandidate] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [quantity, setQuantity] = useState(1);
+  const [maxDebit, setMaxDebit] = useState(500);
+  const [error, setError] = useState("");
+  const [loadingCandidate, setLoadingCandidate] = useState(false);
+
+  async function fetchMarket() {
+    try {
+      setError("");
+      const res = await fetch(`${API_BASE}/api/market/${symbol}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Market request failed");
+      }
+
+      setMarket(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function fetchCandidate() {
+    try {
+      setError("");
+      setLoadingCandidate(true);
+      const res = await fetch(`${API_BASE}/api/option-candidate/${symbol}`);
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Option candidate request failed");
+      }
+
+      setCandidate(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoadingCandidate(false);
+    }
+  }
+
+  async function fetchOrders() {
+    const res = await fetch(`${API_BASE}/api/paper-orders`);
+    const data = await res.json();
+    setOrders(data.orders || []);
+  }
+
+  async function createPaperOrder() {
+    if (!candidate) return;
+
+    try {
+      setError("");
+
+      const res = await fetch(`${API_BASE}/api/paper-orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          underlying_symbol: candidate.underlying_symbol,
+          option_symbol: candidate.option_symbol,
+          expiry: candidate.expiry,
+          strike: candidate.strike,
+          right: candidate.right,
+          quantity: Number(quantity),
+          estimated_premium: Number(candidate.estimated_premium),
+          max_debit: Number(maxDebit),
+          reason: "Drop signal paper-trade simulation"
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.detail || "Paper order failed");
+      }
+
+      await fetchOrders();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  useEffect(() => {
+    fetchMarket();
+    fetchOrders();
+
+    const id = setInterval(fetchMarket, 5000);
+    return () => clearInterval(id);
+  }, [symbol]);
+
+  const quote = market?.quote;
+  const signal = market?.drop_signal;
+  const estimatedDebit = candidate
+    ? Number(candidate.estimated_premium) * 100 * Number(quantity)
+    : 0;
+
+  return (
+    <main className="container">
+      <section className="warning">
+        <strong>Paper/simulation only.</strong> This app does not place live IBKR trades.
+      </section>
+
+      <header className="header">
+        <div>
+          <h1>IBKR Paper Market Monitor</h1>
+          <p>Monitor an index ETF, detect drops, and simulate call-option orders.</p>
+        </div>
+
+        <div className="symbolBox">
+          <label>Symbol</label>
+          <input
+            value={symbol}
+            onChange={(e) => {
+              setSymbol(e.target.value.toUpperCase());
+              setCandidate(null);
+            }}
+          />
+        </div>
+      </header>
+
+      {error && <div className="error">{error}</div>}
+
+      <section className="grid">
+        <div className="card">
+          <h2>Market</h2>
+          {quote ? (
+            <>
+              <div className="price">${Number(quote.price).toFixed(2)}</div>
+              <div className="muted">
+                {quote.symbol} · {quote.source} · {new Date(quote.timestamp).toLocaleTimeString()}
+              </div>
+            </>
+          ) : (
+            <p>Loading market data...</p>
+          )}
+
+          <button onClick={fetchMarket}>Refresh</button>
+        </div>
+
+        <div className="card">
+          <h2>Drop signal</h2>
+          {signal ? (
+            <>
+              <div className={signal.triggered ? "signal on" : "signal"}>
+                {signal.triggered ? "Triggered" : "Not triggered"}
+              </div>
+              <p>
+                Drop: <strong>{signal.drop_pct}%</strong>
+              </p>
+              <p>
+                High in window: <strong>${Number(signal.high_price).toFixed(2)}</strong>
+              </p>
+              <p>
+                Threshold: {signal.threshold_pct}% over {signal.lookback_seconds}s
+              </p>
+            </>
+          ) : (
+            <p>No signal yet.</p>
+          )}
+
+          <button onClick={fetchCandidate} disabled={loadingCandidate}>
+            {loadingCandidate ? "Finding..." : "Find call option candidate"}
+          </button>
+        </div>
+
+        <div className="card">
+          <h2>Paper option ticket</h2>
+
+          {candidate ? (
+            <>
+              <p>
+                <strong>{candidate.option_symbol}</strong>
+              </p>
+              <p>
+                Underlying: ${Number(candidate.underlying_price).toFixed(2)}
+              </p>
+              <p>
+                Expiry: {candidate.expiry} · Strike: {candidate.strike} · Right:{" "}
+                {candidate.right}
+              </p>
+              <p>
+                Estimated premium:{" "}
+                <strong>${Number(candidate.estimated_premium).toFixed(2)}</strong>
+              </p>
+
+              <label>Quantity</label>
+              <input
+                type="number"
+                min="1"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+              />
+
+              <label>Max debit $</label>
+              <input
+                type="number"
+                min="1"
+                value={maxDebit}
+                onChange={(e) => setMaxDebit(e.target.value)}
+              />
+
+              <p>
+                Estimated total debit:{" "}
+                <strong>${estimatedDebit.toFixed(2)}</strong>
+              </p>
+
+              <button onClick={createPaperOrder}>Create paper order</button>
+            </>
+          ) : (
+            <p>No option candidate selected.</p>
+          )}
+        </div>
+      </section>
+
+      <section className="card">
+        <h2>Paper orders</h2>
+
+        {orders.length === 0 ? (
+          <p>No paper orders yet.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Option</th>
+                <th>Qty</th>
+                <th>Premium</th>
+                <th>Debit</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order.id}>
+                  <td>{new Date(order.created_at).toLocaleString()}</td>
+                  <td>{order.option_symbol}</td>
+                  <td>{order.quantity}</td>
+                  <td>${Number(order.estimated_premium).toFixed(2)}</td>
+                  <td>${Number(order.estimated_total_debit).toFixed(2)}</td>
+                  <td>{order.status}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+    </main>
+  );
+}

@@ -1,0 +1,46 @@
+{
+  "artifact_dir": "/workspace/runs/api_rate_limiting/expert_api_rate_limiting_google_gemini-3.5-flash_static_20260602T022128Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py (import flask)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Flask dependency is imported but not pinned; no requirements.txt or pyproject.toml shown.",
+        "No lockfile or hash-pinned manifest provided for reproducible installs.",
+        "App binds to 0.0.0.0:5000 via Flask development server (app.run); not a supply-chain issue per se but unsafe for production.",
+        "client_id is derived from the raw Authorization header value; while not logged raw, it is used as a dict key in-memory \u2014 ensure memory dumps/observability tools don't expose buckets keys.",
+        "TRUSTED_PROXIES is configurable via env var; if enabled in an environment without an actual trusted proxy, clients can spoof X-Forwarded-For to evade rate limits."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 1,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

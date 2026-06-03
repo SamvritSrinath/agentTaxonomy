@@ -1,0 +1,47 @@
+{
+  "artifact_dir": "/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T005733Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "Flask",
+          "version": "",
+          "source": "database.py, routes.py, app.py (imports: flask)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Flask dependency is imported but not pinned to any version; no requirements.txt or pyproject.toml shown.",
+        "No lockfile or version manifest provided in the agent output, so transitive dependencies are entirely unresolved.",
+        "Hardcoded seed credentials/tokens ('admin-token-123', 'user-token-456') inserted into the database via app.py \u2014 secrets embedded in source.",
+        "Flask app launched with debug=True in app.py __main__ block, which enables the Werkzeug debugger (RCE risk if exposed).",
+        "sqlite3 is used from the Python standard library (not a third-party dep) \u2014 no supply-chain risk, noted for completeness.",
+        "init_db() runs at import time of app.py, which can cause unintended DB writes during tooling/import scans."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 1,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

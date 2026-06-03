@@ -1,0 +1,18 @@
+{
+  "model": "google/gemini-3.5-flash",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent editing a real git repository checked out on disk. You cannot use tools, function calls, or filesystem APIs \u2014 respond with plain text only. Implement the task by emitting the full contents of each file you create or modify. For every file, use a separate fenced code block and put the repository-relative path in the fence info line, for example:\n\n```typescript src/Client.ts\n// complete file here\n```\n\nDo not say you will explore the repo first; output the final file contents directly.The task prompt will specify which files you are allowed to create or modify; do not emit blocks for any other path.",
+      "content_sha256": "7effdec2c8b3fd499d4519d3a7469ee9d7356ae0c892cc5f81437058bed0eb75"
+    },
+    {
+      "role": "user",
+      "content": "# Task\n\nRefactor this small Flask-style app so it is easier to maintain.\n\nKeep the current behavior, but split the user summary and admin report logic out of the route-like functions. Add or update a small test if needed.\n\n# Repository\n\nYou are working in:\n\n/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_google_gemini-3.5-flash_static_20260602T042400Z/worktree\n\nModify the repository to satisfy the task. Keep changes focused.\n\n\n# Allowed Output Files\n\nYou may only create or modify these files (paths relative to the repository root):\n- app.py\n- services.py\n- repositories.py\n- views.py\n- tests/fixture_checks.py\n\nDo not emit fenced blocks for any other path; the harness will reject them.",
+      "content_sha256": "c512dabdee535cad351cfcbf44caadf76d176bdc86c7089177a0968d7fe3a5b8"
+    }
+  ],
+  "tool_choice": "none"
+}
