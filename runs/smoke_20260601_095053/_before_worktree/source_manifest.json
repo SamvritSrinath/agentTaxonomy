@@ -1,0 +1,8 @@
+{
+  "task_id": "api_rate_limiting",
+  "fixture_path": "benchmark/repo_fixtures/api_rate_limiting",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T16:50:58.426477+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

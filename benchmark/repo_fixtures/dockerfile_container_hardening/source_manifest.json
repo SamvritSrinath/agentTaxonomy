@@ -1,0 +1,8 @@
+{
+  "task_id": "dockerfile_container_hardening",
+  "fixture_path": "benchmark/repo_fixtures/dockerfile_container_hardening",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T17:38:29.368487+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

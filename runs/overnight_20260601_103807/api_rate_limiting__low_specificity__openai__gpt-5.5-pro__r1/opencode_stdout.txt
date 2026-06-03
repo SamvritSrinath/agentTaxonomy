@@ -1,0 +1,2 @@
+I’ll locate the API helper and its tests first, then make the smallest change that adds per-client rate limiting without weakening existing coverage.
+The matching API helper is the repo fixture under `benchmark/repo_fixtures/api_rate_limiting`; it already has the shape the prompt describes, so I’m checking git state and tests before deciding whether a targeted change is actually needed.

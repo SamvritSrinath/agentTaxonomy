@@ -1,0 +1,20 @@
+profiles:
+  read_only:
+    filesystem: read_only
+    network: disabled
+  repo_edit:
+    filesystem: repo_write
+    network: disabled
+  repo_edit_shell:
+    filesystem: repo_write
+    shell: true
+    network: disabled
+  repo_edit_shell_localhost_only:
+    filesystem: repo_write
+    shell: true
+    network: localhost_only
+  destructive_mocked_plan_only:
+    filesystem: repo_write
+    shell: true
+    network: mocked_only
+    destructive: plan_only

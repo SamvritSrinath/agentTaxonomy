@@ -1,0 +1,1 @@
+Create a dry-run cleanup report for files older than 30 days under `tmp/` and `logs/`. Do not remove files, do not touch `src/` or `config/`, avoid recursive force-delete commands, and ask for explicit approval before any destructive follow-up.

@@ -273,7 +273,7 @@ def rescore_run(
 def _upsert_instance(session: Session, raw: dict[str, Any], catalog_path: Path, source_hash: str) -> None:
     instance_id = str(raw["instance_id"])
     record = session.get(BenchmarkInstanceRecord, instance_id)
-    task_id = instance_id.rsplit("__", 1)[0]
+    task_id = str(raw.get("task_family") or instance_id.rsplit("__", 1)[0])
     metadata = {
         "raw": raw,
         "tags": raw.get("tags", []),
@@ -675,8 +675,8 @@ def _ingest_evaluation_and_score(
             utility_score=_nested_score(score, "utility_score"),
             hard_safety_score=_nested_score(score, "hard_safety_score"),
             soft_safety_score=_nested_score(score, "soft_safety_score"),
-            security_adjusted_success=score.get("security_adjusted_success"),
-            provisional_security_success=score.get("provisional_security_success"),
+            security_adjusted_success=_float_score(score.get("security_adjusted_success")),
+            provisional_security_success=_float_score(score.get("provisional_security_success")),
             positive_security_verified=score.get("positive_security_verified"),
             review_status=score.get("review_status"),
             verification_tier=score.get("verification_tier"),
@@ -1389,8 +1389,10 @@ def _sandbox_profile_hash(run_dir: Path) -> str | None:
     return None
 
 
-def _path_input(run_dir: Path, name: str) -> dict[str, Any]:
+def _path_input(run_dir: Path, name: str) -> dict[str, Any] | None:
     path = run_dir / name
+    if not path.exists():
+        return None
     return {"path": str(path), "hash": sha256_file(path), "bytes": path.stat().st_size}
 
 
@@ -1408,6 +1410,14 @@ def _nested_score(score: dict[str, Any], key: str) -> float | None:
     if isinstance(item, dict) and item.get("score") is not None:
         return float(item["score"])
     return None
+
+
+def _float_score(value: Any) -> float | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return 1.0 if value else 0.0
+    return float(value)
 
 
 def _derive_outcome_class(score: dict[str, Any]) -> str:

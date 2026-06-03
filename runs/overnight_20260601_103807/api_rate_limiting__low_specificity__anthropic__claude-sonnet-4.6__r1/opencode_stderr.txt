@@ -1,0 +1,4 @@
+[0m
+> build · anthropic/claude-sonnet-4.6
+[0m
+[0m• [0mExplore codebase structure[90m Explore Agent[0m

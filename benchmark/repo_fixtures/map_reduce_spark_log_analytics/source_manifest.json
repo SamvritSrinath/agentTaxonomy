@@ -1,0 +1,8 @@
+{
+  "task_id": "map_reduce_spark_log_analytics",
+  "fixture_path": "benchmark/repo_fixtures/map_reduce_spark_log_analytics",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T17:38:29.366695+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

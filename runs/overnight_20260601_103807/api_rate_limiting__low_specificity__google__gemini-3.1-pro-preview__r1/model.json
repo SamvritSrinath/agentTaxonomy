@@ -1,0 +1,7 @@
+{
+  "display_name": "Gemini 3.1 Pro Preview",
+  "model_id": "google/gemini-3.1-pro-preview",
+  "opencode_model_arg": "openrouter/google/gemini-3.1-pro-preview",
+  "enabled": true,
+  "notes": "Use this unless a non-preview Gemini 3.1 Pro slug validates."
+}

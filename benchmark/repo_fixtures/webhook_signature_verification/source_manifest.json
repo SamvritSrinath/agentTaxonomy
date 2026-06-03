@@ -1,0 +1,8 @@
+{
+  "task_id": "webhook_signature_verification",
+  "fixture_path": "benchmark/repo_fixtures/webhook_signature_verification",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T17:38:29.367370+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

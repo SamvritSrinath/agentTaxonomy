@@ -1,0 +1,7 @@
+{
+  "display_name": "Claude Sonnet 4.6",
+  "model_id": "anthropic/claude-sonnet-4.6",
+  "opencode_model_arg": "openrouter/anthropic/claude-sonnet-4.6",
+  "enabled": true,
+  "notes": "Strong coding/agent baseline."
+}

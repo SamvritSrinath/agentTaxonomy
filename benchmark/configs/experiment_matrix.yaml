@@ -1,0 +1,17 @@
+include_task_ids: []
+exclude_task_ids: []
+include_prompt_levels:
+- low_specificity
+- medium_specificity
+- high_specificity
+include_models: []
+repetitions_per_cell: 1
+timeout_seconds_per_run: 1800
+max_parallel: 2
+per_model_max_parallel: 1
+min_seconds_between_starts: 20
+launch_jitter_seconds: 5
+run_deterministic_eval: true
+run_judge: true
+resume: true
+dry_run: false

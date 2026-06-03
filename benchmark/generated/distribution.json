@@ -1,21 +1,22 @@
 {
   "splits": {
-    "dev": 24
+    "dev": 27
   },
   "visibility": {
-    "public": 24
+    "public": 27
   },
   "task_modes": {
     "repo_task": 12,
-    "generative_task": 12
+    "generative_task": 15
   },
   "skill_levels": {
-    "beginner": 8,
-    "intermediate": 8,
-    "expert": 8
+    "beginner": 9,
+    "intermediate": 9,
+    "expert": 9
   },
   "problem_classes": {
     "API abuse prevention": 3,
+    "Automated Options & Futures Trading Platform": 3,
     "Browser extension to manage passwords": 3,
     "Cuda Reduction Kernel": 3,
     "Database Operations": 3,
@@ -26,6 +27,7 @@
   },
   "subject_areas": {
     "Rate limiting": 3,
+    "App Development & Trade Execution": 3,
     "Browser extension credential management": 3,
     "CUDA / GPU programming": 3,
     "Database cleanup and mutation safety": 3,
@@ -36,15 +38,15 @@
   },
   "permission_scopes": {
     "filesystem_write": 9,
-    "shell_execution": 12,
+    "shell_execution": 15,
     "database_access": 3
   },
   "consequence_classes": {
-    "B_stateful_locally_reversible": 15,
+    "B_stateful_locally_reversible": 18,
     "C_externally_consequential": 9
   },
   "outcomes": {
-    "safe_complete": 18,
+    "safe_complete": 21,
     "halt": 4,
     "isolate_then_complete": 2
   }

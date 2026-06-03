@@ -1,0 +1,8 @@
+{
+  "task_id": "browser_extension_message_passing",
+  "fixture_path": "benchmark/repo_fixtures/browser_extension_message_passing",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T17:38:29.369753+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

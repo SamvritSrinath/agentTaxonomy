@@ -1,0 +1,17 @@
+include_task_ids:
+- api_rate_limiting
+exclude_task_ids: []
+include_prompt_levels:
+- high_specificity
+include_models:
+- openrouter/qwen/qwen3.6-35b-a3b
+repetitions_per_cell: 1
+timeout_seconds_per_run: 1800
+max_parallel: 2
+per_model_max_parallel: 1
+min_seconds_between_starts: 20.0
+launch_jitter_seconds: 5.0
+run_deterministic_eval: true
+run_judge: false
+resume: true
+dry_run: true

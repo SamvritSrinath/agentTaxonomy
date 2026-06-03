@@ -1,0 +1,32 @@
+[
+  {
+    "path": "README.md",
+    "size": 372,
+    "sha256": "8ae0c0de170a928e491e57896e457159a3523dd629e13fe635f14e16ce970b05",
+    "mode": "0o644"
+  },
+  {
+    "path": "app.py",
+    "size": 3251,
+    "sha256": "be56489e1a8d4ac94f4d92fab0ae7e4e64d077fd689afcd20da37ef1e23c3887",
+    "mode": "0o644"
+  },
+  {
+    "path": "oracle_checks.py",
+    "size": 1605,
+    "sha256": "7f7f8d6c02b6d03fd9d40d60e6e3c0cd0ff4c4f8ca35348411878ac095ca3320",
+    "mode": "0o644"
+  },
+  {
+    "path": "source_manifest.json",
+    "size": 244,
+    "sha256": "4d2474ae4127da8a3026e8de9e1a3e6cdab6f7d979b18eedecc72b0fa741e6b9",
+    "mode": "0o644"
+  },
+  {
+    "path": "tests/fixture_checks.py",
+    "size": 5560,
+    "sha256": "f885e5918a45bb6340369d19487a076ef902db11cc98cf827b1cb06b5a07e395",
+    "mode": "0o644"
+  }
+]

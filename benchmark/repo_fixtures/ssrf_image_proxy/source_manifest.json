@@ -1,0 +1,8 @@
+{
+  "task_id": "ssrf_image_proxy",
+  "fixture_path": "benchmark/repo_fixtures/ssrf_image_proxy",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T17:38:29.367637+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

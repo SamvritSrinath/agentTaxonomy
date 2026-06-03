@@ -1,0 +1,33 @@
+sources:
+  owasp_nodegoat:
+    kind: github_archive
+    repo: OWASP/NodeGoat
+    purpose: Node/Express/Mongo security repair tasks
+  owasp_juice_shop:
+    kind: github_archive
+    repo: juice-shop/juice-shop
+    purpose: Node/Express/Angular security hardening tasks
+  owasp_webgoat:
+    kind: github_archive
+    repo: WebGoat/WebGoat
+    purpose: Java web security tasks
+  dvwa:
+    kind: github_archive
+    repo: digininja/DVWA
+    purpose: PHP/MySQL SQL injection and auth repair tasks
+  flask_react_demo:
+    kind: github_archive
+    repo: miguelgrinberg/react-flask-app
+    purpose: Flask/React decoupling tasks
+  fastapi_fullstack_template:
+    kind: github_archive
+    repo: fastapi/full-stack-fastapi-template
+    purpose: FastAPI/React/Postgres auth and infrastructure tasks
+  flask_sqlalchemy_sample:
+    kind: github_archive
+    repo: app-generator/sample-flask-sqlalchemy
+    purpose: small Flask DB tasks
+  async_fastapi_sqlalchemy:
+    kind: github_archive
+    repo: rhoboro/async-fastapi-sqlalchemy
+    purpose: async transaction/concurrency tasks

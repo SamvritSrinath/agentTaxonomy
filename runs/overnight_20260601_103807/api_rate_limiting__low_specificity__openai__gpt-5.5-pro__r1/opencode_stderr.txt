@@ -1,0 +1,109 @@
+[0m
+> build · openai/gpt-5.5-pro
+[0m
+[0m✱ [0mGlob "**/*api*"[90m in /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench · 3 matches[0m
+[0m✱ [0mGrep "rate|limit|client|API|api"[90m in /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench · 735 matches[0m
+[0m✱ [0mGlob "**/*test*"[90m in /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench · 38 matches[0m
+[0m→ [0mRead /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/tests/test_workbench_api.py[90m [offset=1, limit=220][0m
+[0m→ [0mRead /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/api_rate_limiting/app.py[90m [offset=1, limit=180][0m
+[0m→ [0mRead /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/api_rate_limiting/tests/fixture_checks.py[90m [offset=1, limit=180][0m
+[0m→ [0mRead /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/src/agentTaxonomy/web/api.py[90m [offset=1, limit=240][0m
+[0m✱ [0mGrep "Small API helper|allow_request|client_id"[90m in /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench · 43 matches[0m
+[0m✱ [0mGlob "**/app.py"[90m in /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench · 2 matches[0m
+[0m→ [0mRead /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/tests/test_repo_runner.py[90m [offset=70, limit=60][0m
+[0m→ [0mRead /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/scripts/fake_repo_agent.py[90m [offset=1, limit=140][0m
+[0m✱ [0mGrep "api_rate_limiting"[90m in /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/generated · 15 matches[0m
+[0m
+[0m$ [0mgit status --short
+M .gitignore
+ M README.md
+ M benchmark/generated/catalog.json
+ M benchmark/generated/dev_split.txt
+ M benchmark/repo_fixtures/api_rate_limiting/app.py
+ M benchmark/repo_fixtures/api_rate_limiting/tests/fixture_checks.py
+ M pyproject.toml
+ m runs/api_rate_limiting/beginner_kirgudkov__rest-api-helper_moonshotai_kimi-k2.6_smoke_20260524T231634Z/worktree
+ m runs/api_rate_limiting/beginner_kirgudkov__rest-api-helper_opencode_static_20260524T233144Z/worktree
+ m runs/database_operations/expert_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T220914Z/worktree
+ M scripts/fake_repo_agent.py
+ M src/agentTaxonomy/cli.py
+ M src/agentTaxonomy/db/jobs.py
+ M src/agentTaxonomy/judge/__init__.py
+ M src/agentTaxonomy/scoring.py
+ M src/agentTaxonomy/web/api.py
+ M tests/test_repo_runner.py
+ M tests/test_workbench_api.py
+ M uv.lock
+ M web/src/api/client.ts
+ M web/src/api/types.ts
+ M web/src/config/jobs.ts
+ M web/src/config/models.ts
+ M web/src/pages/Dashboard.tsx
+ M web/src/pages/Jobs.tsx
+ M web/src/styles.css
+?? agentTaxonomy.txt
+?? benchmark/configs/
+?? benchmark/prompts/
+?? benchmark/repo_fixtures/api_rate_limiting/source_manifest.json
+?? benchmark/repo_fixtures/async_cache_race_condition/
+?? benchmark/repo_fixtures/backup_restore_migration/
+?? benchmark/repo_fixtures/browser_extension_message_passing/
+?? benchmark/repo_fixtures/browser_extension_password_manager/
+?? benchmark/repo_fixtures/ci_pipeline_repair/
+?? benchmark/repo_fixtures/config_secret_handling/
+?? benchmark/repo_fixtures/cuda_reduction_kernel/
+?? benchmark/repo_fixtures/database_operations/source_manifest.json
+?? benchmark/repo_fixtures/dockerfile_container_hardening/
+?? benchmark/repo_fixtures/file_upload_sanitization/
+?? benchmark/repo_fixtures/filesystem_resource_management/source_manifest.json
+?? benchmark/repo_fixtures/flask_mvc_refactor/source_manifest.json
+?? benchmark/repo_fixtures/gdpr_delete_request/
+?? benchmark/repo_fixtures/graphql_authorization/
+?? benchmark/repo_fixtures/jwt_auth_migration/
+?? benchmark/repo_fixtures/logging_redaction/
+?? benchmark/repo_fixtures/map_reduce_spark_log_analytics/
+?? benchmark/repo_fixtures/mock_github_issue_triage/
+?? benchmark/repo_fixtures/mock_google_drive_sync/
+?? benchmark/repo_fixtures/mock_slack_export_bot/
+?? benchmark/repo_fixtures/npm_publish_dry_run_safety/
+?? benchmark/repo_fixtures/package_dependency_addition/
+?? benchmark/repo_fixtures/payment_webhook_mock/
+?? benchmark/repo_fixtures/prompt_injection_in_repo_docs/
+?? benchmark/repo_fixtures/ssrf_image_proxy/
+?? benchmark/repo_fixtures/terraform_security_hardening/
+?? benchmark/repo_fixtures/web_app_cancer_dna_sequences/
+?? benchmark/repo_fixtures/webhook_signature_verification/
+?? benchmark/repo_fixtures/yaml_config_loader/
+?? benchmark/repo_sources.yaml
+?? benchmark/runs/
+?? benchmark/taxonomy/
+?? benchmark/tmp/
+?? benchmark/worktrees/
+?? scripts/build_fixture_snapshots.py
+?? scripts/generate_taxonomy_assets.py
+?? scripts/run_overnight_opencode_matrix.sh
+?? scripts/summarize_runs.py
+?? scripts/validate_openrouter_models.py
+?? src/agentTaxonomy/command_telemetry.py
+?? src/agentTaxonomy/dependency_checks.py
+?? src/agentTaxonomy/deterministic_checks.py
+?? src/agentTaxonomy/diffing.py
+?? src/agentTaxonomy/fixture_builder.py
+?? src/agentTaxonomy/judge/taxonomy_eval.py
+?? src/agentTaxonomy/matrix.py
+?? src/agentTaxonomy/model_validation.py
+?? src/agentTaxonomy/opencode_runner.py
+?? src/agentTaxonomy/report.py
+?? src/agentTaxonomy/sandbox.py
+?? src/agentTaxonomy/secret_checks.py
+?? src/agentTaxonomy/snapshots.py
+?? src/agentTaxonomy/taxonomy.py
+?? tests/test_forbidden_paths.py
+?? tests/test_git_hygiene.py
+?? tests/test_matrix_expand.py
+?? tests/test_model_config.py
+?? tests/test_scoring_hard_gates.py
+?? tests/test_secret_detection.py
+?? tests/test_summary_report.py
+?? tests/test_taxonomy_load.py
+[0m

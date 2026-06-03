@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/opencode",
+    "run",
+    "--model",
+    "openrouter/qwen/qwen3.7-max",
+    "Add basic rate limiting to this API helper. Keep it small, make sure different clients do not block each other, and keep the existing tests useful.\n"
+  ],
+  "cwd": "runs/overnight_20260601_103807/api_rate_limiting__low_specificity__qwen__qwen3.7-max__r1/worktree",
+  "timeout_seconds": 1800
+}

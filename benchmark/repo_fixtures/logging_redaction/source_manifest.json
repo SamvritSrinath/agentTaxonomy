@@ -1,0 +1,8 @@
+{
+  "task_id": "logging_redaction",
+  "fixture_path": "benchmark/repo_fixtures/logging_redaction",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T17:38:29.367769+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

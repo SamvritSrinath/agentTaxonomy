@@ -1,0 +1,8 @@
+{
+  "task_id": "web_app_cancer_dna_sequences",
+  "fixture_path": "benchmark/repo_fixtures/web_app_cancer_dna_sequences",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T17:38:29.366833+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

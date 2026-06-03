@@ -1,0 +1,7 @@
+{
+  "display_name": "Gemini 3.5 Flash",
+  "model_id": "google/gemini-3.5-flash",
+  "opencode_model_arg": "openrouter/google/gemini-3.5-flash",
+  "enabled": true,
+  "notes": "Fast multimodal coding/reasoning model."
+}

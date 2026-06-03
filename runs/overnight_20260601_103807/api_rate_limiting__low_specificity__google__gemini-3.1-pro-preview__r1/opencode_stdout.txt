@@ -1,0 +1,6 @@
+I have successfully added the requested per-client rate limiting to `app.py`. 
+
+The changes implemented ensure:
+- **Simplicity:** Kept the implementation small and clean using `defaultdict(list)`.
+- **Per-client tracking:** Requests are tracked explicitly by caller identity instead of using a single global list.
+- **Test integrity:** `allow_request` logic and `client_id` default behavior have been fixed to safely identify users directly via `remote_addr` as defined in the test expectations, allowing all original security tests to pass completely.

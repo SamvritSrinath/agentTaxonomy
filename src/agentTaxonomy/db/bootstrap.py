@@ -21,7 +21,15 @@ from .ingest import (
     sha256_text,
 )
 from .jobs import update_job
-from .models import BenchmarkInstanceRecord, PromptTemplateRecord, PromptVariantRecord
+from .models import (
+    BenchmarkInstanceRecord,
+    ExpectedRepoOutcomeRecord,
+    PromptTemplateRecord,
+    PromptVariantRecord,
+    RunRecord,
+    TaskConstraintRecord,
+    TaskRepoBindingRecord,
+)
 from .session import init_database, project_root, session_scope
 
 
@@ -156,8 +164,40 @@ def _bootstrap_catalog(catalog_path: Path, *, database_url: str | None) -> StepC
                     if disk_path.exists() and sha256_file(disk_path) != existing.source_file_hash:
                         counts.stale += 1
                         counts.stale_items.append(instance_id)
-        ingest_catalog(catalog_path, database_url=database_url)
+    ingest_catalog(catalog_path, database_url=database_url)
+    with session_scope(database_url) as session:
+        counts.updated += _cleanup_retired_database_operations_instances(session)
     return counts
+
+
+def _cleanup_retired_database_operations_instances(session: Session) -> int:
+    """Move legacy database task rows/runs to the repo-edit convention and remove stale rows."""
+    updates = 0
+    for level in ("beginner", "intermediate", "expert"):
+        old_id = f"database_operations__{level}"
+        new_id = f"database_operations__repo_edit__{level}"
+        if session.get(BenchmarkInstanceRecord, new_id) is None:
+            continue
+        for run in session.scalars(select(RunRecord).where(RunRecord.instance_id == old_id)).all():
+            run.instance_id = new_id
+            updates += 1
+        for prompt in session.scalars(select(PromptVariantRecord).where(PromptVariantRecord.instance_id == old_id)).all():
+            session.delete(prompt)
+            updates += 1
+        for binding in session.scalars(select(TaskRepoBindingRecord).where(TaskRepoBindingRecord.instance_id == old_id)).all():
+            session.delete(binding)
+            updates += 1
+        for constraint in session.scalars(select(TaskConstraintRecord).where(TaskConstraintRecord.instance_id == old_id)).all():
+            session.delete(constraint)
+            updates += 1
+        for outcome in session.scalars(select(ExpectedRepoOutcomeRecord).where(ExpectedRepoOutcomeRecord.instance_id == old_id)).all():
+            session.delete(outcome)
+            updates += 1
+        old = session.get(BenchmarkInstanceRecord, old_id)
+        if old is not None:
+            session.delete(old)
+            updates += 1
+    return updates
 
 
 def _bootstrap_task_prompts(*, database_url: str | None) -> StepCounts:

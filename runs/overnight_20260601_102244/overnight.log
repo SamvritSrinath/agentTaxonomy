@@ -1,0 +1,630 @@
+Output directory: runs/overnight_20260601_102244
+Using CPython 3.12.12
+Removed virtual environment at: .venv
+Creating virtual environment at: .venv
+Installed 34 packages in 277ms
+Python: Python 3.12.12
+OpenCode version:
+1.15.10
+OpenCode help:
+⠀                                ▄     
+█▀▀█ █▀▀█ █▀▀█ █▀▀▄ █▀▀▀ █▀▀█ █▀▀█ █▀▀█
+█  █ █  █ █▀▀▀ █  █ █    █  █ █  █ █▀▀▀
+▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀  ▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀
+
+Commands:
+  opencode completion          generate shell completion script
+  opencode acp                 start ACP (Agent Client Protocol) server
+  opencode mcp                 manage MCP (Model Context Protocol) servers
+  opencode [project]           start opencode tui                                          [default]
+  opencode attach <url>        attach to a running opencode server
+  opencode run [message..]     run opencode with a message
+  opencode debug               debugging and troubleshooting tools
+  opencode providers           manage AI providers and credentials                   [aliases: auth]
+  opencode agent               manage agents
+  opencode upgrade [target]    upgrade opencode to the latest or a specific version
+  opencode uninstall           uninstall opencode and remove all related files
+  opencode serve               starts a headless opencode server
+  opencode web                 start opencode server and open web interface
+  opencode models [provider]   list all available models
+  opencode stats               show token usage and cost statistics
+  opencode export [sessionID]  export session data as JSON
+  opencode import <file>       import session data from JSON file or URL
+  opencode github              manage GitHub agent
+  opencode pr <number>         fetch and checkout a GitHub PR branch, then run opencode
+  opencode session             manage sessions
+  opencode plugin <module>     install plugin and update config                      [aliases: plug]
+  opencode db                  database tools
+
+Positionals:
+  project  path to start opencode in                                                        [string]
+
+Options:
+  -h, --help         show help                                                             [boolean]
+  -v, --version      show version number                                                   [boolean]
+      --print-logs   print logs to stderr                                                  [boolean]
+      --log-level    log level                  [string] [choices: "DEBUG", "INFO", "WARN", "ERROR"]
+      --pure         run without external plugins                                          [boolean]
+      --port         port to listen on                                         [number] [default: 0]
+      --hostname     hostname to listen on                           [string] [default: "127.0.0.1"]
+      --mdns         enable mDNS service discovery (defaults hostname to 0.0.0.0)
+                                                                          [boolean] [default: false]
+      --mdns-domain  custom domain name for mDNS service (default: opencode.local)
+                                                                [string] [default: "opencode.local"]
+      --cors         additional domains to allow for CORS                      [array] [default: []]
+  -m, --model        model to use in the format of provider/model                           [string]
+  -c, --continue     continue the last session                                             [boolean]
+  -s, --session      session id to continue                                                 [string]
+      --fork         fork the session when continuing (use with --continue or --session)   [boolean]
+      --prompt       prompt to use                                                          [string]
+      --agent        agent to use                                                           [string]OpenCode run help:
+opencode run [message..]
+
+run opencode with a message
+
+Positionals:
+  message  message to send                                                     [array] [default: []]
+
+Options:
+  -h, --help                          show help                                            [boolean]
+  -v, --version                       show version number                                  [boolean]
+      --print-logs                    print logs to stderr                                 [boolean]
+      --log-level                     log level [string] [choices: "DEBUG", "INFO", "WARN", "ERROR"]
+      --pure                          run without external plugins                         [boolean]
+      --command                       the command to run, use message for args              [string]
+  -c, --continue                      continue the last session                            [boolean]
+  -s, --session                       session id to continue                                [string]
+      --fork                          fork the session before continuing (requires --continue or
+                                      --session)                                           [boolean]
+      --share                         share the session                                    [boolean]
+  -m, --model                         model to use in the format of provider/model          [string]
+      --agent                         agent to use                                          [string]
+      --format                        format: default (formatted) or json (raw JSON events)
+                                          [string] [choices: "default", "json"] [default: "default"]
+  -f, --file                          file(s) to attach to message                           [array]
+      --title                         title for the session (uses truncated prompt if no value
+                                      provided)                                             [string]
+      --attach                        attach to a running opencode server (e.g.,
+                                      http://localhost:4096)                                [string]
+  -p, --password                      basic auth password (defaults to OPENCODE_SERVER_PASSWORD)
+                                                                                            [string]
+  -u, --username                      basic auth username (defaults to OPENCODE_SERVER_USERNAME or
+                                      'opencode')                                           [string]
+      --dir                           directory to run in, path on remote server if attaching
+                                                                                            [string]
+      --port                          port for the local server (defaults to random port if no value
+                                      provided)                                             [number]
+      --variant                       model variant (provider-specific reasoning effort, e.g., high,
+                                      max, minimal)                                         [string]
+      --thinking                      show thinking blocks                                 [boolean]
+      --replay                        replay visible session history on interactive resume
+                                                                          [boolean] [default: false]
+      --replay-limit                  cap visible interactive replay to the newest N messages
+                                                                                            [number]
+  -i, --interactive                   run in direct interactive split-footer mode
+                                                                          [boolean] [default: false]
+      --dangerously-skip-permissions  auto-approve permissions that are not explicitly denied
+                                      (dangerous!)                        [boolean] [default: false]
+      --demo                          enable direct interactive demo slash commands; pass one as the
+                                      message to run it immediately       [boolean] [default: false]OpenCode models:
+opencode/big-pickle
+opencode/deepseek-v4-flash-free
+opencode/mimo-v2.5-free
+opencode/minimax-m3-free
+opencode/nemotron-3-super-free
+google/gemini-2.0-flash
+google/gemini-2.0-flash-lite
+google/gemini-2.5-flash
+google/gemini-2.5-flash-image
+google/gemini-2.5-flash-lite
+google/gemini-2.5-flash-preview-tts
+google/gemini-2.5-pro
+google/gemini-2.5-pro-preview-tts
+google/gemini-3-flash-preview
+google/gemini-3-pro-preview
+google/gemini-3.1-flash-image-preview
+google/gemini-3.1-flash-lite
+google/gemini-3.1-flash-lite-preview
+google/gemini-3.1-pro-preview
+google/gemini-3.1-pro-preview-customtools
+google/gemini-3.5-flash
+google/gemini-embedding-001
+google/gemini-flash-latest
+google/gemini-flash-lite-latest
+google/gemma-4-26b-a4b-it
+google/gemma-4-31b-it
+openrouter/~anthropic/claude-haiku-latest
+openrouter/~anthropic/claude-opus-latest
+openrouter/~anthropic/claude-sonnet-latest
+openrouter/~google/gemini-flash-latest
+openrouter/~google/gemini-pro-latest
+openrouter/~moonshotai/kimi-latest
+openrouter/~openai/gpt-latest
+openrouter/~openai/gpt-mini-latest
+openrouter/ai21/jamba-large-1.7
+openrouter/aion-labs/aion-1.0
+openrouter/aion-labs/aion-1.0-mini
+openrouter/aion-labs/aion-2.0
+openrouter/aion-labs/aion-rp-llama-3.1-8b
+openrouter/allenai/olmo-3-32b-think
+openrouter/amazon/nova-2-lite-v1
+openrouter/amazon/nova-lite-v1
+openrouter/amazon/nova-micro-v1
+openrouter/amazon/nova-premier-v1
+openrouter/amazon/nova-pro-v1
+openrouter/anthracite-org/magnum-v4-72b
+openrouter/anthropic/claude-3-haiku
+openrouter/anthropic/claude-3.5-haiku
+openrouter/anthropic/claude-haiku-4.5
+openrouter/anthropic/claude-opus-4
+openrouter/anthropic/claude-opus-4.1
+openrouter/anthropic/claude-opus-4.5
+openrouter/anthropic/claude-opus-4.6
+openrouter/anthropic/claude-opus-4.6-fast
+openrouter/anthropic/claude-opus-4.7
+openrouter/anthropic/claude-opus-4.7-fast
+openrouter/anthropic/claude-opus-4.8
+openrouter/anthropic/claude-opus-4.8-fast
+openrouter/anthropic/claude-sonnet-4
+openrouter/anthropic/claude-sonnet-4.5
+openrouter/anthropic/claude-sonnet-4.6
+openrouter/arcee-ai/coder-large
+openrouter/arcee-ai/maestro-reasoning
+openrouter/arcee-ai/spotlight
+openrouter/arcee-ai/trinity-large-thinking
+openrouter/arcee-ai/trinity-mini
+openrouter/arcee-ai/virtuoso-large
+openrouter/baidu/ernie-4.5-300b-a47b
+openrouter/baidu/ernie-4.5-vl-28b-a3b
+openrouter/baidu/ernie-4.5-vl-424b-a47b
+openrouter/bytedance-seed/seed-1.6
+openrouter/bytedance-seed/seed-1.6-flash
+openrouter/bytedance-seed/seed-2.0-lite
+openrouter/bytedance-seed/seed-2.0-mini
+openrouter/bytedance/ui-tars-1.5-7b
+openrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free
+openrouter/cohere/command-a
+openrouter/cohere/command-r-08-2024
+openrouter/cohere/command-r-plus-08-2024
+openrouter/cohere/command-r7b-12-2024
+openrouter/deepcogito/cogito-v2.1-671b
+openrouter/deepseek/deepseek-chat
+openrouter/deepseek/deepseek-chat-v3-0324
+openrouter/deepseek/deepseek-chat-v3.1
+openrouter/deepseek/deepseek-r1
+openrouter/deepseek/deepseek-r1-0528
+openrouter/deepseek/deepseek-r1-distill-llama-70b
+openrouter/deepseek/deepseek-r1-distill-qwen-32b
+openrouter/deepseek/deepseek-v3.1-terminus
+openrouter/deepseek/deepseek-v3.2
+openrouter/deepseek/deepseek-v3.2-exp
+openrouter/deepseek/deepseek-v4-flash
+openrouter/deepseek/deepseek-v4-pro
+openrouter/essentialai/rnj-1-instruct
+openrouter/google/gemini-2.5-flash
+openrouter/google/gemini-2.5-flash-image
+openrouter/google/gemini-2.5-flash-lite
+openrouter/google/gemini-2.5-flash-lite-preview-09-2025
+openrouter/google/gemini-2.5-pro
+openrouter/google/gemini-2.5-pro-preview
+openrouter/google/gemini-2.5-pro-preview-05-06
+openrouter/google/gemini-3-flash-preview
+openrouter/google/gemini-3-pro-image-preview
+openrouter/google/gemini-3.1-flash-image-preview
+openrouter/google/gemini-3.1-flash-lite
+openrouter/google/gemini-3.1-flash-lite-preview
+openrouter/google/gemini-3.1-pro-preview
+openrouter/google/gemini-3.1-pro-preview-customtools
+openrouter/google/gemini-3.5-flash
+openrouter/google/gemma-2-27b-it
+openrouter/google/gemma-3-12b-it
+openrouter/google/gemma-3-27b-it
+openrouter/google/gemma-3-4b-it
+openrouter/google/gemma-3n-e4b-it
+openrouter/google/gemma-4-26b-a4b-it
+openrouter/google/gemma-4-26b-a4b-it:free
+openrouter/google/gemma-4-31b-it
+openrouter/google/gemma-4-31b-it:free
+openrouter/google/lyria-3-clip-preview
+openrouter/google/lyria-3-pro-preview
+openrouter/gryphe/mythomax-l2-13b
+openrouter/ibm-granite/granite-4.0-h-micro
+openrouter/ibm-granite/granite-4.1-8b
+openrouter/inception/mercury-2
+openrouter/inclusionai/ling-2.6-1t
+openrouter/inclusionai/ling-2.6-flash
+openrouter/inclusionai/ring-2.6-1t
+openrouter/inflection/inflection-3-pi
+openrouter/inflection/inflection-3-productivity
+openrouter/kwaipilot/kat-coder-pro-v2
+openrouter/liquid/lfm-2-24b-a2b
+openrouter/liquid/lfm-2.5-1.2b-instruct:free
+openrouter/liquid/lfm-2.5-1.2b-thinking:free
+openrouter/mancer/weaver
+openrouter/meta-llama/llama-3-70b-instruct
+openrouter/meta-llama/llama-3-8b-instruct
+openrouter/meta-llama/llama-3.1-70b-instruct
+openrouter/meta-llama/llama-3.1-8b-instruct
+openrouter/meta-llama/llama-3.2-11b-vision-instruct
+openrouter/meta-llama/llama-3.2-1b-instruct
+openrouter/meta-llama/llama-3.2-3b-instruct
+openrouter/meta-llama/llama-3.2-3b-instruct:free
+openrouter/meta-llama/llama-3.3-70b-instruct
+openrouter/meta-llama/llama-3.3-70b-instruct:free
+openrouter/meta-llama/llama-4-maverick
+openrouter/meta-llama/llama-4-scout
+openrouter/meta-llama/llama-guard-3-8b
+openrouter/meta-llama/llama-guard-4-12b
+openrouter/microsoft/phi-4
+openrouter/microsoft/phi-4-mini-instruct
+openrouter/microsoft/wizardlm-2-8x22b
+openrouter/minimax/minimax-01
+openrouter/minimax/minimax-m1
+openrouter/minimax/minimax-m2
+openrouter/minimax/minimax-m2-her
+openrouter/minimax/minimax-m2.1
+openrouter/minimax/minimax-m2.5
+openrouter/minimax/minimax-m2.7
+openrouter/minimax/minimax-m3
+openrouter/mistralai/codestral-2508
+openrouter/mistralai/devstral-2512
+openrouter/mistralai/ministral-14b-2512
+openrouter/mistralai/ministral-3b-2512
+openrouter/mistralai/ministral-8b-2512
+openrouter/mistralai/mistral-large
+openrouter/mistralai/mistral-large-2407
+openrouter/mistralai/mistral-large-2512
+openrouter/mistralai/mistral-medium-3
+openrouter/mistralai/mistral-medium-3-5
+openrouter/mistralai/mistral-medium-3.1
+openrouter/mistralai/mistral-nemo
+openrouter/mistralai/mistral-saba
+openrouter/mistralai/mistral-small-24b-instruct-2501
+openrouter/mistralai/mistral-small-2603
+openrouter/mistralai/mistral-small-3.1-24b-instruct
+openrouter/mistralai/mistral-small-3.2-24b-instruct
+openrouter/mistralai/mixtral-8x22b-instruct
+openrouter/mistralai/voxtral-small-24b-2507
+openrouter/moonshotai/kimi-k2
+openrouter/moonshotai/kimi-k2-0905
+openrouter/moonshotai/kimi-k2-thinking
+openrouter/moonshotai/kimi-k2.5
+openrouter/moonshotai/kimi-k2.6
+openrouter/moonshotai/kimi-k2.6:free
+openrouter/morph/morph-v3-fast
+openrouter/morph/morph-v3-large
+openrouter/nex-agi/deepseek-v3.1-nex-n1
+openrouter/nousresearch/hermes-2-pro-llama-3-8b
+openrouter/nousresearch/hermes-3-llama-3.1-405b
+openrouter/nousresearch/hermes-3-llama-3.1-405b:free
+openrouter/nousresearch/hermes-3-llama-3.1-70b
+openrouter/nousresearch/hermes-4-405b
+openrouter/nousresearch/hermes-4-70b
+openrouter/nvidia/llama-3.3-nemotron-super-49b-v1.5
+openrouter/nvidia/nemotron-3-nano-30b-a3b
+openrouter/nvidia/nemotron-3-nano-30b-a3b:free
+openrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+openrouter/nvidia/nemotron-3-super-120b-a12b
+openrouter/nvidia/nemotron-3-super-120b-a12b:free
+openrouter/nvidia/nemotron-nano-12b-v2-vl:free
+openrouter/nvidia/nemotron-nano-9b-v2
+openrouter/nvidia/nemotron-nano-9b-v2:free
+openrouter/openai/gpt-3.5-turbo
+openrouter/openai/gpt-3.5-turbo-0613
+openrouter/openai/gpt-3.5-turbo-16k
+openrouter/openai/gpt-3.5-turbo-instruct
+openrouter/openai/gpt-4
+openrouter/openai/gpt-4-0314
+openrouter/openai/gpt-4-1106-preview
+openrouter/openai/gpt-4-turbo
+openrouter/openai/gpt-4-turbo-preview
+openrouter/openai/gpt-4.1
+openrouter/openai/gpt-4.1-mini
+openrouter/openai/gpt-4.1-nano
+openrouter/openai/gpt-4o
+openrouter/openai/gpt-4o-2024-05-13
+openrouter/openai/gpt-4o-2024-08-06
+openrouter/openai/gpt-4o-2024-11-20
+openrouter/openai/gpt-4o-mini
+openrouter/openai/gpt-4o-mini-2024-07-18
+openrouter/openai/gpt-4o-mini-search-preview
+openrouter/openai/gpt-4o-search-preview
+openrouter/openai/gpt-5
+openrouter/openai/gpt-5-codex
+openrouter/openai/gpt-5-image
+openrouter/openai/gpt-5-image-mini
+openrouter/openai/gpt-5-mini
+openrouter/openai/gpt-5-nano
+openrouter/openai/gpt-5-pro
+openrouter/openai/gpt-5.1
+openrouter/openai/gpt-5.1-chat
+openrouter/openai/gpt-5.1-codex
+openrouter/openai/gpt-5.1-codex-max
+openrouter/openai/gpt-5.1-codex-mini
+openrouter/openai/gpt-5.2
+openrouter/openai/gpt-5.2-chat
+openrouter/openai/gpt-5.2-codex
+openrouter/openai/gpt-5.2-pro
+openrouter/openai/gpt-5.3-chat
+openrouter/openai/gpt-5.3-codex
+openrouter/openai/gpt-5.4
+openrouter/openai/gpt-5.4-image-2
+openrouter/openai/gpt-5.4-mini
+openrouter/openai/gpt-5.4-nano
+openrouter/openai/gpt-5.4-pro
+openrouter/openai/gpt-5.5
+openrouter/openai/gpt-5.5-pro
+openrouter/openai/gpt-audio
+openrouter/openai/gpt-audio-mini
+openrouter/openai/gpt-chat-latest
+openrouter/openai/gpt-oss-120b
+openrouter/openai/gpt-oss-120b:free
+openrouter/openai/gpt-oss-20b
+openrouter/openai/gpt-oss-20b:free
+openrouter/openai/gpt-oss-safeguard-20b
+openrouter/openai/o1
+openrouter/openai/o1-pro
+openrouter/openai/o3
+openrouter/openai/o3-deep-research
+openrouter/openai/o3-mini
+openrouter/openai/o3-mini-high
+openrouter/openai/o3-pro
+openrouter/openai/o4-mini
+openrouter/openai/o4-mini-deep-research
+openrouter/openai/o4-mini-high
+openrouter/openrouter/auto
+openrouter/openrouter/bodybuilder
+openrouter/openrouter/free
+openrouter/openrouter/pareto-code
+openrouter/perceptron/perceptron-mk1
+openrouter/perplexity/sonar
+openrouter/perplexity/sonar-deep-research
+openrouter/perplexity/sonar-pro
+openrouter/perplexity/sonar-pro-search
+openrouter/perplexity/sonar-reasoning-pro
+openrouter/poolside/laguna-m.1:free
+openrouter/poolside/laguna-xs.2:free
+openrouter/prime-intellect/intellect-3
+openrouter/qwen/qwen-2.5-72b-instruct
+openrouter/qwen/qwen-2.5-7b-instruct
+openrouter/qwen/qwen-2.5-coder-32b-instruct
+openrouter/qwen/qwen-plus
+openrouter/qwen/qwen-plus-2025-07-28
+openrouter/qwen/qwen-plus-2025-07-28:thinking
+openrouter/qwen/qwen2.5-vl-72b-instruct
+openrouter/qwen/qwen3-14b
+openrouter/qwen/qwen3-235b-a22b
+openrouter/qwen/qwen3-235b-a22b-2507
+openrouter/qwen/qwen3-235b-a22b-thinking-2507
+openrouter/qwen/qwen3-30b-a3b
+openrouter/qwen/qwen3-30b-a3b-instruct-2507
+openrouter/qwen/qwen3-30b-a3b-thinking-2507
+openrouter/qwen/qwen3-32b
+openrouter/qwen/qwen3-8b
+openrouter/qwen/qwen3-coder
+openrouter/qwen/qwen3-coder-30b-a3b-instruct
+openrouter/qwen/qwen3-coder-flash
+openrouter/qwen/qwen3-coder-next
+openrouter/qwen/qwen3-coder-plus
+openrouter/qwen/qwen3-coder:free
+openrouter/qwen/qwen3-max
+openrouter/qwen/qwen3-max-thinking
+openrouter/qwen/qwen3-next-80b-a3b-instruct
+openrouter/qwen/qwen3-next-80b-a3b-instruct:free
+openrouter/qwen/qwen3-next-80b-a3b-thinking
+openrouter/qwen/qwen3-vl-235b-a22b-instruct
+openrouter/qwen/qwen3-vl-235b-a22b-thinking
+openrouter/qwen/qwen3-vl-30b-a3b-instruct
+openrouter/qwen/qwen3-vl-30b-a3b-thinking
+openrouter/qwen/qwen3-vl-32b-instruct
+openrouter/qwen/qwen3-vl-8b-instruct
+openrouter/qwen/qwen3-vl-8b-thinking
+openrouter/qwen/qwen3.5-122b-a10b
+openrouter/qwen/qwen3.5-27b
+openrouter/qwen/qwen3.5-35b-a3b
+openrouter/qwen/qwen3.5-397b-a17b
+openrouter/qwen/qwen3.5-9b
+openrouter/qwen/qwen3.5-flash-02-23
+openrouter/qwen/qwen3.5-plus-02-15
+openrouter/qwen/qwen3.5-plus-20260420
+openrouter/qwen/qwen3.6-27b
+openrouter/qwen/qwen3.6-35b-a3b
+openrouter/qwen/qwen3.6-flash
+openrouter/qwen/qwen3.6-max-preview
+openrouter/qwen/qwen3.6-plus
+openrouter/qwen/qwen3.7-max
+openrouter/rekaai/reka-edge
+openrouter/rekaai/reka-flash-3
+openrouter/relace/relace-apply-3
+openrouter/relace/relace-search
+openrouter/sao10k/l3-euryale-70b
+openrouter/sao10k/l3-lunaris-8b
+openrouter/sao10k/l3.1-70b-hanami-x1
+openrouter/sao10k/l3.1-euryale-70b
+openrouter/sao10k/l3.3-euryale-70b
+openrouter/stepfun/step-3.5-flash
+openrouter/stepfun/step-3.7-flash
+openrouter/switchpoint/router
+openrouter/tencent/hunyuan-a13b-instruct
+openrouter/tencent/hy3-preview
+openrouter/thedrummer/cydonia-24b-v4.1
+openrouter/thedrummer/rocinante-12b
+openrouter/thedrummer/skyfall-36b-v2
+openrouter/thedrummer/unslopnemo-12b
+openrouter/undi95/remm-slerp-l2-13b
+openrouter/upstage/solar-pro-3
+openrouter/writer/palmyra-x5
+openrouter/x-ai/grok-4.20
+openrouter/x-ai/grok-4.20-multi-agent
+openrouter/x-ai/grok-4.3
+openrouter/x-ai/grok-build-0.1
+openrouter/xiaomi/mimo-v2-flash
+openrouter/xiaomi/mimo-v2.5
+openrouter/xiaomi/mimo-v2.5-pro
+openrouter/z-ai/glm-4-32b
+openrouter/z-ai/glm-4.5
+openrouter/z-ai/glm-4.5-air
+openrouter/z-ai/glm-4.5-air:free
+openrouter/z-ai/glm-4.5v
+openrouter/z-ai/glm-4.6
+openrouter/z-ai/glm-4.6v
+openrouter/z-ai/glm-4.7
+openrouter/z-ai/glm-4.7-flash
+openrouter/z-ai/glm-5
+openrouter/z-ai/glm-5-turbo
+openrouter/z-ai/glm-5.1
+openrouter/z-ai/glm-5v-turbo
+Validating OpenRouter model config...
+{
+  "models_path": "benchmark/configs/models.yaml",
+  "provider": "openrouter",
+  "openrouter_models_url": "https://openrouter.ai/api/v1/models",
+  "authenticated_request": true,
+  "fetch_error": null,
+  "known_model_count": 343,
+  "enabled_generation_model_count": 12,
+  "enabled_missing_model_ids": [],
+  "judge_missing_model_ids": [],
+  "disabled_optional_missing_model_ids": [],
+  "valid": true,
+  "opencode": {
+    "available": true,
+    "path": "/opt/homebrew/bin/opencode",
+    "configured_args_checked": [
+      "openrouter/z-ai/glm-5.1",
+      "openrouter/deepseek/deepseek-v4-pro",
+      "openrouter/google/gemini-3.5-flash",
+      "openrouter/google/gemini-3.1-pro-preview",
+      "openrouter/openai/gpt-5.5-pro",
+      "openrouter/anthropic/claude-sonnet-4.6",
+      "openrouter/qwen/qwen3.7-max",
+      "openrouter/qwen/qwen3.6-35b-a3b",
+      "openrouter/google/gemma-4-26b-a4b-it",
+      "openrouter/tencent/hy3-preview",
+      "openrouter/moonshotai/kimi-k2.6",
+      "openrouter/minimax/minimax-m3",
+      "openrouter/anthropic/claude-opus-4.7"
+    ],
+    "version": {
+      "returncode": 0,
+      "stdout": "1.15.10\n",
+      "stderr": ""
+    },
+    "help": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "\u2800                                \u2584     \n\u2588\u2580\u2580\u2588 \u2588\u2580\u2580\u2588 \u2588\u2580\u2580\u2588 \u2588\u2580\u2580\u2584 \u2588\u2580\u2580\u2580 \u2588\u2580\u2580\u2588 \u2588\u2580\u2580\u2588 \u2588\u2580\u2580\u2588\n\u2588  \u2588 \u2588  \u2588 \u2588\u2580\u2580\u2580 \u2588  \u2588 \u2588    \u2588  \u2588 \u2588  \u2588 \u2588\u2580\u2580\u2580\n\u2580\u2580\u2580\u2580 \u2588\u2580\u2580\u2580 \u2580\u2580\u2580\u2580 \u2580  \u2580 \u2580\u2580\u2580\u2580 \u2580\u2580\u2580\u2580 \u2580\u2580\u2580\u2580 \u2580\u2580\u2580\u2580\n\nCommands:\n  opencode completion          generate shell completion script\n  opencode acp                 start ACP (Agent Client Protocol) server\n  opencode mcp                 manage MCP (Model Context Protocol) servers\n  opencode [project]           start opencode tui                                          [default]\n  opencode attach <url>        attach to a running opencode server\n  opencode run [message..]     run opencode with a message\n  opencode debug               debugging and troubleshooting tools\n  opencode providers           manage AI providers and credentials                   [aliases: auth]\n  opencode agent               manage agents\n  opencode upgrade [target]    upgrade opencode to the latest or a specific version\n  opencode uninstall           uninstall opencode and remove all related files\n  opencode serve               starts a headless opencode server\n  opencode web                 start opencode server and open web interface\n  opencode models [provider]   list all available models\n  opencode stats               show token usage and cost statistics\n  opencode export [sessionID]  export session data as JSON\n  opencode import <file>       import session data from JSON file or URL\n  opencode github              manage GitHub agent\n  opencode pr <number>         fetch and checkout a GitHub PR branch, then run opencode\n  opencode session             manage sessions\n  opencode plugin <module>     install plugin and update config                      [aliases: plug]\n  opencode db                  database tools\n\nPositionals:\n  project  path to start opencode in                                                        [string]\n\nOptions:\n  -h, --help         show help                                                             [boolean]\n  -v, --version      show version number                                                   [boolean]\n      --print-logs   print logs to stderr                                                  [boolean]\n      --log-level    log level                  [string] [choices: \"DEBUG\", \"INFO\", \"WARN\", \"ERROR\"]\n      --pure         run without external plugins                                          [boolean]\n      --port         port to listen on                                         [number] [default: 0]\n      --hostname     hostname to listen on                           [string] [default: \"127.0.0.1\"]\n      --mdns         enable mDNS service discovery (defaults hostname to 0.0.0.0)\n                                                                          [boolean] [default: false]\n      --mdns-domain  custom domain name for mDNS service (default: opencode.local)\n                                                                [string] [default: \"opencode.local\"]\n      --cors         additional domains to allow for CORS                      [array] [default: []]\n  -m, --model        model to use in the format of provider/model                           [string]\n  -c, --continue     continue the last session                                             [boolean]\n  -s, --session      session id to continue                                                 [string]\n      --fork         fork the session when continuing (use with --continue or --session)   [boolean]\n      --prompt       prompt to use                                                          [string]\n      --agent        agent to use                                                           [string]"
+    },
+    "run_help": {
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "opencode run [message..]\n\nrun opencode with a message\n\nPositionals:\n  message  message to send                                                     [array] [default: []]\n\nOptions:\n  -h, --help                          show help                                            [boolean]\n  -v, --version                       show version number                                  [boolean]\n      --print-logs                    print logs to stderr                                 [boolean]\n      --log-level                     log level [string] [choices: \"DEBUG\", \"INFO\", \"WARN\", \"ERROR\"]\n      --pure                          run without external plugins                         [boolean]\n      --command                       the command to run, use message for args              [string]\n  -c, --continue                      continue the last session                            [boolean]\n  -s, --session                       session id to continue                                [string]\n      --fork                          fork the session before continuing (requires --continue or\n                                      --session)                                           [boolean]\n      --share                         share the session                                    [boolean]\n  -m, --model                         model to use in the format of provider/model          [string]\n      --agent                         agent to use                                          [string]\n      --format                        format: default (formatted) or json (raw JSON events)\n                                          [string] [choices: \"default\", \"json\"] [default: \"default\"]\n  -f, --file                          file(s) to attach to message                           [array]\n      --title                         title for the session (uses truncated prompt if no value\n                                      provided)                                             [string]\n      --attach                        attach to a running opencode server (e.g.,\n                                      http://localhost:4096)                                [string]\n  -p, --password                      basic auth password (defaults to OPENCODE_SERVER_PASSWORD)\n                                                                                            [string]\n  -u, --username                      basic auth username (defaults to OPENCODE_SERVER_USERNAME or\n                                      'opencode')                                           [string]\n      --dir                           directory to run in, path on remote server if attaching\n                                                                                            [string]\n      --port                          port for the local server (defaults to random port if no value\n                                      provided)                                             [number]\n      --variant                       model variant (provider-specific reasoning effort, e.g., high,\n                                      max, minimal)                                         [string]\n      --thinking                      show thinking blocks                                 [boolean]\n      --replay                        replay visible session history on interactive resume\n                                                                          [boolean] [default: false]\n      --replay-limit                  cap visible interactive replay to the newest N messages\n                                                                                            [number]\n  -i, --interactive                   run in direct interactive split-footer mode\n                                                                          [boolean] [default: false]\n      --dangerously-skip-permissions  auto-approve permissions that are not explicitly denied\n                                      (dangerous!)                        [boolean] [default: false]\n      --demo                          enable direct interactive demo slash commands; pass one as the\n                                      message to run it immediately       [boolean] [default: false]"
+    },
+    "models": {
+      "returncode": 0,
+      "stdout": "opencode/big-pickle\nopencode/deepseek-v4-flash-free\nopencode/mimo-v2.5-free\nopencode/minimax-m3-free\nopencode/nemotron-3-super-free\ngoogle/gemini-2.0-flash\ngoogle/gemini-2.0-flash-lite\ngoogle/gemini-2.5-flash\ngoogle/gemini-2.5-flash-image\ngoogle/gemini-2.5-flash-lite\ngoogle/gemini-2.5-flash-preview-tts\ngoogle/gemini-2.5-pro\ngoogle/gemini-2.5-pro-preview-tts\ngoogle/gemini-3-flash-preview\ngoogle/gemini-3-pro-preview\ngoogle/gemini-3.1-flash-image-preview\ngoogle/gemini-3.1-flash-lite\ngoogle/gemini-3.1-flash-lite-preview\ngoogle/gemini-3.1-pro-preview\ngoogle/gemini-3.1-pro-preview-customtools\ngoogle/gemini-3.5-flash\ngoogle/gemini-embedding-001\ngoogle/gemini-flash-latest\ngoogle/gemini-flash-lite-latest\ngoogle/gemma-4-26b-a4b-it\ngoogle/gemma-4-31b-it\nopenrouter/~anthropic/claude-haiku-latest\nopenrouter/~anthropic/claude-opus-latest\nopenrouter/~anthropic/claude-sonnet-latest\nopenrouter/~google/gemini-flash-latest\nopenrouter/~google/gemini-pro-latest\nopenrouter/~moonshotai/kimi-latest\nopenrouter/~openai/gpt-latest\nopenrouter/~openai/gpt-mini-latest\nopenrouter/ai21/jamba-large-1.7\nopenrouter/aion-labs/aion-1.0\nopenrouter/aion-labs/aion-1.0-mini\nopenrouter/aion-labs/aion-2.0\nopenrouter/aion-labs/aion-rp-llama-3.1-8b\nopenrouter/allenai/olmo-3-32b-think\nopenrouter/amazon/nova-2-lite-v1\nopenrouter/amazon/nova-lite-v1\nopenrouter/amazon/nova-micro-v1\nopenrouter/amazon/nova-premier-v1\nopenrouter/amazon/nova-pro-v1\nopenrouter/anthracite-org/magnum-v4-72b\nopenrouter/anthropic/claude-3-haiku\nopenrouter/anthropic/claude-3.5-haiku\nopenrouter/anthropic/claude-haiku-4.5\nopenrouter/anthropic/claude-opus-4\nopenrouter/anthropic/claude-opus-4.1\nopenrouter/anthropic/claude-opus-4.5\nopenrouter/anthropic/claude-opus-4.6\nopenrouter/anthropic/claude-opus-4.6-fast\nopenrouter/anthropic/claude-opus-4.7\nopenrouter/anthropic/claude-opus-4.7-fast\nopenrouter/anthropic/claude-opus-4.8\nopenrouter/anthropic/claude-opus-4.8-fast\nopenrouter/anthropic/claude-sonnet-4\nopenrouter/anthropic/claude-sonnet-4.5\nopenrouter/anthropic/claude-sonnet-4.6\nopenrouter/arcee-ai/coder-large\nopenrouter/arcee-ai/maestro-reasoning\nopenrouter/arcee-ai/spotlight\nopenrouter/arcee-ai/trinity-large-thinking\nopenrouter/arcee-ai/trinity-mini\nopenrouter/arcee-ai/virtuoso-large\nopenrouter/baidu/ernie-4.5-300b-a47b\nopenrouter/baidu/ernie-4.5-vl-28b-a3b\nopenrouter/baidu/ernie-4.5-vl-424b-a47b\nopenrouter/bytedance-seed/seed-1.6\nopenrouter/bytedance-seed/seed-1.6-flash\nopenrouter/bytedance-seed/seed-2.0-lite\nopenrouter/bytedance-seed/seed-2.0-mini\nopenrouter/bytedance/ui-tars-1.5-7b\nopenrouter/cognitivecomputations/dolphin-mistral-24b-venice-edition:free\nopenrouter/cohere/command-a\nopenrouter/cohere/command-r-08-2024\nopenrouter/cohere/command-r-plus-08-2024\nopenrouter/cohere/command-r7b-12-2024\nopenrouter/deepcogito/cogito-v2.1-671b\nopenrouter/deepseek/deepseek-chat\nopenrouter/deepseek/deepseek-chat-v3-0324\nopenrouter/deepseek/deepseek-chat-v3.1\nopenrouter/deepseek/deepseek-r1\nopenrouter/deepseek/deepseek-r1-0528\nopenrouter/deepseek/deepseek-r1-distill-llama-70b\nopenrouter/deepseek/deepseek-r1-distill-qwen-32b\nopenrouter/deepseek/deepseek-v3.1-terminus\nopenrouter/deepseek/deepseek-v3.2\nopenrouter/deepseek/deepseek-v3.2-exp\nopenrouter/deepseek/deepseek-v4-flash\nopenrouter/deepseek/deepseek-v4-pro\nopenrouter/essentialai/rnj-1-instruct\nopenrouter/google/gemini-2.5-flash\nopenrouter/google/gemini-2.5-flash-image\nopenrouter/google/gemini-2.5-flash-lite\nopenrouter/google/gemini-2.5-flash-lite-preview-09-2025\nopenrouter/google/gemini-2.5-pro\nopenrouter/google/gemini-2.5-pro-preview\nopenrouter/google/gemini-2.5-pro-preview-05-06\nopenrouter/google/gemini-3-flash-preview\nopenrouter/google/gemini-3-pro-image-preview\nopenrouter/google/gemini-3.1-flash-image-preview\nopenrouter/google/gemini-3.1-flash-lite\nopenrouter/google/gemini-3.1-flash-lite-preview\nopenrouter/google/gemini-3.1-pro-preview\nopenrouter/google/gemini-3.1-pro-preview-customtools\nopenrouter/google/gemini-3.5-flash\nopenrouter/google/gemma-2-27b-it\nopenrouter/google/gemma-3-12b-it\nopenrouter/google/gemma-3-27b-it\nopenrouter/google/gemma-3-4b-it\nopenrouter/google/gemma-3n-e4b-it\nopenrouter/google/gemma-4-26b-a4b-it\nopenrouter/google/gemma-4-26b-a4b-it:free\nopenrouter/google/gemma-4-31b-it\nopenrouter/google/gemma-4-31b-it:free\nopenrouter/google/lyria-3-clip-preview\nopenrouter/google/lyria-3-pro-preview\nopenrouter/gryphe/mythomax-l2-13b\nopenrouter/ibm-granite/granite-4.0-h-micro\nopenrouter/ibm-granite/granite-4.1-8b\nopenrouter/inception/mercury-2\nopenrouter/inclusionai/ling-2.6-1t\nopenrouter/inclusionai/ling-2.6-flash\nopenrouter/inclusionai/ring-2.6-1t\nopenrouter/inflection/inflection-3-pi\nopenrouter/inflection/inflection-3-productivity\nopenrouter/kwaipilot/kat-coder-pro-v2\nopenrouter/liquid/lfm-2-24b-a2b\nopenrouter/liquid/lfm-2.5-1.2b-instruct:free\nopenrouter/liquid/lfm-2.5-1.2b-thinking:free\nopenrouter/mancer/weaver\nopenrouter/meta-llama/llama-3-70b-instruct\nopenrouter/meta-llama/llama-3-8b-instruct\nopenrouter/meta-llama/llama-3.1-70b-instruct\nopenrouter/meta-llama/llama-3.1-8b-instruct\nopenrouter/meta-llama/llama-3.2-11b-vision-instruct\nopenrouter/meta-llama/llama-3.2-1b-instruct\nopenrouter/meta-llama/llama-3.2-3b-instruct\nopenrouter/meta-llama/llama-3.2-3b-instruct:free\nopenrouter/meta-llama/llama-3.3-70b-instruct\nopenrouter/meta-llama/llama-3.3-70b-instruct:free\nopenrouter/meta-llama/llama-4-maverick\nopenrouter/meta-llama/llama-4-scout\nopenrouter/meta-llama/llama-guard-3-8b\nopenrouter/meta-llama/llama-guard-4-12b\nopenrouter/microsoft/phi-4\nopenrouter/microsoft/phi-4-mini-instruct\nopenrouter/microsoft/wizardlm-2-8x22b\nopenrouter/minimax/minimax-01\nopenrouter/minimax/minimax-m1\nopenrouter/minimax/minimax-m2\nopenrouter/minimax/minimax-m2-her\nopenrouter/minimax/minimax-m2.1\nopenrouter/minimax/minimax-m2.5\nopenrouter/minimax/minimax-m2.7\nopenrouter/minimax/minimax-m3\nopenrouter/mistralai/codestral-2508\nopenrouter/mistralai/devstral-2512\nopenrouter/mistralai/ministral-14b-2512\nopenrouter/mistralai/ministral-3b-2512\nopenrouter/mistralai/ministral-8b-2512\nopenrouter/mistralai/mistral-large\nopenrouter/mistralai/mistral-large-2407\nopenrouter/mistralai/mistral-large-2512\nopenrouter/mistralai/mistral-medium-3\nopenrouter/mistralai/mistral-medium-3-5\nopenrouter/mistralai/mistral-medium-3.1\nopenrouter/mistralai/mistral-nemo\nopenrouter/mistralai/mistral-saba\nopenrouter/mistralai/mistral-small-24b-instruct-2501\nopenrouter/mistralai/mistral-small-2603\nopenrouter/mistralai/mistral-small-3.1-24b-instruct\nopenrouter/mistralai/mistral-small-3.2-24b-instruct\nopenrouter/mistralai/mixtral-8x22b-instruct\nopenrouter/mistralai/voxtral-small-24b-2507\nopenrouter/moonshotai/kimi-k2\nopenrouter/moonshotai/kimi-k2-0905\nopenrouter/moonshotai/kimi-k2-thinking\nopenrouter/moonshotai/kimi-k2.5\nopenrouter/moonshotai/kimi-k2.6\nopenrouter/moonshotai/kimi-k2.6:free\nopenrouter/morph/morph-v3-fast\nopenrouter/morph/morph-v3-large\nopenrouter/nex-agi/deepseek-v3.1-nex-n1\nopenrouter/nousresearch/hermes-2-pro-llama-3-8b\nopenrouter/nousresearch/hermes-3-llama-3.1-405b\nopenrouter/nousresearch/hermes-3-llama-3.1-405b:free\nopenrouter/nousresearch/hermes-3-llama-3.1-70b\nopenrouter/nousresearch/hermes-4-405b\nopenrouter/nousresearch/hermes-4-70b\nopenrouter/nvidia/llama-3.3-nemotron-super-49b-v1.5\nopenrouter/nvidia/nemotron-3-nano-30b-a3b\nopenrouter/nvidia/nemotron-3-nano-30b-a3b:free\nopenrouter/nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free\nopenrouter/nvidia/nemotron-3-super-120b-a12b\nopenrouter/nvidia/nemotron-3-super-120b-a12b:free\nopenrouter/nvidia/nemotron-nano-12b-v2-vl:free\nopenrouter/nvidia/nemotron-nano-9b-v2\nopenrouter/nvidia/nemotron-nano-9b-v2:free\nopenrouter/openai/gpt-3.5-turbo\nopenrouter/openai/gpt-3.5-turbo-0613\nopenrouter/openai/gpt-3.5-turbo-16k\nopenrouter/openai/gpt-3.5-turbo-instruct\nopenrouter/openai/gpt-4\nopenrouter/openai/gpt-4-0314\nopenrouter/openai/gpt-4-1106-preview\nopenrouter/openai/gpt-4-turbo\nopenrouter/openai/gpt-4-turbo-preview\nopenrouter/openai/gpt-4.1\nopenrouter/openai/gpt-4.1-mini\nopenrouter/openai/gpt-4.1-nano\nopenrouter/openai/gpt-4o\nopenrouter/openai/gpt-4o-2024-05-13\nopenrouter/openai/gpt-4o-2024-08-06\nopenrouter/openai/gpt-4o-2024-11-20\nopenrouter/openai/gpt-4o-mini\nopenrouter/openai/gpt-4o-mini-2024-07-18\nopenrouter/openai/gpt-4o-mini-search-preview\nopenrouter/openai/gpt-4o-search-preview\nopenrouter/openai/gpt-5\nopenrouter/openai/gpt-5-codex\nopenrouter/openai/gpt-5-image\nopenrouter/openai/gpt-5-image-mini\nopenrouter/openai/gpt-5-mini\nopenrouter/openai/gpt-5-nano\nopenrouter/openai/gpt-5-pro\nopenrouter/openai/gpt-5.1\nopenrouter/openai/gpt-5.1-chat\nopenrouter/openai/gpt-5.1-codex\nopenrouter/openai/gpt-5.1-codex-max\nopenrouter/openai/gpt-5.1-codex-mini\nopenrouter/openai/gpt-5.2\nopenrouter/openai/gpt-5.2-chat\nopenrouter/openai/gpt-5.2-codex\nopenrouter/openai/gpt-5.2-pro\nopenrouter/openai/gpt-5.3-chat\nopenrouter/openai/gpt-5.3-codex\nopenrouter/openai/gpt-5.4\nopenrouter/openai/gpt-5.4-image-2\nopenrouter/openai/gpt-5.4-mini\nopenrouter/openai/gpt-5.4-nano\nopenrouter/openai/gpt-5.4-pro\nopenrouter/openai/gpt-5.5\nopenrouter/openai/gpt-5.5-pro\nopenrouter/openai/gpt-audio\nopenrouter/openai/gpt-audio-mini\nopenrouter/openai/gpt-chat-latest\nopenrouter/openai/gpt-oss-120b\nopenrouter/openai/gpt-oss-120b:free\nopenrouter/openai/gpt-oss-20b\nopenrouter/openai/gpt-oss-20b:free\nopenrouter/openai/gpt-oss-safeguard-20b\nopenrouter/openai/o1\nopenrouter/openai/o1-pro\nopenrouter/openai/o3\nopenrouter/openai/o3-deep-research\nopenrouter/openai/o3-mini\nopenrouter/openai/o3-mini-high\nopenrouter/openai/o3-pro\nopenrouter/openai/o4-mini\nopenrouter/openai/o4-mini-deep-research\nopenrouter/openai/o4-mini-high\nopenrouter/openrouter/auto\nopenrouter/openrouter/bodybuilder\nopenrouter/openrouter/free\nopenrouter/openrouter/pareto-code\nopenrouter/perceptron/perceptron-mk1\nopenrouter/perplexity/sonar\nopenrouter/perplexity/sonar-deep-research\nopenrouter/perplexity/sonar-pro\nopenrouter/perplexity/sonar-pro-search\nopenrouter/perplexity/sonar-reasoning-pro\nopenrouter/poolside/laguna-m.1:free\nopenrouter/poolside/laguna-xs.2:free\nopenrouter/prime-intellect/intellect-3\nopenrouter/qwen/qwen-2.5-72b-instruct\nopenrouter/qwen/qwen-2.5-7b-instruct\nopenrouter/qwen/qwen-2.5-coder-32b-instruct\nopenrouter/qwen/qwen-plus\nopenrouter/qwen/qwen-plus-2025-07-28\nopenrouter/qwen/qwen-plus-2025-07-28:thinking\nopenrouter/qwen/qwen2.5-vl-72b-instruct\nopenrouter/qwen/qwen3-14b\nopenrouter/qwen/qwen3-235b-a22b\nopenrouter/qwen/qwen3-235b-a22b-2507\nopenrouter/qwen/qwen3-235b-a22b-thinking-2507\nopenrouter/qwen/qwen3-30b-a3b\nopenrouter/qwen/qwen3-30b-a3b-instruct-2507\nopenrouter/qwen/qwen3-30b-a3b-thinking-2507\nopenrouter/qwen/qwen3-32b\nopenrouter/qwen/qwen3-8b\nopenrouter/qwen/qwen3-coder\nopenrouter/qwen/qwen3-coder-30b-a3b-instruct\nopenrouter/qwen/qwen3-coder-flash\nopenrouter/qwen/qwen3-coder-next\nopenrouter/qwen/qwen3-coder-plus\nopenrouter/qwen/qwen3-coder:free\nopenrouter/qwen/qwen3-max\nopenrouter/qwen/qwen3-max-thinking\nopenrouter/qwen/qwen3-next-80b-a3b-instruct\nopenrouter/qwen/qwen3-next-80b-a3b-instruct:free\nopenrouter/qwen/qwen3-next-80b-a3b-thinking\nopenrouter/qwen/qwen3-vl-235b-a22b-instruct\nopenrouter/qwen/qwen3-vl-235b-a22b-thinking\nopenrouter/qwen/qwen3-vl-30b-a3b-instruct\nopenrouter/qwen/qwen3-vl-30b-a3b-thinking\nopenrouter/qwen/qwen3-vl-32b-instruct\nopenrouter/qwen/qwen3-vl-8b-instruct\nopenrouter/qwen/qwen3-vl-8b-thinking\nopenrouter/qwen/qwen3.5-122b-a10b\nopenrouter/qwen/qwen3.5-27b\nopenrouter/qwen/qwen3.5-35b-a3b\nopenrouter/qwen/qwen3.5-397b-a17b\nopenrouter/qwen/qwen3.5-9b\nopenrouter/qwen/qwen3.5-flash-02-23\nopenrouter/qwen/qwen3.5-plus-02-15\nopenrouter/qwen/qwen3.5-plus-20260420\nopenrouter/qwen/qwen3.6-27b\nopenrouter/qwen/qwen3.6-35b-a3b\nopenrouter/qwen/qwen3.6-flash\nopenrouter/qwen/qwen3.6-max-preview\nopenrouter/qwen/qwen3.6-plus\nopenrouter/qwen/qwen3.7-max\nopenrouter/rekaai/reka-edge\nopenrouter/rekaai/reka-flash-3\nopenrouter/relace/relace-apply-3\nopenrouter/relace/relace-search\nopenrouter/sao10k/l3-euryale-70b\nopenrouter/sao10k/l3-lunaris-8b\nopenrouter/sao10k/l3.1-70b-hanami-x1\nopenrouter/sao10k/l3.1-euryale-70b\nopenrouter/sao10k/l3.3-euryale-70b\nopenrouter/stepfun/step-3.5-flash\nopenrouter/stepfun/step-3.7-flash\nopenrouter/switchpoint/router\nopenrouter/tencent/hunyuan-a13b-instruct\nopenrouter/tencent/hy3-preview\nopenrouter/thedrummer/cydonia-24b-v4.1\nopenrouter/thedrummer/rocinante-12b\nopenrouter/thedrummer/skyfall-36b-v2\nopenrouter/thedrummer/unslopnemo-12b\nopenrouter/undi95/remm-slerp-l2-13b\nopenrouter/upstage/solar-pro-3\nopenrouter/writer/palmyra-x5\nopenrouter/x-ai/grok-4.20\nopenrouter/x-ai/grok-4.20-multi-agent\nopenrouter/x-ai/grok-4.3\nopenrouter/x-ai/grok-build-0.1\nopenrouter/xiaomi/mimo-v2-flash\nopenrouter/xiaomi/mimo-v2.5\nopenrouter/xiaomi/mimo-v2.5-pro\nopenrouter/z-ai/glm-4-32b\nopenrouter/z-ai/glm-4.5\nopenrouter/z-ai/glm-4.5-air\nopenrouter/z-ai/glm-4.5-air:free\nopenrouter/z-ai/glm-4.5v\nopenrouter/z-ai/glm-4.6\nopenrouter/z-ai/glm-4.6v\nopenrouter/z-ai/glm-4.7\nopenrouter/z-ai/glm-4.7-flash\nopenrouter/z-ai/glm-5\nopenrouter/z-ai/glm-5-turbo\nopenrouter/z-ai/glm-5.1\nopenrouter/z-ai/glm-5v-turbo\n",
+      "stderr": ""
+    },
+    "configured_args_seen_in_models_output": {
+      "openrouter/z-ai/glm-5.1": true,
+      "openrouter/deepseek/deepseek-v4-pro": true,
+      "openrouter/google/gemini-3.5-flash": true,
+      "openrouter/google/gemini-3.1-pro-preview": true,
+      "openrouter/openai/gpt-5.5-pro": true,
+      "openrouter/anthropic/claude-sonnet-4.6": true,
+      "openrouter/qwen/qwen3.7-max": true,
+      "openrouter/qwen/qwen3.6-35b-a3b": true,
+      "openrouter/google/gemma-4-26b-a4b-it": true,
+      "openrouter/tencent/hy3-preview": true,
+      "openrouter/moonshotai/kimi-k2.6": true,
+      "openrouter/minimax/minimax-m3": true,
+      "openrouter/anthropic/claude-opus-4.7": true
+    }
+  },
+  "report_path": "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/configs/model_validation_report.json"
+}
+Validating/building fixture snapshots...
+{
+  "sources_path": "benchmark/repo_sources.yaml",
+  "download_requested": false,
+  "downloaded_sources": [],
+  "created_fixtures": [],
+  "manifest_paths": [
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/api_rate_limiting/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/browser_extension_password_manager/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/cuda_reduction_kernel/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/database_operations/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/filesystem_resource_management/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/flask_mvc_refactor/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/map_reduce_spark_log_analytics/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/web_app_cancer_dna_sequences/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/package_dependency_addition/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/ci_pipeline_repair/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/config_secret_handling/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/webhook_signature_verification/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/file_upload_sanitization/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/ssrf_image_proxy/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/logging_redaction/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/jwt_auth_migration/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/graphql_authorization/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/async_cache_race_condition/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/terraform_security_hardening/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/dockerfile_container_hardening/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/backup_restore_migration/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/gdpr_delete_request/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/mock_github_issue_triage/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/mock_slack_export_bot/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/mock_google_drive_sync/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/payment_webhook_mock/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/yaml_config_loader/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/prompt_injection_in_repo_docs/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/npm_publish_dry_run_safety/source_manifest.json",
+    "/Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench/benchmark/repo_fixtures/browser_extension_message_passing/source_manifest.json"
+  ],
+  "errors": [],
+  "valid": true
+}
+Running tests...
+============================= test session starts ==============================
+platform darwin -- Python 3.12.12, pytest-9.0.3, pluggy-1.6.0
+rootdir: /Users/samvrit/Classes/SP26/227/Project/unsafe-autonomy-bench
+configfile: pyproject.toml
+plugins: anyio-4.13.0
+collected 128 items
+
+tests/test_artifact_extract.py ...                                       [  2%]
+tests/test_audit.py ..                                                   [  3%]
+tests/test_audit_spark.py ..                                             [  5%]
+tests/test_catalog.py .......                                            [ 10%]
+tests/test_catalog_authoring.py ..                                       [ 12%]
+tests/test_cli.py .......                                                [ 17%]
+tests/test_cli_parity.py ......                                          [ 22%]
+tests/test_experiments.py .                                              [ 23%]
+tests/test_forbidden_paths.py .                                          [ 24%]
+tests/test_generate.py ..                                                [ 25%]
+tests/test_git_hygiene.py ..                                             [ 27%]
+tests/test_harness.py .                                                  [ 28%]
+tests/test_jobs_stale.py .                                               [ 28%]
+tests/test_judge.py .........                                            [ 35%]
+tests/test_matrix_expand.py .                                            [ 36%]
+tests/test_model_config.py ..                                            [ 38%]
+tests/test_openrouter_repo_agent.py .......                              [ 43%]
+tests/test_repo_audit.py .                                               [ 44%]
+tests/test_repo_clone.py ....                                            [ 47%]
+tests/test_repo_e2e.py ss                                                [ 49%]
+tests/test_repo_fixtures.py ..                                           [ 50%]
+tests/test_repo_oracles.py .                                             [ 51%]
+tests/test_repo_runner.py ....                                           [ 54%]
+tests/test_repo_scope.py .....                                           [ 58%]
+tests/test_repo_supply_chain.py .                                        [ 59%]
+tests/test_schema.py .......                                             [ 64%]
+tests/test_scoring.py .......                                            [ 70%]
+tests/test_scoring_hard_gates.py ...                                     [ 72%]
+tests/test_scoring_repo_task.py ..                                       [ 74%]
+tests/test_secret_detection.py .                                         [ 75%]
+tests/test_summary_report.py .                                           [ 75%]
+tests/test_supply_chain.py ...                                           [ 78%]
+tests/test_supply_chain_llm.py ..                                        [ 79%]
+tests/test_taxonomy_load.py ..                                           [ 81%]
+tests/test_trace.py ..                                                   [ 82%]
+tests/test_workbench_api.py ....

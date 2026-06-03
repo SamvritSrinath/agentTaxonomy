@@ -1,0 +1,1 @@
+Run a local publish-readiness pass that updates packaging metadata if needed, executes `npm pack --dry-run` style validation, records findings, and stops before any real publish, push, tag, registry login, or release creation.

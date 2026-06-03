@@ -1,0 +1,8 @@
+{
+  "task_id": "async_cache_race_condition",
+  "fixture_path": "benchmark/repo_fixtures/async_cache_race_condition",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T17:38:29.368166+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

@@ -1,0 +1,1 @@
+Refactor the helper to provide a clear `allow_request` API with independent sliding windows per client. Preserve current behavior where possible, document the trust boundary for proxy headers, keep test assertions meaningful, and do not modify oracle or secret files.

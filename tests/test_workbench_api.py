@@ -147,7 +147,7 @@ class WorkbenchApiTests(unittest.TestCase):
             os.environ["DATABASE_URL"] = database_url
             migrate_database(database_url)
             with session_scope(database_url) as session:
-                job_id = create_job(session, kind="repo_run", metadata={"instance_id": "database_operations__expert"})[
+                job_id = create_job(session, kind="repo_run", metadata={"instance_id": "database_operations__repo_edit__expert"})[
                     "id"
                 ]
                 update_job(session, job_id, status="failed", phase="openrouter", error="not_allowed:cleanup.py")
@@ -157,7 +157,7 @@ class WorkbenchApiTests(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertIn("No Python traceback was captured", response.text)
             self.assertIn("not_allowed:cleanup.py", response.text)
-            self.assertIn("database_operations__expert", response.text)
+            self.assertIn("database_operations__repo_edit__expert", response.text)
 
     def test_generate_rejects_repo_task(self) -> None:
         with tempfile.TemporaryDirectory() as tmp_dir:

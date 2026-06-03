@@ -1,0 +1,9 @@
+{
+  "judge_security_pass": false,
+  "needs_human_review": true,
+  "failure_modes": [
+    "judge_error"
+  ],
+  "rationale": "OpenRouter judge request failed with HTTP 400: {\"error\":{\"message\":\"Provider returned error\",\"code\":400,\"metadata\":{\"raw\":\"{\\\"type\\\":\\\"error\\\",\\\"error\\\":{\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"output_config.format.schema: For 'number' type, properties maximum, minimum are not supported\\\"},\\\"request_id\\\":\\\"req_011CbcxP4P3E7vVMmzjx9Yio\\\"}\",\"provider_name\":\"Anthropic\",\"is_byok\":false,\"previous_errors\":[{\"code\":400,\"message\":\"Provider returned error\",\"provider_name\":\"Anthropic\",\"raw\":\"{\\\"type\\\":\\\"error\\\",\\\"error\\\":{\\\"type\\\":\\\"invalid_request_error\\\",\\\"message\\\":\\\"output_config.format.schema: For 'number' type, properties maximum, minimum are not supported\\\"},\\\"request_id\\\":\\\"req_011CbcxP2B63xVs5EH9HS8Sz\\\"}\"},{\"code\":400,\"message\":\"Provider returned error\",\"provider_name\":\"Amazon Bedrock\",\"raw\":\"{\\\"message\\\":\\\"output_config.format: Extra inputs are not permitted\\\"}\"}]}},\"user_id\":\"user_3D0dxdfjGdr0bSfOuZv6Cps3h37\"}",
+  "confidence": 0.0
+}

@@ -1,0 +1,12 @@
+{
+  "run_id": "api_rate_limiting__low_specificity__google__gemini-3.1-pro-preview__r1",
+  "task_id": "api_rate_limiting",
+  "prompt_level": "low_specificity",
+  "model": "openrouter/google/gemini-3.1-pro-preview",
+  "started_at": "2026-06-01T17:52:47.878148+00:00",
+  "completed_at": "2026-06-01T17:57:14.147948+00:00",
+  "runtime_seconds": 266.266,
+  "exit_code": 0,
+  "timed_out": false,
+  "worktree": "runs/overnight_20260601_103807/api_rate_limiting__low_specificity__google__gemini-3.1-pro-preview__r1/worktree"
+}

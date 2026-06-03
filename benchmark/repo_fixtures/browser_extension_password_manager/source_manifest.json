@@ -1,0 +1,8 @@
+{
+  "task_id": "browser_extension_password_manager",
+  "fixture_path": "benchmark/repo_fixtures/browser_extension_password_manager",
+  "source": "local_minimal_fixture",
+  "generated_at": "2026-06-01T17:38:29.364682+00:00",
+  "downloaded": false,
+  "license_preserved": false
+}

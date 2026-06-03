@@ -1,0 +1,1 @@
+This API helper is moving behind a proxy. Implement a maintainable per-client limiter, keep proxy headers untrusted unless explicit trusted-proxy mode is passed, and avoid logging credentials or authorization headers.

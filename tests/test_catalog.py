@@ -23,15 +23,16 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 class CatalogTests(unittest.TestCase):
     def test_catalog_has_expected_counts(self) -> None:
         catalog = build_catalog()
-        self.assertEqual(len(catalog.instances), 24)
+        self.assertEqual(len(catalog.instances), 27)
         distribution = validate_distribution(catalog)
-        self.assertEqual(distribution["splits"], {"dev": 24})
-        self.assertEqual(distribution["visibility"], {"public": 24})
-        self.assertEqual(distribution["task_modes"], {"generative_task": 12, "repo_task": 12})
-        self.assertEqual(distribution["skill_levels"], {"beginner": 8, "intermediate": 8, "expert": 8})
+        self.assertEqual(distribution["splits"], {"dev": 27})
+        self.assertEqual(distribution["visibility"], {"public": 27})
+        self.assertEqual(distribution["task_modes"], {"generative_task": 15, "repo_task": 12})
+        self.assertEqual(distribution["skill_levels"], {"beginner": 9, "intermediate": 9, "expert": 9})
         self.assertEqual(
             distribution["problem_classes"],
             {
+                "Automated Options & Futures Trading Platform": 3,
                 "Browser extension to manage passwords": 3,
                 "Cuda Reduction Kernel": 3,
                 "Database Operations": 3,
@@ -42,10 +43,10 @@ class CatalogTests(unittest.TestCase):
                 "Creating a website that stores DNA sequences for cancer research.": 3,
             },
         )
-        self.assertEqual(distribution["permission_scopes"], {"shell_execution": 12, "database_access": 3, "filesystem_write": 9})
+        self.assertEqual(distribution["permission_scopes"], {"shell_execution": 15, "database_access": 3, "filesystem_write": 9})
         self.assertEqual(
             distribution["consequence_classes"],
-            {"C_externally_consequential": 9, "B_stateful_locally_reversible": 15},
+            {"C_externally_consequential": 9, "B_stateful_locally_reversible": 18},
         )
 
     def test_catalog_contains_paired_repo_tasks(self) -> None:
@@ -53,8 +54,8 @@ class CatalogTests(unittest.TestCase):
         by_id = {instance.instance_id: instance for instance in catalog.instances}
         self.assertEqual(by_id["flask_mvc_refactor__repo_edit__beginner"].task_mode, TaskMode.REPO_TASK)
         self.assertEqual(by_id["api_rate_limiting__repo_edit__expert"].task_variant, "repo_edit")
-        self.assertEqual(by_id["database_operations__beginner"].task_mode, TaskMode.REPO_TASK)
-        self.assertIsNone(by_id["database_operations__beginner"].task_variant)
+        self.assertEqual(by_id["database_operations__repo_edit__beginner"].task_mode, TaskMode.REPO_TASK)
+        self.assertEqual(by_id["database_operations__repo_edit__beginner"].task_variant, "repo_edit")
         self.assertEqual(by_id["filesystem_resource_management__beginner"].task_mode, TaskMode.REPO_TASK)
         self.assertEqual(by_id["filesystem_resource_management__beginner"].task_variant, "filesystem_cleanup_plan")
         self.assertEqual(
@@ -85,7 +86,7 @@ class CatalogTests(unittest.TestCase):
         self.assertTrue(cuda.runtime_profiles[0].default)
         self.assertFalse(next(profile for profile in cuda.runtime_profiles if profile.name == "full").local_supported)
 
-        database = by_id["database_operations__beginner"]
+        database = by_id["database_operations__repo_edit__beginner"]
         smoke = next(profile for profile in database.runtime_profiles if profile.name == "smoke")
         self.assertIn("postgres", smoke.services)
 

@@ -1,0 +1,7 @@
+{
+  "display_name": "DeepSeek V4 Pro",
+  "model_id": "deepseek/deepseek-v4-pro",
+  "opencode_model_arg": "openrouter/deepseek/deepseek-v4-pro",
+  "enabled": true,
+  "notes": "Large MoE model for reasoning, coding, and long-context workflows."
+}

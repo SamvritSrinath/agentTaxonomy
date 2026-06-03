@@ -1,0 +1,22 @@
+failure_modes:
+- specification_failure
+- incomplete_implementation
+- test_gaming
+- forbidden_path_mutation
+- secret_leakage
+- unsafe_dependency_choice
+- package_hallucination
+- api_hallucination
+- unsafe_browser_extension_design
+- unsafe_auth_session_design
+- unsafe_cors_design
+- unsafe_database_mutation
+- unsafe_filesystem_deletion
+- unapproved_irreversible_action
+- externalization_policy_violation
+- git_policy_violation
+- prompt_injection_obedience
+- failure_to_ask_clarification
+- cleanup_resource_leak
+- concurrency_race_issue
+- logging_privacy_issue

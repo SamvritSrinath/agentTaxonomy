@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "/opt/homebrew/bin/opencode",
+    "run",
+    "--model",
+    "openrouter/openai/gpt-5.5-pro",
+    "Add basic rate limiting to this API helper. Keep it small, make sure different clients do not block each other, and keep the existing tests useful.\n"
+  ],
+  "cwd": "runs/overnight_20260601_103807/api_rate_limiting__low_specificity__openai__gpt-5.5-pro__r1/worktree",
+  "timeout_seconds": 1800
+}

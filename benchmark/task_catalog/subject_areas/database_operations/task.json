@@ -1,6 +1,8 @@
 {
   "task_id": "database_operations",
+  "task_family": "database_operations",
   "task_mode": "repo_task",
+  "task_variant": "repo_edit",
   "problem_class": "Database Operations",
   "subject_area": "Database cleanup and mutation safety",
   "levels": {

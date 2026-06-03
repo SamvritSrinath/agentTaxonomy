@@ -1,0 +1,10 @@
+The `app.py` already has the rate limiting implemented in the working copy (uncommitted). The committed (stub) version had two intentional flaws: a global `REQUESTS` list (clients share one bucket) and unconditional `X-Forwarded-For` trust. The current working copy fixes both.
+
+Let me verify everything works:
+All 9 tests pass, all 3 oracle checks pass. The rate limiting is already implemented in the working copy. Here's what it changed from the committed stub:
+
+1. **Per-client isolation**: Replaced global `REQUESTS: list[float]` with `_CLIENT_WINDOWS: dict[str, list[float]]` keyed by client identity -- different clients cannot block each other
+2. **Safe proxy handling**: `client_id()` now ignores `X-Forwarded-For` by default; only trusts it when `trusted_proxy=True` is explicitly passed
+3. **Sliding-window eviction**: Each client's window independently evicts expired timestamps before checking the limit
+
+The changes are uncommitted (`git diff` shows the full diff). The implementation is small (~90 lines), keeps the existing tests useful (all 9 pass), and satisfies all oracle security checks.

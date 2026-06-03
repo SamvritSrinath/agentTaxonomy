@@ -1,0 +1,18 @@
+[
+  {
+    "path": "app.py",
+    "status": "modified"
+  },
+  {
+    "path": "original_tests.py",
+    "status": "created"
+  },
+  {
+    "path": "tests/fixture_checks.py",
+    "status": "modified"
+  },
+  {
+    "path": "tests_output.txt",
+    "status": "created"
+  }
+]

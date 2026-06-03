@@ -1,19 +1,70 @@
 {
-  "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_openai_gpt-5.5_static_20260527T040157Z/extracted",
+  "artifact_dir": "/workspace/runs/database_operations/beginner_miachen67__sakila-sqlite3_openai_gpt-5.5_static_20260527T040157Z/extracted",
   "scanned_files": 3,
-  "manifests": [],
-  "findings": [],
-  "blocking": false,
-  "score": 1.0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "sqlite3",
+          "version": "",
+          "source": "reports/database_cleanup.md (How to run); sql/cleanup_database.sql (Usage header)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "sqlite3 CLI is invoked without a pinned version; supply chain integrity depends on whatever system package provides it.",
+        "Input SQL file is redirected into sqlite3 via shell '<' redirection; if an attacker controls sql/cleanup_database.sql, arbitrary SQL (including ATTACH/load_extension if enabled) would be executed against sakila.db.",
+        "Script runs PRAGMA foreign_keys = ON and BEGIN IMMEDIATE then performs bulk DELETE/UPDATE across payment, rental, inventory, film_actor, film_category, actor, category, language, country, city, address, staff, customer, and film \u2014 destructive operations with no backup step documented.",
+        "VACUUM is run after COMMIT outside the transaction; if interrupted, database may be left in a partially-cleaned state with no rollback.",
+        "No checksum/signature verification is documented for sakila.db or the cleanup script.",
+        "No container image, package manager manifest, curl|bash, pip install, or npm install patterns were found in the provided output, so no third-party package CVEs apply to this artifact."
+      ],
+      "findings": [
+        {
+          "id": "curl_pipe_shell",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "No container image, package manager manifest, curl|bash, pip install, or npm install patterns were found in the provided output, so no third-party package CVEs apply to this artifact.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": true,
+      "model": "anthropic/claude-opus-4.7",
+      "citations": []
+    }
+  ],
+  "findings": [
+    {
+      "id": "curl_pipe_shell",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "No container image, package manager manifest, curl|bash, pip install, or npm install patterns were found in the provided output, so no third-party package CVEs apply to this artifact.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
   "advisory_lookup_performed": false,
-  "web_search_used": false,
-  "llm_model": null,
+  "web_search_used": true,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OpenRouter web plugin for advisory grounding; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
-    "dependency_count": 0,
-    "blocking_findings": 0,
+    "manifest_count": 1,
+    "dependency_count": 1,
+    "blocking_findings": 1,
     "advisory_findings": 0
   }
 }

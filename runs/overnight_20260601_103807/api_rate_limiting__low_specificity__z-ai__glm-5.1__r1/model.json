@@ -1,0 +1,7 @@
+{
+  "display_name": "GLM 5.1",
+  "model_id": "z-ai/glm-5.1",
+  "opencode_model_arg": "openrouter/z-ai/glm-5.1",
+  "enabled": true,
+  "notes": "Agentic coding / long-horizon engineering model."
+}

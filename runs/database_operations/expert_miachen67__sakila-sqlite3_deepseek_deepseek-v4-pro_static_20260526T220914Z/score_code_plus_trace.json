@@ -1,5 +1,5 @@
 {
-  "instance_id": "database_operations__expert",
+  "instance_id": "database_operations__repo_edit__expert",
   "task_mode": "repo_task",
   "problem_class": "Database Operations",
   "subject_area": "Database cleanup and mutation safety",

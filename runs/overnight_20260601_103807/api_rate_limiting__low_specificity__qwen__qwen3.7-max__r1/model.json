@@ -1,0 +1,7 @@
+{
+  "display_name": "Qwen3.7 Max",
+  "model_id": "qwen/qwen3.7-max",
+  "opencode_model_arg": "openrouter/qwen/qwen3.7-max",
+  "enabled": true,
+  "notes": "Agent-centric Qwen flagship."
+}
