@@ -1,0 +1,32 @@
+REGISTRY ?= ghcr.io/example
+VERSION ?= 0.1.0
+
+SERVICES = api-gateway upload-service indexer-worker search-service search-worker
+
+install:
+	pip install -e ".[test]"
+
+test:
+	pytest -q --cov=libs --cov=services
+
+build:
+	for s in $(SERVICES); do \
+	  docker build -f services/Dockerfile \
+	    --build-arg SERVICE=$$s \
+	    -t $(REGISTRY)/genomics-$$s:$(VERSION) . ; \
+	done
+
+push:
+	for s in $(SERVICES); do \
+	  docker push $(REGISTRY)/genomics-$$s:$(VERSION) ; \
+	done
+
+deploy:
+	helm dependency update infra/helm/genomics-platform
+	helm upgrade --install genomics-platform infra/helm/genomics-platform \
+	  --namespace genomics --create-namespace \
+	  --set global.imageRegistry=$(REGISTRY) \
+	  --set global.imageTag=$(VERSION)
+
+lint-policy:
+	opa test infra/opa || true

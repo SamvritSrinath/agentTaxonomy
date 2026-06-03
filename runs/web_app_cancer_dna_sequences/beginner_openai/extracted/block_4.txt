@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>DNA Sequence Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+<header>
+    <h1>DNA Sequence Store</h1>
+
+    <nav>
+        <a href="{{ url_for('home') }}">Home</a>
+
+        {% if g.user %}
+            <a href="{{ url_for('upload_sequence') }}">Upload Sequence</a>
+            <a href="{{ url_for('list_sequences') }}">My Sequences</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+            <span class="user-label">Logged in as {{ g.user.username }}</span>
+        {% else %}
+            <a href="{{ url_for('signup') }}">Signup</a>
+            <a href="{{ url_for('login') }}">Login</a>
+        {% endif %}
+    </nav>
+</header>
+
+<main>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <section class="messages">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+</body>
+</html>

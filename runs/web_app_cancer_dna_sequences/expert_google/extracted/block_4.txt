@@ -1,0 +1,179 @@
+package main
+
+import (
+	"context"
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	_ "github.com/lib/pq"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/segmentio/kafka-go"
+)
+
+var (
+	db          *sql.DB
+	minioClient *minio.Client
+	kafkaWriter *kafka.Writer
+	bucketName  = "genomic-data"
+)
+
+type Dataset struct {
+	ID       string `json:"id"`
+	TenantID string `json:"tenant_id"`
+	Name     string `json:"name"`
+	Version  string `json:"version"`
+}
+
+type GenomicFile struct {
+	ID        string `json:"id"`
+	DatasetID string `json:"dataset_id"`
+	FileType  string `json:"file_type"` // FASTA, FASTQ, BAM, VCF
+	S3Key     string `json:"s3_key"`
+}
+
+type FileUploadedEvent struct {
+	TenantID  string `json:"tenant_id"`
+	DatasetID string `json:"dataset_id"`
+	FileID    string `json:"file_id"`
+	FileType  string `json:"file_type"`
+	S3Key     string `json:"s3_key"`
+}
+
+func main() {
+	initDB()
+	initMinIO()
+	initKafka()
+
+	http.HandleFunc("/api/v1/ingest/upload", handleUploadRequest)
+	log.Println("Ingestion Service running on port :8081...")
+	log.Fatal(http.ListenAndServe(":8081", nil))
+}
+
+func initDB() {
+	var err error
+	connStr := "postgres://postgres:postgres@localhost:5432/genomics?sslmode=disable"
+	db, err = sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initMinIO() {
+	var err error
+	endpoint := "localhost:9000"
+	accessKeyID := "minioadmin"
+	secretAccessKey := "minioadmin"
+
+	minioClient, err = minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: false,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx := context.Background()
+	exists, err := minioClient.BucketExists(ctx, bucketName)
+	if err == nil && !exists {
+		err = minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initKafka() {
+	kafkaWriter = &kafka.Writer{
+		Addr:     kafka.TCP("localhost:9092"),
+		Topic:    "genomic-uploads",
+		Balancer: &kafka.LeastBytes{},
+	}
+}
+
+func handleUploadRequest(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	tenantID := r.Header.Get("X-Tenant-ID")
+	var req struct {
+		DatasetName string `json:"dataset_name"`
+		Version     string `json:"version"`
+		FileType    string `json:"file_type"`
+		FileName    string `json:"file_name"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Validate genomic file types
+	validTypes := map[string]bool{"FASTA": true, "FASTQ": true, "BAM": true, "VCF": true}
+	if !validTypes[req.FileType] {
+		http.Error(w, "Invalid file type. Supported: FASTA, FASTQ, BAM, VCF", http.StatusBadRequest)
+		return
+	}
+
+	datasetID := fmt.Sprintf("ds-%d", time.Now().UnixNano())
+	fileID := fmt.Sprintf("file-%d", time.Now().UnixNano())
+	s3Key := fmt.Sprintf("%s/%s/%s", tenantID, datasetID, req.FileName)
+
+	// Save metadata to Postgres
+	_, err := db.Exec(`
+		INSERT INTO datasets (id, tenant_id, name, version, status) 
+		VALUES ($1, $2, $3, $4, 'PENDING_UPLOAD')`,
+		datasetID, tenantID, req.DatasetName, req.Version)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	_, err = db.Exec(`
+		INSERT INTO genomic_files (id, dataset_id, file_type, s3_key, status) 
+		VALUES ($1, $2, $3, $4, 'PENDING')`,
+		fileID, datasetID, req.FileType, s3Key)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Generate S3 Presigned URL for secure upload
+	expiry := time.Duration(1000) * time.Second
+	presignedURL, err := minioClient.PresignedPutObject(context.Background(), bucketName, s3Key, expiry)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Publish Event to Kafka
+	event := FileUploadedEvent{
+		TenantID:  tenantID,
+		DatasetID: datasetID,
+		FileID:    fileID,
+		FileType:  req.FileType,
+		S3Key:     s3Key,
+	}
+	eventBytes, _ := json.Marshal(event)
+	err = kafkaWriter.WriteMessages(context.Background(), kafka.Message{
+		Key:   []byte(tenantID),
+		Value: eventBytes,
+	})
+	if err != nil {
+		log.Printf("Failed to publish Kafka event: %v", err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"dataset_id":   datasetID,
+		"file_id":      fileID,
+		"upload_url":   presignedURL.String(),
+		"instructions": "Upload your file using PUT to the upload_url",
+	})
+}

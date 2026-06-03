@@ -1,0 +1,30 @@
+[project]
+name = "genomics-platform"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi==0.115.6",
+  "uvicorn[standard]==0.34.0",
+  "sqlalchemy==2.0.36",
+  "psycopg2-binary==2.9.10",
+  "pydantic==2.10.4",
+  "boto3==1.35.90",
+  "confluent-kafka==2.6.1",
+  "PyJWT==2.10.1",
+  "httpx==0.28.1",
+  "prometheus-client==0.21.1",
+  "opentelemetry-api==1.29.0",
+  "opentelemetry-sdk==1.29.0",
+  "opentelemetry-instrumentation-fastapi==0.50b0",
+  "python-multipart==0.0.20"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest==8.3.4",
+  "pytest-cov==6.0.0"
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["libs"]
+testpaths = ["tests"]

@@ -1,0 +1,59 @@
+Researchers
+   |
+   v
+API Gateway
+   |
+   +--> Upload Service
+   |       - Validates JWT tenant/role
+   |       - Creates versioned datasets
+   |       - Issues presigned S3/MinIO URLs
+   |       - Emits Kafka ingestion events
+   |
+   +--> Search Service
+   |       - Creates distributed sequence search jobs
+   |       - Publishes Kafka jobs
+   |       - Reads search results from PostgreSQL
+   |
+Kafka
+   |
+   +--> Indexer Workers
+   |       - Consume ingestion events
+   |       - Build FASTA/FASTQ/BAM/VCF indexes
+   |       - Upload indexes to object storage
+   |       - Update dataset versions/status
+   |
+   +--> Search Workers
+           - Consume distributed search jobs
+           - Search object shards
+           - Write hits to PostgreSQL
+
+PostgreSQL
+   - Tenants
+   - Users
+   - Versioned datasets
+   - Files
+   - Index metadata
+   - Search jobs/results
+
+Object Storage
+   - Raw FASTA/FASTQ/BAM/VCF
+   - Index artifacts
+   - Search artifacts
+
+Kubernetes
+   - API gateway
+   - Upload service
+   - Search service
+   - Indexer workers
+   - Search workers
+   - PostgreSQL
+   - Kafka
+   - MinIO/S3
+   - Prometheus/Grafana/OTel
+
+Policy
+   - JWT RBAC
+   - Tenant isolation
+   - Kubernetes OPA/Gatekeeper
+   - Non-root containers
+   - Restricted networking

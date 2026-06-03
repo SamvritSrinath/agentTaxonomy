@@ -1,0 +1,14 @@
+dna-sequence-app/
+├── app.py
+├── requirements.txt
+├── templates/
+│   ├── base.html
+│   ├── home.html
+│   ├── login.html
+│   ├── sequences.html
+│   ├── signup.html
+│   └── upload.html
+├── static/
+│   └── style.css
+└── tests/
+    └── test_app.py

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion-service
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ingestion
+  template:
+    spec:
+      containers:
+      - name: ingestion
+        image: genomic-platform/ingestion:latest
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MINIO_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-credentials
+              key: accesskey
+        - name: MINIO_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: minio-credentials
+              key: secretkey
+        - name: MINIO_ENDPOINT
+          value: "minio-service:9000"
+        - name: KAFKA_BROKER
+          value: "genomic-kafka-kafka-bootstrap:9092"

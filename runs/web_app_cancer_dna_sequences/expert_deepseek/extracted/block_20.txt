@@ -1,0 +1,22 @@
+package genomics.authz
+
+default allow = false
+
+allow {
+    input.method == "GET"
+    input.path[0] == "api"
+    input.path[1] == "v1"
+    input.path[2] == "datasets"
+    input.path[3] == input.user.tenant
+}
+
+allow {
+    input.method == "POST"
+    input.path == ["api", "v1", "upload"]
+    input.user.tenant in data.allowed_tenants
+}
+
+# Admin override
+allow {
+    "admin" in input.user.roles
+}

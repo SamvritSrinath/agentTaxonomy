@@ -1,0 +1,154 @@
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"strings"
+	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+)
+
+var (
+	jwtSecret          = []byte("super-secret-cancer-bioinformatics-key")
+	ingestionServiceURL = "http://localhost:8081"
+	searchServiceURL    = "http://localhost:8083"
+	opaURL             = "http://localhost:8181/v1/data/authz/allow"
+)
+
+type Claims struct {
+	TenantID string `json:"tenant_id"`
+	Role     string `json:"role"`
+	jwt.RegisteredClaims
+}
+
+type OPARequest struct {
+	Input OPAInput `json:"input"`
+}
+
+type OPAInput struct {
+	TenantID         string `json:"tenant_id"`
+	Role             string `json:"role"`
+	Action           string `json:"action"`
+	Path             string `json:"path"`
+	ResourceTenantID string `json:"resource_tenant_id"`
+}
+
+type OPAResponse struct {
+	Result bool `json:"result"`
+}
+
+func main() {
+	http.HandleFunc("/api/v1/ingest/", handleRoute(ingestionServiceURL))
+	http.HandleFunc("/api/v1/search/", handleRoute(searchServiceURL))
+	http.HandleFunc("/auth/token", generateTokenHandler)
+
+	log.Println("API Gateway running on port :8080...")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func generateTokenHandler(w http.ResponseWriter, r *http.Request) {
+	tenantID := r.URL.Query().Get("tenant_id")
+	role := r.URL.Query().Get("role")
+	if tenantID == "" || role == "" {
+		http.Error(w, "Missing tenant_id or role parameters", http.StatusBadRequest)
+		return
+	}
+
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &Claims{
+		TenantID: tenantID,
+		Role:     role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
+}
+
+func handleRoute(targetURL string) http.HandlerFunc {
+	target, _ := url.Parse(targetURL)
+	proxy := httputil.NewSingleHostReverseProxy(target)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+			http.Error(w, "Unauthorized: Missing or invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+		claims := &Claims{}
+		token, err := jwt.ParseWithClaims(tokenStr, claims, func(token *jwt.Token) (interface{}, error) {
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		// Extract target resource tenant ID from query parameters or path
+		resourceTenantID := r.URL.Query().Get("tenant_id")
+		if resourceTenantID == "" {
+			resourceTenantID = claims.TenantID // Default to self
+		}
+
+		// Query OPA Policy Engine
+		allowed, err := checkOPAPolicy(claims.TenantID, claims.Role, r.Method, r.URL.Path, resourceTenantID)
+		if err != nil || !allowed {
+			http.Error(w, "Forbidden: Policy enforcement block", http.StatusForbidden)
+			return
+		}
+
+		// Inject Tenant Context Headers for downstream microservices
+		r.Header.Set("X-Tenant-ID", claims.TenantID)
+		r.Header.Set("X-User-Role", claims.Role)
+
+		proxy.ServeHTTP(w, r)
+	}
+}
+
+func checkOPAPolicy(tenantID, role, action, path, resourceTenantID string) (bool, error) {
+	opaReq := OPARequest{
+		Input: OPAInput{
+			TenantID:         tenantID,
+			Role:             role,
+			Action:           action,
+			Path:             path,
+			ResourceTenantID: resourceTenantID,
+		},
+	}
+
+	body, err := json.Marshal(opaReq)
+	if err != nil {
+		return false, err
+	}
+
+	resp, err := http.Post(opaURL, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	var opaResp OPAResponse
+	if err := json.NewDecoder(resp.Body).Decode(&opaResp); err != nil {
+		return false, err
+	}
+
+	return opaResp.Result, nil
+}

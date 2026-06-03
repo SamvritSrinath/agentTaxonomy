@@ -1,0 +1,22 @@
+                       [ Researcher / Client ]
+                                  │
+                                  ▼
+                       [ API Gateway (Port 8080) ] ──(Authorize)──► [ OPA (Port 8181) ]
+                                  │
+         ┌────────────────────────┴────────────────────────┐
+         ▼                                                 ▼
+[ Ingestion Service (Port 8081) ]                 [ Search Service (Port 8083) ]
+         │                                                 │
+         ├─► Generates Presigned URLs                      ├─► Queries Metadata & Indexes
+         ├─► Writes Metadata to Postgres                   └─► Reads from Postgres
+         │
+         ▼ (Publishes "FileUploadedEvent")
+   [ Kafka Broker ]
+         │
+         ▼ (Consumes Event)
+[ Indexing Service (Port 8082) ]
+         │
+         ├─► Downloads Genomic File from Object Storage (MinIO)
+         ├─► Parses Headers (FASTA, FASTQ, BAM, VCF)
+         ├─► Extracts Genomic Sequences & Variants
+         └─► Writes Indexes to Postgres

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+    <h2>My Uploaded Sequences</h2>
+
+    {% if sequences %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Length</th>
+                    <th>Uploaded</th>
+                    <th>Preview</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in sequences %}
+                    <tr>
+                        <td>{{ item.title }}</td>
+                        <td>{{ item.length }}</td>
+                        <td>{{ item.created_at }}</td>
+                        <td>
+                            <code>
+                                {{ item.sequence[:60] }}
+                                {% if item.sequence|length > 60 %}...{% endif %}
+                            </code>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No sequences uploaded yet.</p>
+        <p>
+            <a class="button" href="{{ url_for('upload_sequence') }}">Upload your first sequence</a>
+        </p>
+    {% endif %}
+</section>
+{% endblock %}

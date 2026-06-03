@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+    <h2>Upload or Paste DNA Sequence</h2>
+
+    <p>
+        Paste a DNA sequence below, upload a text file, or do both.
+        Whitespace will be removed automatically.
+    </p>
+
+    <p>
+        Allowed characters: <strong>A, C, G, T, N</strong>
+    </p>
+
+    <form method="post" enctype="multipart/form-data">
+        <label for="title">Sequence title</label>
+        <input id="title" name="title" type="text" placeholder="Example: BRCA1 sample sequence">
+
+        <label for="sequence_text">Paste DNA sequence</label>
+        <textarea id="sequence_text" name="sequence_text" rows="10" placeholder="ACGTNNACGT..."></textarea>
+
+        <label for="sequence_file">Or upload a text file</label>
+        <input id="sequence_file" name="sequence_file" type="file" accept=".txt,text/plain">
+
+        <button type="submit">Save sequence</button>
+    </form>
+</section>
+{% endblock %}

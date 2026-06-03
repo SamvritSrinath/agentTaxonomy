@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Upload or Paste a DNA Sequence</h2>
+<form method="POST" enctype="multipart/form-data">
+    <h3>Option 1: Upload a file (FASTA, TXT, etc.)</h3>
+    <input type="file" name="dna_file" accept=".txt,.fasta,.fa,.fna">
+
+    <h3>Option 2: Paste the sequence below</h3>
+    <textarea name="sequence_paste" rows="8" cols="80" placeholder="Paste your DNA sequence here (e.g., ATCGGATCGA...)"></textarea>
+
+    <br><br>
+    <button type="submit">Save Sequence</button>
+</form>
+{% endblock %}

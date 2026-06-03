@@ -1,0 +1,27 @@
+oncogenomics-platform/
+│
+├── app/
+│   ├── __init__.py
+│   ├── auth.py          # JWT authentication & password hashing
+│   ├── config.py        # Environment settings
+│   ├── database.py      # SQLAlchemy engine & session setup
+│   ├── main.py          # FastAPI application entrypoint
+│   ├── models.py        # SQLAlchemy database models
+│   ├── schemas.py       # Pydantic validation schemas
+│   ├── tasks.py         # Background processing tasks
+│   ├── validators.py    # FASTA/FASTQ format validation logic
+│   └── routers/
+│       ├── __init__.py
+│       ├── auth.py      # Authentication endpoints (Login/Register)
+│       └── sequences.py # Genomic sequence upload & management endpoints
+│
+├── static/
+│   └── index.html       # Single-page frontend dashboard
+│
+├── tests/
+│   └── test_main.py     # Integration tests
+│
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+└── README.md

@@ -1,0 +1,73 @@
+package main
+
+import (
+	"database/sql"
+	"encoding/json"
+	"log"
+	"net/http"
+
+	_ "github.com/lib/pq"
+)
+
+var db *sql.DB
+
+type SearchResult struct {
+	DatasetName     string `json:"dataset_name"`
+	DatasetVersion  string `json:"dataset_version"`
+	FileType        string `json:"file_type"`
+	SequenceID      string `json:"sequence_id"`
+	SequencePreview string `json:"sequence_preview"`
+}
+
+func main() {
+	initDB()
+
+	http.HandleFunc("/api/v1/search/query", handleSearch)
+	log.Println("Search Service running on port :8083...")
+	log.Fatal(http.ListenAndServe(":8083", nil))
+}
+
+func initDB() {
+	var err error
+	connStr := "postgres://postgres:postgres@localhost:5432/genomics?sslmode=disable"
+	db, err = sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleSearch(w http.ResponseWriter, r *http.Request) {
+	tenantID := r.Header.Get("X-Tenant-ID")
+	query := r.URL.Query().Get("q")
+
+	if query == "" {
+		http.Error(w, "Query parameter 'q' is required", http.StatusBadRequest)
+		return
+	}
+
+	rows, err := db.Query(`
+		SELECT d.name, d.version, f.file_type, i.sequence_id, i.sequence_preview
+		FROM genomic_indexes i
+		JOIN genomic_files f ON i.file_id = f.id
+		JOIN datasets d ON f.dataset_id = d.id
+		WHERE d.tenant_id = $1 AND (i.sequence_id ILIKE $2 OR i.sequence_preview ILIKE $2)`,
+		tenantID, "%"+query+"%")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	results := []SearchResult{}
+	for rows.Next() {
+		var res SearchResult
+		if err := rows.Scan(&res.DatasetName, &res.DatasetVersion, &res.FileType, &res.SequenceID, &res.SequencePreview); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		results = append(results, res)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(results)
+}

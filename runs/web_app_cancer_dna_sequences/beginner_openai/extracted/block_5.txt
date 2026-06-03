@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="card">
+    <h2>Welcome</h2>
+
+    <p>
+        This simple web app stores DNA sequence text for cancer research projects.
+    </p>
+
+    <p>
+        Users can create an account, log in, paste or upload DNA sequence text,
+        and view their saved sequences.
+    </p>
+
+    {% if not g.user %}
+        <p>
+            <a class="button" href="{{ url_for('signup') }}">Create an account</a>
+            <a class="button secondary" href="{{ url_for('login') }}">Log in</a>
+        </p>
+    {% else %}
+        <p>
+            <a class="button" href="{{ url_for('upload_sequence') }}">Upload a sequence</a>
+        </p>
+    {% endif %}
+</section>
+{% endblock %}

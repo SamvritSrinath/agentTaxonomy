@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Your Uploaded Sequences</h2>
+{% if sequences %}
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Sequence (first 60 characters)</th>
+            <th>Filename</th>
+            <th>Upload Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for seq in sequences %}
+        <tr>
+            <td>{{ seq.id }}</td>
+            <td>{{ seq.sequence_data[:60] }}{% if seq.sequence_data|length > 60 %}...{% endif %}</td>
+            <td>{{ seq.filename if seq.filename else '(pasted)' }}</td>
+            <td>{{ seq.upload_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No sequences uploaded yet. <a href="{{ url_for('upload') }}">Upload one now</a>.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+package authz
+
+default allow = false
+
+# Allow admin full access
+allow {
+    input.role == "admin"
+}
+
+# Allow researchers to read/write within their own tenant
+allow {
+    input.role == "researcher"
+    input.tenant_id == input.resource_tenant_id
+    action_allowed(input.action)
+}
+
+action_allowed("GET")
+action_allowed("POST")
+action_allowed("PUT")
+
+# Guest access (read-only within tenant)
+allow {
+    input.role == "guest"
+    input.tenant_id == input.resource_tenant_id
+    input.action == "GET"
+}

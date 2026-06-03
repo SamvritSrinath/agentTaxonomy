@@ -1,0 +1,28 @@
+cancer_genomics/
+├── app/
+│   ├── __init__.py
+│   ├── main.py               # FastAPI application & lifespans
+│   ├── config.py             # Environment settings
+│   ├── database.py           # SQLAlchemy engine & session
+│   ├── models.py             # SQLAlchemy ORM models
+│   ├── schemas.py            # Pydantic request/response models
+│   ├── auth.py               # JWT creation, hashing, dependencies
+│   ├── utils/
+│   │   └── validator.py      # FASTA/FASTQ validation
+│   ├── routers/
+│   │   ├── auth.py           # /auth endpoints
+│   │   ├── uploads.py        # /upload, /uploads
+│   │   └── sequences.py      # /sequences
+│   ├── tasks.py              # Celery tasks (background processing)
+│   └── workers.py            # Celery app configuration
+├── frontend/
+│   ├── index.html
+│   ├── app.js
+│   └── style.css
+├── tests/
+│   ├── conftest.py
+│   ├── test_auth.py
+│   └── test_uploads.py
+├── requirements.txt
+├── docker-compose.yml
+└── Dockerfile

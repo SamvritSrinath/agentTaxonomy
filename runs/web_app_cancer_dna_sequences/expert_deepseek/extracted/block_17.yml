@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genomic-indexer
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: indexer
+        image: genomic-platform/indexer-worker:latest
+        env:
+        - name: KAFKA_BROKER
+          value: "genomic-kafka-kafka-bootstrap:9092"
+        - name: POSTGRES_DSN
+          valueFrom:
+            secretKeyRef:
+              name: postgres-credentials
+              key: dsn
+        - name: MINIO_ACCESS_KEY
+          valueFrom: ...

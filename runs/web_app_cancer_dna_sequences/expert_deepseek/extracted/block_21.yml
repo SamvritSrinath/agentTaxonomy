@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opa
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+      - name: opa
+        image: openpolicyagent/opa:latest
+        args:
+        - "run"
+        - "--server"
+        - "--log-level=info"
+        ports:
+        - containerPort: 8181
+        volumeMounts:
+        - name: policies
+          mountPath: /policies
+      volumes:
+      - name: policies
+        configMap:
+          name: opa-policies

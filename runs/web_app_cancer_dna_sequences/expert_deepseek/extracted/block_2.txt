@@ -1,0 +1,77 @@
+genomic-platform/
+├── api-gateway/                   # FastAPI + OPA
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── main.py
+│   ├── auth.py
+│   ├── opa_middleware.py
+│   └── policies/                  # OPA rules
+│       └── tenant.rego
+├── ingestion-service/             # File upload & validation
+│   ├── Dockerfile
+│   ├── requirements.txt
+│   ├── main.py
+│   ├── upload.py
+│   └── validate.py
+├── workers/                       # Kafka consumers
+│   ├── indexer/
+│   │   ├── Dockerfile
+│   │   ├── index.sh
+│   │   └── worker.py
+│   ├── search/
+│   │   ├── Dockerfile
+│   │   ├── blast_worker.py
+│   │   └── blastdb_config.yaml
+│   └── converter/
+│       ├── Dockerfile
+│       └── converter.sh
+├── infrastructure/
+│   ├── kubernetes/
+│   │   ├── namespace.yaml
+│   │   ├── configmaps/
+│   │   │   ├── api-gateway-config.yaml
+│   │   │   ├── kafka-config.yaml
+│   │   │   └── postgres-config.yaml
+│   │   ├── secrets/
+│   │   │   ├── jwt-secret.yaml
+│   │   │   ├── minio-credentials.yaml
+│   │   │   └── postgres-credentials.yaml
+│   │   ├── deployments/
+│   │   │   ├── api-gateway.yaml
+│   │   │   ├── ingestion.yaml
+│   │   │   ├── indexer.yaml
+│   │   │   ├── search-worker.yaml
+│   │   │   ├── postgres.yaml
+│   │   │   └── minio.yaml
+│   │   ├── services/
+│   │   │   ├── api-gateway-svc.yaml
+│   │   │   ├── ingestion-svc.yaml
+│   │   │   ├── postgres-svc.yaml
+│   │   │   └── minio-svc.yaml
+│   │   └── ingress/
+│   │       └── api-ingress.yaml
+│   ├── kafka/                     # Strimzi custom resources
+│   │   ├── kafka-cluster.yaml
+│   │   └── kafka-topics.yaml
+│   └── opa/
+│       └── opa-deployment.yaml
+├── database/
+│   └── migrations/
+│       ├── 001_initial.sql
+│       └── 002_versions.sql
+├── monitoring/
+│   ├── prometheus/
+│   │   ├── config.yaml
+│   │   └── rules.yaml
+│   ├── grafana/
+│   │   └── dashboards/
+│   │       └── genomics-overview.json
+│   ├── jaeger/                     # OpenTelemetry collector
+│   │   ├── collector.yaml
+│   │   └── agent.yaml
+│   └── otel-collector-config.yaml
+├── policy-as-code/
+│   ├── rego-policies/
+│   │   └── tenant-access.rego
+│   └── constraints.yaml
+└── docker-compose.yaml            # For local development

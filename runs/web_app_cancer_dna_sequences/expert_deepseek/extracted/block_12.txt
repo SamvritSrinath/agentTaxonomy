@@ -1,0 +1,21 @@
+package genomics.authz
+
+default allow = false
+
+allow {
+    input.method == "GET"
+    input.path = ["api", "v1", "datasets"]
+    tenant_own
+}
+
+allow {
+    input.method == "POST"
+    input.path = ["api", "v1", "upload"]
+    tenant_own
+}
+
+tenant_own {
+    requested_tenant := input.user.tenant
+    # All endpoints in /api/v1/datasets/{tenant}...
+    requested_tenant == input.path[3]
+}

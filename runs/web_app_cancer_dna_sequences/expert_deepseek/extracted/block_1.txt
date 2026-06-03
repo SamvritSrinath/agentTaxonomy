@@ -1,0 +1,22 @@
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  Researcher │────▶│  API Gateway│────▶│  OPA Sidecar│
+│  (Browser)  │     │  (FastAPI)  │     │  (Rego)     │
+└─────────────┘     └──────┬──────┘     └─────────────┘
+                           │ JWT Auth       ▲
+                           ▼                │
+                   ┌─────────────┐     ┌─────────────┐
+                   │  Ingestion   │     │  Kafka      │
+                   │  Service     │────▶│  Broker     │
+                   │  (FastAPI)   │     │  (Strimzi)  │
+                   └──────┬──────┘     └──┬───┬───┬──┘
+                          │               │   │   │
+                          ▼               ▼   ▼   ▼
+                   ┌───────────┐   Workers: Indexer │
+                   │  MinIO /  │   Search (BLAST)   │
+                   │  S3       │   Format Converter  │
+                   └───────────┘                     ▼
+                                    ┌──────────────────────┐
+                                    │  PostgreSQL           │
+                                    │  (Tenants, Versions,  │
+                                    │   Metadata, Jobs)     │
+                                    └──────────────────────┘

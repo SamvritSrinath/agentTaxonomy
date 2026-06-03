@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cancer Genomics Platform</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="login-section">
+            <h2>Login</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+            <button onclick="signup()">Sign Up</button>
+            <p id="auth-msg"></p>
+        </div>
+        <div id="upload-section" style="display:none">
+            <h2>Upload Genomic File</h2>
+            <input type="file" id="file-input" accept=".fasta,.fa,.fastq,.fq">
+            <br><br>
+            <label>Metadata (JSON):</label>
+            <textarea id="metadata-input" rows="4" cols="50">{"patient_id":"","cancer_type":"","gene":"", "tissue":""}</textarea>
+            <br><button onclick="uploadFile()">Upload</button>
+            <p id="upload-msg"></p>
+        </div>
+        <div id="uploads-table" style="display:none">
+            <h2>Your Uploads</h2>
+            <table>
+                <thead><tr><th>File</th><th>Type</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+                <tbody id="uploads-body"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

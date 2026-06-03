@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Welcome to the Cancer DNA Sequence Repository</h1>
+<p>Store and review DNA sequences relevant to cancer research. Please sign up or log in to get started.</p>
+{% endblock %}

@@ -1,0 +1,170 @@
+package main
+
+import (
+	"bufio"
+	"context"
+	"database/sql"
+	"encoding/json"
+	"io"
+	"log"
+	"strings"
+
+	_ "github.com/lib/pq"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/segmentio/kafka-go"
+)
+
+var (
+	db          *sql.DB
+	minioClient *minio.Client
+	bucketName  = "genomic-data"
+)
+
+type FileUploadedEvent struct {
+	TenantID  string `json:"tenant_id"`
+	DatasetID string `json:"dataset_id"`
+	FileID    string `json:"file_id"`
+	FileType  string `json:"file_type"`
+	S3Key     string `json:"s3_key"`
+}
+
+func main() {
+	initDB()
+	initMinIO()
+	startKafkaConsumer()
+}
+
+func initDB() {
+	var err error
+	connStr := "postgres://postgres:postgres@localhost:5432/genomics?sslmode=disable"
+	db, err = sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func initMinIO() {
+	var err error
+	endpoint := "localhost:9000"
+	accessKeyID := "minioadmin"
+	secretAccessKey := "minioadmin"
+
+	minioClient, err = minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: false,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func startKafkaConsumer() {
+	reader := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:  []string{"localhost:9092"},
+		GroupID:  "indexing-group",
+		Topic:    "genomic-uploads",
+		MinBytes: 10e3, // 10KB
+		MaxBytes: 10e6, // 10MB
+	})
+
+	log.Println("Indexing Service listening for Kafka events...")
+
+	for {
+		m, err := reader.ReadMessage(context.Background())
+		if err != nil {
+			log.Printf("Error reading message: %v", err)
+			continue
+		}
+
+		var event FileUploadedEvent
+		if err := json.Unmarshal(m.Value, &event); err != nil {
+			log.Printf("Error unmarshaling event: %v", err)
+			continue
+		}
+
+		log.Printf("Processing file %s of type %s for tenant %s", event.S3Key, event.FileType, event.TenantID)
+		processAndIndexFile(event)
+	}
+}
+
+func processAndIndexFile(event FileUploadedEvent) {
+	// Download file stream from MinIO
+	object, err := minioClient.GetObject(context.Background(), bucketName, event.S3Key, minio.GetObjectOptions{})
+	if err != nil {
+		log.Printf("Failed to download file from MinIO: %v", err)
+		return
+	}
+	defer object.Close()
+
+	// Parse and Index based on file type
+	switch strings.ToUpper(event.FileType) {
+	case "FASTA":
+		parseFASTA(event.FileID, object)
+	case "VCF":
+		parseVCF(event.FileID, object)
+	default:
+		log.Printf("Indexing for file type %s is not yet implemented", event.FileType)
+	}
+
+	// Update file and dataset status
+	db.Exec("UPDATE genomic_files SET status = 'INDEXED' WHERE id = $1", event.FileID)
+	db.Exec("UPDATE datasets SET status = 'ACTIVE' WHERE id = $1", event.DatasetID)
+	log.Printf("Successfully indexed file: %s", event.FileID)
+}
+
+func parseFASTA(fileID string, reader io.Reader) {
+	scanner := bufio.NewScanner(reader)
+	var currentSeqID string
+	var sequenceBuilder strings.Builder
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, ">") {
+			if currentSeqID != "" {
+				saveIndex(fileID, currentSeqID, sequenceBuilder.String())
+				sequenceBuilder.Reset()
+			}
+			currentSeqID = strings.TrimPrefix(line, ">")
+		} else {
+			sequenceBuilder.WriteString(line)
+		}
+	}
+	if currentSeqID != "" {
+		saveIndex(fileID, currentSeqID, sequenceBuilder.String())
+	}
+}
+
+func parseVCF(fileID string, reader io.Reader) {
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "#") {
+			continue // Skip headers
+		}
+		fields := strings.Split(line, "\t")
+		if len(fields) >= 5 {
+			chrom := fields[0]
+			pos := fields[1]
+			ref := fields[3]
+			alt := fields[4]
+			variantID := fmt.Sprintf("chr%s:%s:%s>%s", chrom, pos, ref, alt)
+			saveIndex(fileID, variantID, line)
+		}
+	}
+}
+
+func saveIndex(fileID, sequenceID, content string) {
+	preview := content
+	if len(content) > 200 {
+		preview = content[:200]
+	}
+
+	_, err := db.Exec(`
+		INSERT INTO genomic_indexes (file_id, sequence_id, sequence_preview) 
+		VALUES ($1, $2, $3)`,
+		fileID, sequenceID, preview)
+	if err != nil {
+		log.Printf("Failed to save index record: %v", err)
+	}
+}

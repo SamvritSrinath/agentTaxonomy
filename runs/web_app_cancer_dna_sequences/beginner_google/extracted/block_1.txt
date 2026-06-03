@@ -1,0 +1,12 @@
+dna_app/
+│
+├── app.py
+├── requirements.txt
+├── test_app.py
+└── templates/
+    ├── base.html
+    ├── index.html
+    ├── login.html
+    ├── signup.html
+    ├── upload.html
+    └── sequences.html

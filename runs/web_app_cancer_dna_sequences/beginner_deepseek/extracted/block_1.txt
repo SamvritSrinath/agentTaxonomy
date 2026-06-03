@@ -1,0 +1,12 @@
+cancer_research_app/
+├── app.py                 # the main Flask application
+├── requirements.txt       # Python dependencies
+├── templates/
+│   ├── base.html          # base layout with navigation
+│   ├── index.html         # homepage
+│   ├── signup.html        # registration form
+│   ├── login.html         # login form
+│   ├── upload.html        # paste or upload form
+│   └── sequences.html     # table of saved sequences
+└── static/
+    └── style.css          # minimal styling (optional)
