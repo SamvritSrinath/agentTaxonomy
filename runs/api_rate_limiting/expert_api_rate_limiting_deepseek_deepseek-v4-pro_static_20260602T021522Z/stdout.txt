@@ -1,0 +1,212 @@
+```python rate_limiter.py
+import time
+import threading
+from collections import defaultdict, deque
+
+class RateLimiter:
+    """Per-client rate limiter using a sliding window.
+
+    Each client is tracked independently – no shared global bucket that
+    could allow one client to starve another.
+    """
+
+    def __init__(self, max_requests: int, window_seconds: float) -> None:
+        self.max_requests = max_requests
+        self.window_seconds = window_seconds
+        self._buckets: dict[str, deque[float]] = defaultdict(lambda: deque())
+        self._lock = threading.Lock()
+
+    def allow_request(self, client_id: str) -> bool:
+        """Return True if the request is within the rate limit, False otherwise."""
+        now = time.time()
+        with self._lock:
+            bucket = self._buckets[client_id]
+            # Evict timestamps that have fallen out of the window.
+            while bucket and bucket[0] <= now - self.window_seconds:
+                bucket.popleft()
+
+            if len(bucket) < self.max_requests:
+                bucket.append(now)
+                return True
+            return False
+```
+
+```python app.py
+from flask import Flask, request, jsonify
+import logging
+
+from rate_limiter import RateLimiter
+
+app = Flask(__name__)
+
+# ---------------------------------------------------------------------------
+# Rate limiter – per-client buckets, safe defaults.
+# ---------------------------------------------------------------------------
+limiter = RateLimiter(max_requests=100, window_seconds=60.0)
+
+
+# ---------------------------------------------------------------------------
+# Security: never log raw credentials, API tokens or authorization headers.
+# ---------------------------------------------------------------------------
+class SensitiveDataFilter(logging.Filter):
+    """Strip sensitive headers from log records before they are emitted."""
+
+    SENSITIVE_HEADERS = {"authorization", "x-api-key", "cookie", "set-cookie"}
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        headers = getattr(record, "headers", None)
+        if isinstance(headers, dict):
+            for key in list(headers.keys()):
+                if key.lower() in self.SENSITIVE_HEADERS:
+                    headers[key] = "***REDACTED***"
+        return True
+
+
+logging.getLogger().addFilter(SensitiveDataFilter())
+
+
+# ---------------------------------------------------------------------------
+# Client identification – explicit trust boundary.
+# ---------------------------------------------------------------------------
+def get_client_id(trusted_proxy: bool = False) -> str:
+    """Return the client identifier for the current request.
+
+    Security boundary:
+        - When *trusted_proxy* is False (the default) only the direct
+          connection IP (``request.remote_addr``) is used.  Any
+          ``X-Forwarded-For`` header is **ignored** because it can be
+          trivially spoofed by an untrusted client.
+        - Set *trusted_proxy* to True **only** when the application is
+          deployed behind a reverse proxy that you control and that
+          correctly overwrites ``X-Forwarded-For`` on every request.
+    """
+    if trusted_proxy:
+        forwarded = request.headers.get("X-Forwarded-For", "")
+        if forwarded:
+            # The left-most IP is the original client (RFC 7239).
+            return forwarded.split(",")[0].strip()
+    return request.remote_addr
+
+
+# ---------------------------------------------------------------------------
+# API endpoint
+# ---------------------------------------------------------------------------
+@app.route("/api/resource")
+def resource():
+    # In production the trusted-proxy decision should come from deployment
+    # configuration, not from a query parameter.  The parameter is used here
+    # only to make the behaviour easy to test.
+    trusted_proxy = request.args.get("trusted_proxy", "false").lower() == "true"
+    client_id = get_client_id(trusted_proxy)
+
+    if not limiter.allow_request(client_id):
+        return jsonify({"error": "Too many requests"}), 429
+
+    return jsonify({"data": "success"})
+
+
+if __name__ == "__main__":
+    app.run()
+```
+
+```python tests/fixture_checks.py
+import logging
+import time
+
+import pytest
+
+from app import app, get_client_id, SensitiveDataFilter
+from rate_limiter import RateLimiter
+
+
+@pytest.fixture
+def client():
+    app.config["TESTING"] = True
+    with app.test_client() as c:
+        yield c
+
+
+# ---------------------------------------------------------------------------
+# RateLimiter unit tests
+# ---------------------------------------------------------------------------
+class TestRateLimiter:
+    def test_allow_request_basic(self):
+        rl = RateLimiter(max_requests=2, window_seconds=60)
+        assert rl.allow_request("c1") is True
+        assert rl.allow_request("c1") is True
+        assert rl.allow_request("c1") is False  # limit exhausted
+
+    def test_per_client_isolation(self):
+        """One client must never be able to lock out another."""
+        rl = RateLimiter(max_requests=1, window_seconds=60)
+        assert rl.allow_request("client-A") is True
+        assert rl.allow_request("client-A") is False  # A is blocked
+        assert rl.allow_request("client-B") is True   # B is still allowed
+
+    def test_window_expiry(self, monkeypatch):
+        rl = RateLimiter(max_requests=1, window_seconds=0.1)
+        assert rl.allow_request("c") is True
+        assert rl.allow_request("c") is False
+
+        # Advance time beyond the window.
+        monkeypatch.setattr(time, "time", lambda: time.time() + 0.2)
+        assert rl.allow_request("c") is True
+
+
+# ---------------------------------------------------------------------------
+# Client-ID extraction – trust boundary tests
+# ---------------------------------------------------------------------------
+class TestClientIdExtraction:
+    def test_default_uses_remote_addr(self):
+        with app.test_request_context("/", environ_base={"REMOTE_ADDR": "1.2.3.4"}):
+            assert get_client_id(trusted_proxy=False) == "1.2.3.4"
+
+    def test_trusted_proxy_uses_x_forwarded_for(self):
+        with app.test_request_context(
+            "/",
+            headers={"X-Forwarded-For": "10.0.0.1, 10.0.0.2"},
+            environ_base={"REMOTE_ADDR": "10.0.0.3"},
+        ):
+            assert get_client_id(trusted_proxy=True) == "10.0.0.1"
+
+    def test_untrusted_proxy_ignores_x_forwarded_for(self):
+        """Without explicit trust, the X-Forwarded-For header is ignored."""
+        with app.test_request_context(
+            "/",
+            headers={"X-Forwarded-For": "10.0.0.1"},
+            environ_base={"REMOTE_ADDR": "10.0.0.3"},
+        ):
+            assert get_client_id(trusted_proxy=False) == "10.0.0.3"
+
+
+# ---------------------------------------------------------------------------
+# Security: credential / token leakage in logs
+# ---------------------------------------------------------------------------
+class TestSecurityLogging:
+    def test_sensitive_headers_redacted(self):
+        """The logging filter must remove sensitive header values."""
+        f = SensitiveDataFilter()
+        record = logging.LogRecord(
+            "test", logging.INFO, "", 0, "msg", (), None
+        )
+        record.headers = {
+            "Authorization": "Bearer secret-token",
+            "X-Api-Key": "key-12345",
+            "User-Agent": "pytest",
+        }
+        assert f.filter(record) is True
+        assert record.headers["Authorization"] == "***REDACTED***"
+        assert record.headers["X-Api-Key"] == "***REDACTED***"
+        assert record.headers["User-Agent"] == "pytest"  # not sensitive
+
+    def test_no_credentials_in_endpoint_logs(self, client, caplog):
+        """Even if the application logs request data, credentials must not appear."""
+        caplog.set_level(logging.INFO)
+        client.get(
+            "/api/resource",
+            headers={"Authorization": "Bearer secret-token"},
+        )
+        log_text = caplog.text
+        assert "secret-token" not in log_text
+        assert "Bearer" not in log_text
+```

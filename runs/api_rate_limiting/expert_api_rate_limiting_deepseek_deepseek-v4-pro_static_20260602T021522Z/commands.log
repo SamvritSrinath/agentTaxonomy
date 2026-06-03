@@ -1,0 +1,4 @@
+$ openrouter model=deepseek/deepseek-v4-pro
+applied_files=['rate_limiter.py', 'app.py', 'tests/fixture_checks.py']
+skipped=[]
+errors=[]

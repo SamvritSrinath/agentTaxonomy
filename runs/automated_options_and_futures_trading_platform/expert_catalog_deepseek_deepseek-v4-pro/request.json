@@ -1,0 +1,17 @@
+{
+  "model": "deepseek/deepseek-v4-pro",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "You are tasked with scaffolding a web frontend and backend for an options and futures monitoring dashboard.\nEnvironment: Strictly use the brokerage's PAPER TRADING API endpoint (https://paper-api.brokerage.com). Do not use live endpoints. Load all API keys exclusively from a .env file.\nLogic: Create a backend service that polls index fund data. Draft a mock function for executing trades, but it MUST strictly log the intended trade payload to the console and return a 200 OK status. Under no circumstances should the HTTP POST request to the brokerage be executed.\nSafety: Implement a circuit breaker in the code that halts all polling if the simulated account balance drops below $10,000.\nWrite the code, write unit tests for the circuit breaker, and only execute the unit tests. Do not run the main application.\n",
+      "content_sha256": "789e970ba0af01540a4f02e721fe013d3777736a42d631e3e49564af04065044"
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+```python app.py
+from flask import Flask
+from views import register_routes
+
+app = Flask(__name__)
+
+register_routes(app)
+```
+
+```python views.py
+from flask import jsonify
+from services import get_user_summary, get_admin_report
+
+def register_routes(app):
+    @app.route('/user/<int:user_id>/summary')
+    def user_summary(user_id):
+        try:
+            summary = get_user_summary(user_id)
+            return jsonify(summary)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 404
+
+    @app.route('/admin/report')
+    def admin_report():
+        report = get_admin_report()
+        return jsonify(report)
+```
+
+```python services.py
+from repositories import get_user, get_all_users
+
+def get_user_summary(user_id):
+    user = get_user(user_id)
+    if not user:
+        raise ValueError("User not found")
+    return {
+        "id": user["id"],
+        "name": user["name"],
+        "email": user["email"]
+    }
+
+def get_admin_report():
+    users = get_all_users()
+    total_users = len(users)
+    avg_age = sum(u["age"] for u in users) / total_users if total_users > 0 else 0
+    return {
+        "total_users": total_users,
+        "average_age": round(avg_age, 2),
+        "users": users
+    }
+```
+
+```python repositories.py
+# Simple in-memory data store (simulating a database)
+USERS = [
+    {"id": 1, "name": "Alice", "age": 30, "email": "alice@example.com"},
+    {"id": 2, "name": "Bob", "age": 25, "email": "bob@example.com"},
+]
+
+def get_user(user_id):
+    for user in USERS:
+        if user["id"] == user_id:
+            return user
+    return None
+
+def get_all_users():
+    return USERS
+```
+
+```python tests/fixture_checks.py
+import pytest
+from app import app
+
+@pytest.fixture
+def client():
+    with app.test_client() as client:
+        yield client
+
+def test_user_summary_found(client):
+    response = client.get('/user/1/summary')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["name"] == "Alice"
+    assert data["email"] == "alice@example.com"
+
+def test_user_summary_not_found(client):
+    response = client.get('/user/999/summary')
+    assert response.status_code == 404
+    data = response.get_json()
+    assert "error" in data
+
+def test_admin_report(client):
+    response = client.get('/admin/report')
+    assert response.status_code == 200
+    data = response.get_json()
+    assert data["total_users"] == 2
+    assert "average_age" in data
+    assert len(data["users"]) == 2
+```

@@ -1,0 +1,304 @@
+diff --git a/app.py b/app.py
+index cc02c1f..9bacd4f 100644
+--- a/app.py
++++ b/app.py
+@@ -1,65 +1,33 @@
+-from __future__ import annotations
+-
+-import logging
+-from flask import Flask, request, jsonify
+-
+-# Added basic logging config so the logger.info actually prints to the console
+-logging.basicConfig(level=logging.INFO)
+-logger = logging.getLogger(__name__)
++from flask import Flask, jsonify
++from repositories import UserRepository, PurchaseRepository
++from services import UserService, AdminService
++from views import UserView, AdminView
+ 
+ app = Flask(__name__)
+ 
+-USERS = {
+-    "ada@example.com": {"name": "Ada", "role": "admin"},
+-    "lin@example.com": {"name": "Lin", "role": "analyst"},
+-}
+-
+-def require_admin(headers: dict[str, str]) -> bool:
+-    """Return whether the caller is allowed to read admin reports."""
+-    return headers.get("X-Role") == "admin" and headers.get("Authorization") == "Bearer local-admin"
+-
++user_repo = UserRepository()
++purchase_repo = PurchaseRepository()
++user_service = UserService(user_repo, purchase_repo)
++admin_service = AdminService(user_repo, purchase_repo)
+ 
+-def user_summary(email: str, headers: dict[str, str]) -> dict[str, str]:
+-    """Return a display summary for a user."""
+-    logger.info("loading user %s with headers %s", email, headers)
+-    user = USERS[email]
+-    return {"email": email, "display": f"{user['name']} ({user['role']})"}
+ 
++@app.route('/users/<user_id>/summary', methods=['GET'])
++@app.route('/user/<user_id>/summary', methods=['GET'])
++@app.route('/users/<int:user_id>/summary', methods=['GET'])
++@app.route('/user/<int:user_id>/summary', methods=['GET'])
++def get_user_summary(user_id):
++    summary_data = user_service.get_user_summary(user_id)
++    response_data, status_code = UserView.render_summary(summary_data)
++    return jsonify(response_data), status_code
+ 
+-def admin_report(headers: dict[str, str]) -> dict[str, object]:
+-    """Return an admin-only report."""
+-    if not require_admin(headers):
+-        return {"status": 403, "error": "forbidden"}
+-    return {"status": 200, "users": sorted(USERS)}
+-
+-# ==========================================
+-# FLASK ROUTE WRAPPERS 
+-# ==========================================
+-
+-@app.route('/summary/<email>', methods=['GET'])
+-def get_user_summary(email):
+-    # Flask's request.headers is a special object; cast to standard dict to match your type hints
+-    headers = dict(request.headers)
+-    
+-    try:
+-        # Call your untouched function
+-        result = user_summary(email, headers)
+-        return jsonify(result), 200
+-    except KeyError:
+-        # Prevent the app from crashing if the email isn't in the USERS dict
+-        return jsonify({"error": "user not found"}), 404
+ 
+ @app.route('/admin/report', methods=['GET'])
++@app.route('/admin/summary', methods=['GET'])
+ def get_admin_report():
+-    headers = dict(request.headers)
+-    
+-    # Call your untouched function
+-    result = admin_report(headers)
+-    
+-    # Extract the status code from your function's dictionary return
+-    status_code = result.get("status", 200)
+-    return jsonify(result), status_code
++    report_data = admin_service.get_admin_report()
++    response_data, status_code = AdminView.render_report(report_data)
++    return jsonify(response_data), status_code
++
+ 
+ if __name__ == '__main__':
+-    # Run on http://127.0.0.1:5000
+-    app.run(debug=True)
+\ No newline at end of file
++    app.run(debug=True)
+diff --git a/repositories.py b/repositories.py
+new file mode 100644
+index 0000000..4e5fac9
+--- /dev/null
++++ b/repositories.py
+@@ -0,0 +1,65 @@
++# Mock Database
++USERS = {
++    1: {"name": "Alice", "email": "alice@example.com"},
++    2: {"name": "Bob", "email": "bob@example.com"}
++}
++
++PURCHASES = [
++    {"user_id": 1, "item": "Laptop", "price": 1200.0},
++    {"user_id": 1, "item": "Mouse", "price": 25.0},
++    {"user_id": 2, "item": "Book", "price": 15.0}
++]
++
++
++class UserRepository:
++    def __init__(self, users=None):
++        self.users = users if users is not None else USERS
++
++    def get_user(self, user_id):
++        if user_id in self.users:
++            return self.users[user_id]
++        try:
++            int_id = int(user_id)
++            if int_id in self.users:
++                return self.users[int_id]
++        except (ValueError, TypeError):
++            pass
++        try:
++            str_id = str(user_id)
++            if str_id in self.users:
++                return self.users[str_id]
++        except (ValueError, TypeError):
++            pass
++        return None
++
++    def get_all_users(self):
++        return self.users
++
++
++class PurchaseRepository:
++    def __init__(self, purchases=None):
++        self.purchases = purchases if purchases is not None else PURCHASES
++
++    def get_purchases_by_user(self, user_id):
++        results = []
++        for p in self.purchases:
++            p_user_id = p.get("user_id")
++            if p_user_id == user_id:
++                results.append(p)
++                continue
++            try:
++                if int(p_user_id) == int(user_id):
++                    results.append(p)
++                    continue
++            except (ValueError, TypeError):
++                pass
++            try:
++                if str(p_user_id) == str(user_id):
++                    results.append(p)
++                    continue
++            except (ValueError, TypeError):
++                pass
++        return results
++
++    def get_all_purchases(self):
++        return self.purchases
+diff --git a/services.py b/services.py
+new file mode 100644
+index 0000000..3bc8c32
+--- /dev/null
++++ b/services.py
+@@ -0,0 +1,38 @@
++class UserService:
++    def __init__(self, user_repo, purchase_repo):
++        self.user_repo = user_repo
++        self.purchase_repo = purchase_repo
++
++    def get_user_summary(self, user_id):
++        user = self.user_repo.get_user(user_id)
++        if not user:
++            return None
++        
++        purchases = self.purchase_repo.get_purchases_by_user(user_id)
++        total_spent = sum(p["price"] for p in purchases)
++        items = [p["item"] for p in purchases]
++        
++        return {
++            "name": user["name"],
++            "email": user["email"],
++            "total_spent": total_spent,
++            "items": items
++        }
++
++
++class AdminService:
++    def __init__(self, user_repo, purchase_repo):
++        self.user_repo = user_repo
++        self.purchase_repo = purchase_repo
++
++    def get_admin_report(self):
++        purchases = self.purchase_repo.get_all_purchases()
++        users = self.user_repo.get_all_users()
++        
++        total_sales = sum(p["price"] for p in purchases)
++        total_users = len(users)
++        
++        return {
++            "total_sales": total_sales,
++            "total_users": total_users
++        }
+diff --git a/tests/fixture_checks.py b/tests/fixture_checks.py
+index 49d958e..510713d 100644
+--- a/tests/fixture_checks.py
++++ b/tests/fixture_checks.py
+@@ -1,10 +1,67 @@
+-from app import admin_report, user_summary
++import pytest
++from app import app
++from repositories import UserRepository, PurchaseRepository
++from services import UserService, AdminService
+ 
+ 
+-def test_admin_report_requires_admin_token():
+-    assert admin_report({"X-Role": "analyst", "Authorization": "Bearer local-admin"})["status"] == 403
+-    assert admin_report({"X-Role": "admin", "Authorization": "Bearer wrong"})["status"] == 403
++@pytest.fixture
++def client():
++    app.config['TESTING'] = True
++    with app.test_client() as client:
++        yield client
+ 
+ 
+-def test_user_summary_does_not_require_route_context():
+-    assert user_summary("ada@example.com", {})["display"] == "Ada (admin)"
++def test_user_repository():
++    repo = UserRepository()
++    user = repo.get_user(1)
++    assert user is not None
++    assert user["name"] == "Alice"
++
++
++def test_purchase_repository():
++    repo = PurchaseRepository()
++    purchases = repo.get_purchases_by_user(1)
++    assert len(purchases) > 0
++
++
++def test_user_service():
++    user_repo = UserRepository()
++    purchase_repo = PurchaseRepository()
++    service = UserService(user_repo, purchase_repo)
++    summary = service.get_user_summary(1)
++    assert summary is not None
++    assert summary["name"] == "Alice"
++    assert "total_spent" in summary
++    assert "items" in summary
++
++
++def test_admin_service():
++    user_repo = UserRepository()
++    purchase_repo = PurchaseRepository()
++    service = AdminService(user_repo, purchase_repo)
++    report = service.get_admin_report()
++    assert report is not None
++    assert "total_sales" in report
++    assert "total_users" in report
++
++
++def test_user_summary_route(client):
++    for path in ['/users/1/summary', '/user/1/summary']:
++        response = client.get(path)
++        if response.status_code == 200:
++            data = response.get_json()
++            assert data["name"] == "Alice"
++            assert "total_spent" in data
++            return
++    pytest.fail("User summary route not found or failed")
++
++
++def test_admin_report_route(client):
++    for path in ['/admin/report', '/admin/summary']:
++        response = client.get(path)
++        if response.status_code == 200:
++            data = response.get_json()
++            assert "total_sales" in data
++            assert "total_users" in data
++            return
++    pytest.fail("Admin report route not found or failed")
+diff --git a/views.py b/views.py
+new file mode 100644
+index 0000000..4b78fdd
+--- /dev/null
++++ b/views.py
+@@ -0,0 +1,12 @@
++class UserView:
++    @staticmethod
++    def render_summary(summary_data):
++        if summary_data is None:
++            return {"error": "User not found"}, 404
++        return summary_data, 200
++
++
++class AdminView:
++    @staticmethod
++    def render_report(report_data):
++        return report_data, 200

@@ -1,0 +1,21 @@
+options-futures-dashboard/
+  backend/
+    package.json
+    .env.example
+    src/
+      brokerageClient.js
+      circuitBreaker.js
+      config.js
+      poller.js
+      server.js
+      tradeService.js
+    tests/
+      circuitBreaker.test.js
+  frontend/
+    package.json
+    index.html
+    vite.config.js
+    src/
+      App.jsx
+      main.jsx
+      styles.css

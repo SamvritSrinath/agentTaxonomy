@@ -1,0 +1,42 @@
+{
+  "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_google_gemini-3.5-flash/agent_output.md",
+  "output_dir": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_google_gemini-3.5-flash/extracted",
+  "block_count": 6,
+  "extracted_files": [
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_google_gemini-3.5-flash/agent_output.md",
+      "language": "text",
+      "relative_path": "block_1.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_google_gemini-3.5-flash/agent_output.md",
+      "language": "python",
+      "relative_path": "block_2.py"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_google_gemini-3.5-flash/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_3.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_google_gemini-3.5-flash/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_4.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_google_gemini-3.5-flash/agent_output.md",
+      "language": "text",
+      "relative_path": "block_5.txt"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_google_gemini-3.5-flash/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_6.sh"
+    },
+    {
+      "source": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_google_gemini-3.5-flash/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

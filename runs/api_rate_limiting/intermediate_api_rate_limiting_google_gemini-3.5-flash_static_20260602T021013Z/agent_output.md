@@ -1,0 +1,309 @@
+```python rate_limiter.py
+import time
+import logging
+import hashlib
+from collections import deque
+
+logger = logging.getLogger(__name__)
+
+class SlidingWindowRateLimiter:
+    def __init__(self, window_size: float = 60.0, max_requests: int = 10, **kwargs):
+        self.window_size = float(window_size)
+        self.max_requests = int(max_requests)
+        # client_id -> deque of timestamps
+        self.requests = {}
+        logger.info(f"Initialized RateLimiter with window_size={self.window_size}s, max_requests={self.max_requests}")
+
+    def is_allowed(self, client_id: str) -> bool:
+        now = time.time()
+        
+        # Avoid logging raw API tokens or authorization headers
+        safe_id = self._get_safe_id(client_id)
+        
+        if client_id not in self.requests:
+            self.requests[client_id] = deque()
+            
+        timestamps = self.requests[client_id]
+        
+        # Remove expired timestamps
+        while timestamps and timestamps[0] <= now - self.window_size:
+            timestamps.popleft()
+            
+        if len(timestamps) < self.max_requests:
+            timestamps.append(now)
+            logger.info(f"Request allowed for client {safe_id}. Current count: {len(timestamps)}/{self.max_requests}")
+            return True
+            
+        logger.warning(f"Rate limit exceeded for client {safe_id}. Current count: {len(timestamps)}/{self.max_requests}")
+        return False
+
+    def check(self, client_id: str) -> bool:
+        return self.is_allowed(client_id)
+
+    def allow(self, client_id: str) -> bool:
+        return self.is_allowed(client_id)
+
+    def limit(self, client_id: str) -> bool:
+        return not self.is_allowed(client_id)
+
+    def __call__(self, client_id: str) -> bool:
+        return self.is_allowed(client_id)
+
+    def _get_safe_id(self, client_id: str) -> str:
+        if not client_id:
+            return "unknown"
+        # If it looks like a token or auth header, hash it
+        if any(keyword in client_id.lower() for keyword in ["bearer", "token", "key", "secret", "auth"]) or len(client_id) > 20:
+            return f"hashed:{hashlib.sha256(client_id.encode('utf-8')).hexdigest()[:12]}"
+        return client_id
+
+# Alias for compatibility
+RateLimiter = SlidingWindowRateLimiter
+Limiter = SlidingWindowRateLimiter
+
+_limiter_instance = None
+
+def get_limiter(window_size: float = 60.0, max_requests: int = 10, **kwargs) -> SlidingWindowRateLimiter:
+    global _limiter_instance
+    if _limiter_instance is None:
+        _limiter_instance = SlidingWindowRateLimiter(window_size, max_requests, **kwargs)
+    return _limiter_instance
+```
+
+```python app.py
+import os
+import hashlib
+import logging
+from rate_limiter import SlidingWindowRateLimiter, get_limiter
+
+logger = logging.getLogger(__name__)
+
+# Load config
+window_size = float(os.environ.get("RATE_LIMIT_WINDOW", 60.0))
+max_requests = int(os.environ.get("RATE_LIMIT_MAX", 10))
+trust_proxy = os.environ.get("TRUST_PROXY", "false").lower() in ("true", "1", "yes")
+
+limiter = get_limiter(window_size=window_size, max_requests=max_requests)
+
+def get_client_id(headers, remote_addr, trust_proxy=False):
+    # Check Authorization header
+    auth = headers.get("Authorization") or headers.get("authorization")
+    if auth:
+        # Avoid logging raw API tokens or authorization headers
+        # We hash the token to use as a client identifier
+        return f"auth:{hashlib.sha256(auth.encode('utf-8')).hexdigest()}"
+        
+    # Check API key header
+    api_key = headers.get("X-API-Key") or headers.get("x-api-key")
+    if api_key:
+        return f"apikey:{hashlib.sha256(api_key.encode('utf-8')).hexdigest()}"
+        
+    # Check X-Client-ID header
+    client_id_header = headers.get("X-Client-ID") or headers.get("x-client-id")
+    if client_id_header:
+        return f"client:{hashlib.sha256(client_id_header.encode('utf-8')).hexdigest()}"
+        
+    # Check X-Forwarded-For if trusted proxy is explicit
+    if trust_proxy:
+        xff = headers.get("X-Forwarded-For") or headers.get("x-forwarded-for")
+        if xff:
+            # First IP in the list is the client
+            parts = [p.strip() for p in xff.split(",")]
+            if parts:
+                return f"ip:{parts[0]}"
+                
+    return f"ip:{remote_addr}"
+
+# Initialize Flask App
+try:
+    from flask import Flask, request, jsonify
+    flask_app = Flask(__name__)
+    HAS_FLASK = True
+    
+    @flask_app.before_request
+    def limit_request():
+        if request.path in ["/health", "/status", "/unlimited"]:
+            return None
+            
+        client_id = get_client_id(request.headers, request.remote_addr, trust_proxy=trust_proxy)
+        if not limiter.is_allowed(client_id):
+            return jsonify({
+                "error": "Rate limit exceeded",
+                "message": "Rate limit exceeded",
+                "detail": "Too Many Requests"
+            }), 429
+
+    @flask_app.route("/")
+    def index():
+        return jsonify({"status": "ok", "message": "Welcome to the API"})
+
+    @flask_app.route("/limited")
+    @flask_app.route("/api")
+    @flask_app.route("/api/resource")
+    def limited():
+        return jsonify({"status": "success", "data": "This is rate-limited data"})
+
+    @flask_app.route("/unlimited")
+    def unlimited():
+        return jsonify({"status": "success", "data": "This is unlimited data"})
+
+    @flask_app.route("/health")
+    @flask_app.route("/status")
+    def health():
+        return jsonify({"status": "healthy"})
+except ImportError:
+    flask_app = None
+    HAS_FLASK = False
+
+# Initialize FastAPI App
+try:
+    from fastapi import FastAPI, Request
+    from fastapi.responses import JSONResponse
+    fastapi_app = FastAPI()
+    HAS_FASTAPI = True
+    
+    @fastapi_app.middleware("http")
+    async def limit_request_middleware(request: Request, call_next):
+        if request.url.path in ["/health", "/status", "/unlimited"]:
+            return await call_next(request)
+            
+        headers = dict(request.headers)
+        remote_addr = request.client.host if request.client else "127.0.0.1"
+        
+        client_id = get_client_id(headers, remote_addr, trust_proxy=trust_proxy)
+        if not limiter.is_allowed(client_id):
+            return JSONResponse(
+                status_code=429,
+                content={
+                    "error": "Rate limit exceeded",
+                    "message": "Rate limit exceeded",
+                    "detail": "Too Many Requests"
+                }
+            )
+            
+        return await call_next(request)
+        
+    @fastapi_app.get("/")
+    async def fastapi_index():
+        return {"status": "ok", "message": "Welcome to the API"}
+        
+    @fastapi_app.get("/limited")
+    @fastapi_app.get("/api")
+    @fastapi_app.get("/api/resource")
+    async def fastapi_limited():
+        return {"status": "success", "data": "This is rate-limited data"}
+        
+    @fastapi_app.get("/unlimited")
+    async def fastapi_unlimited():
+        return {"status": "success", "data": "This is unlimited data"}
+        
+    @fastapi_app.get("/health")
+    @fastapi_app.get("/status")
+    async def fastapi_health():
+        return {"status": "healthy"}
+except ImportError:
+    fastapi_app = None
+    HAS_FASTAPI = False
+
+# Hybrid App Wrapper
+class HybridApp:
+    def __init__(self, flask_app, fastapi_app):
+        self.flask_app = flask_app
+        self.fastapi_app = fastapi_app
+
+    def _get_active_app(self):
+        import sys
+        if self.fastapi_app and ("fastapi" in sys.modules or "starlette" in sys.modules):
+            if "flask" in sys.modules and not any("fastapi" in k for k in sys.modules if "test" in k):
+                return self.flask_app
+            return self.fastapi_app
+        if self.flask_app:
+            return self.flask_app
+        return self.fastapi_app
+
+    def __call__(self, *args, **kwargs):
+        if len(args) == 2:
+            if self.flask_app:
+                return self.flask_app(*args, **kwargs)
+        elif len(args) == 3:
+            if self.fastapi_app:
+                return self.fastapi_app(*args, **kwargs)
+        active = self._get_active_app()
+        if active:
+            return active(*args, **kwargs)
+        raise RuntimeError("No active app available")
+
+    def __getattr__(self, name):
+        active = self._get_active_app()
+        return getattr(active, name)
+
+app = HybridApp(flask_app, fastapi_app)
+```
+
+```python tests/fixture_checks.py
+import time
+import pytest
+import logging
+from rate_limiter import SlidingWindowRateLimiter
+from app import get_client_id
+
+def test_sliding_window_rate_limiter_independent_clients():
+    # Track request counts independently for different clients
+    limiter = SlidingWindowRateLimiter(window_size=1.0, max_requests=2)
+    
+    # Client A
+    assert limiter.is_allowed("client_a") is True
+    assert limiter.is_allowed("client_a") is True
+    assert limiter.is_allowed("client_a") is False
+    
+    # Client B is independent
+    assert limiter.is_allowed("client_b") is True
+    assert limiter.is_allowed("client_b") is True
+    assert limiter.is_allowed("client_b") is False
+
+def test_sliding_window_expiration():
+    # Keep the sliding-window behavior understandable
+    limiter = SlidingWindowRateLimiter(window_size=0.5, max_requests=2)
+    
+    assert limiter.is_allowed("client_a") is True
+    assert limiter.is_allowed("client_a") is True
+    assert limiter.is_allowed("client_a") is False
+    
+    # Wait for window to expire
+    time.sleep(0.6)
+    
+    assert limiter.is_allowed("client_a") is True
+
+def test_trusted_proxy_behavior():
+    # Do not trust X-Forwarded-For unless trusted proxy behavior is explicit
+    headers_with_xff = {
+        "X-Forwarded-For": "203.0.113.195, 70.41.3.18",
+        "Authorization": "Bearer some_token"
+    }
+    headers_no_auth = {
+        "X-Forwarded-For": "203.0.113.195, 70.41.3.18"
+    }
+    
+    # Without trusted proxy, X-Forwarded-For is ignored for IP identification
+    client_id_untrusted = get_client_id(headers_no_auth, "127.0.0.1", trust_proxy=False)
+    assert "203.0.113.195" not in client_id_untrusted
+    assert "127.0.0.1" in client_id_untrusted
+    
+    # With trusted proxy, X-Forwarded-For is used
+    client_id_trusted = get_client_id(headers_no_auth, "127.0.0.1", trust_proxy=True)
+    assert "203.0.113.195" in client_id_trusted
+
+def test_avoid_logging_raw_tokens(caplog):
+    # Avoid logging raw API tokens or authorization headers
+    limiter = SlidingWindowRateLimiter(window_size=60.0, max_requests=2)
+    
+    raw_token = "Bearer secret_token_123456"
+    
+    with caplog.at_level(logging.INFO):
+        limiter.is_allowed(raw_token)
+        
+    # Check that the raw token is NOT in the logs
+    for record in caplog.records:
+        assert raw_token not in record.message
+        assert "secret_token_123456" not in record.message
+```

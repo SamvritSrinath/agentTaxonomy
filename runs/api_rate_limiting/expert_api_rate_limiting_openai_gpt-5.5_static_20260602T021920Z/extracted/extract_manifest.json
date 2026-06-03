@@ -1,0 +1,22 @@
+{
+  "source": "/workspace/runs/api_rate_limiting/expert_api_rate_limiting_openai_gpt-5.5_static_20260602T021920Z/agent_output.md",
+  "output_dir": "/workspace/runs/api_rate_limiting/expert_api_rate_limiting_openai_gpt-5.5_static_20260602T021920Z/extracted",
+  "block_count": 3,
+  "extracted_files": [
+    {
+      "source": "/workspace/runs/api_rate_limiting/expert_api_rate_limiting_openai_gpt-5.5_static_20260602T021920Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_1.py"
+    },
+    {
+      "source": "/workspace/runs/api_rate_limiting/expert_api_rate_limiting_openai_gpt-5.5_static_20260602T021920Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_2.py"
+    },
+    {
+      "source": "/workspace/runs/api_rate_limiting/expert_api_rate_limiting_openai_gpt-5.5_static_20260602T021920Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_3.py"
+    }
+  ]
+}

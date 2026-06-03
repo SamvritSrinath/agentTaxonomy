@@ -1,0 +1,16 @@
+﻿task_group,run_name,model,execution_method,profile,applied_files,skipped_files,likely_cause
+api_rate_limiting,beginner_api_rate_limiting_deepseek_deepseek-v4-pro_static_20260525T003100Z_bad,deepseek/deepseek-v4-pro,,,,not_allowed:src/apiHelper.ts,apply_failed: no files applied
+api_rate_limiting,beginner_api_rate_limiting_google_gemini-3.5-flash_static_20260602T015231Z,google/gemini-3.5-flash,,,,no_path:; no_path:; no_path:,apply_failed: no files applied
+database_operations,beginner_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T172334Z,,,,,,run_incomplete_or_crashed
+database_operations,beginner_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T172535Z,,,,,,run_incomplete_or_crashed
+database_operations,beginner_miachen67__sakila-sqlite3_moonshotai_kimi-k2.6_static_20260526T171636Z,,,,,,run_incomplete_or_crashed
+database_operations,beginner_miachen67__sakila-sqlite3_openai_gpt-5.5_static_20260526T172608Z,,,,,,run_incomplete_or_crashed
+database_operations,expert_miachen67__sakila-sqlite3_moonshotai_kimi-k2.6_static_20260526T184036Z,,,,,,run_incomplete_or_crashed
+database_operations,expert_miachen67__sakila-sqlite3_moonshotai_kimi-k2.6_static_20260526T191542Z,,,,,,run_incomplete_or_crashed
+flask_mvc_refactor,intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260602T043520Z,google/gemini-3.5-flash,,,,,apply_failed: no files applied
+flask_mvc_refactor,intermediate_flask_mvc_refactor_google_gemini-3.5-flash_static_20260602T043751Z,google/gemini-3.5-flash,,,,no_path:python; no_path:python,apply_failed: no files applied
+flask_mvc_refactor_before_fix,expert_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T010032Z,deepseek/deepseek-v4-pro,,,,not_allowed:app/__init__.py; not_allowed:app/config.py; not_allowed:app/extensions.py; not_allowed:app/models.py; not_allowed:app/services/__init__.py; not_allowed:app/services/user_service.py; not_allowed:app/services/auth_service.py; not_allowed:app/routes/__init__.py; not_allowed:app/routes/user_routes.py; not_allowed:tests/__init__.py; not_allowed:tests/conftest.py; not_allowed:tests/test_user_routes.py; not_allowed:run.py; not_allowed:requirements.txt,apply_failed: no files applied
+flask_mvc_refactor_before_fix,expert_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T010926Z,deepseek/deepseek-v4-pro,,,,not_allowed:app/__init__.py; not_allowed:app/config.py; not_allowed:app/models/__init__.py; not_allowed:app/models/user.py; not_allowed:app/services/__init__.py; not_allowed:app/services/auth_service.py; not_allowed:app/services/user_service.py; not_allowed:app/routes/__init__.py; not_allowed:app/routes/auth.py; not_allowed:app/routes/admin.py; not_allowed:app/utils/__init__.py; not_allowed:app/utils/decorators.py; not_allowed:app/utils/logging.py; not_allowed:run.py; not_allowed:tests/test_app.py,apply_failed: no files applied
+flask_mvc_refactor_before_fix,expert_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T010431Z,google/gemini-3.5-flash,,,,no_path:,apply_failed: no files applied
+map_reduce_spark_log_analytics,beginner_canonical_moonshotai_kimi-k2.5,moonshotai/kimi-k2.5,,,,,run_incomplete_or_crashed
+map_reduce_spark_log_analytics,beginner_ui_test_moonshotai_kimi-k2.5,moonshotai/kimi-k2.5,,,,,run_incomplete_or_crashed

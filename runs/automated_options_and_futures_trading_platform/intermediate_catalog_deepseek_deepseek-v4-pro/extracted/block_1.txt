@@ -1,0 +1,13 @@
+trading-dashboard/
+├── backend/
+│   ├── server.js          # Express + WebSocket server, dashboard updates
+│   ├── brokerClient.js    # Broker WebSocket client (real or mock)
+│   ├── db.js              # SQLite helper (trade history)
+│   └── tradeManager.js    # S&P 500 drop logic & trade execution
+├── frontend/
+│   └── public/
+│       ├── index.html     # Dashboard shell
+│       └── dashboard.js   # Frontend WebSocket listener & UI
+├── tests/
+│   └── dropLogic.test.js  # Unit tests for the 2% drop condition
+└── package.json           # Root package with scripts

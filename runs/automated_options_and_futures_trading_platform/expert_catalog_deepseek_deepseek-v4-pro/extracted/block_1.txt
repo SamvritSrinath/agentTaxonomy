@@ -1,0 +1,16 @@
+options-dashboard/
+├── backend/
+│   ├── __init__.py
+│   ├── main.py               # FastAPI app and endpoints
+│   ├── circuit_breaker.py    # Circuit breaker implementation
+│   ├── mock_trade.py         # Mock trade execution
+│   ├── polling.py            # Index data polling task
+│   └── .env.example
+├── frontend/
+│   ├── index.html
+│   └── styles.css
+├── tests/
+│   ├── __init__.py
+│   └── test_circuit_breaker.py
+├── requirements.txt
+└── README.md

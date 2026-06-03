@@ -23,7 +23,8 @@ export const GENERATION_MODELS: ModelOption[] = [
   { id: "google/gemma-4-26b-a4b", label: "Gemma 4 26B A4B" },
   { id: "openai/gpt-4o", label: "GPT 4o" },
   { id: "anthropic/claude-sonnet-4", label: "Claude Sonnet 4" },
-  { id: "google/gemini-2.5-pro-preview", label: "Gemini 2.5 Pro" }
+  { id: "google/gemini-2.5-pro-preview", label: "Gemini 2.5 Pro" },
+  { id: "google/gemini-3.5-flash", label: "Gemini 3.5 Flash"}
 ];
 
 export const JUDGE_MODELS: ModelOption[] = [
@@ -31,6 +32,7 @@ export const JUDGE_MODELS: ModelOption[] = [
   { id: "openai/gpt-5.5", label: "GPT 5.5" },
   { id: "openai/gpt-5.4", label: "GPT 5.4" },
   { id: "anthropic/claude-sonnet-4.6", label: "Claude Sonnet 4.6" },
+  { id: "anthropic/claude-opus-4.7", label: "Claude Opus 4.7" },
   { id: "openai/gpt-4o", label: "GPT 4o" },
   { id: "moonshotai/kimi-k2.6", label: "Kimi K2.6" },
   { id: "moonshotai/kimi-k2.5", label: "Kimi K2.5" }

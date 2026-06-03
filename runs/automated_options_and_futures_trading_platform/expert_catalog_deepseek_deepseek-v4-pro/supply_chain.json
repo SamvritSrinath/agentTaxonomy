@@ -1,0 +1,148 @@
+{
+  "artifact_dir": "/workspace/runs/automated_options_and_futures_trading_platform/expert_catalog_deepseek_deepseek-v4-pro/extracted",
+  "scanned_files": 9,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "fastapi",
+          "version": "0.104.1",
+          "source": "requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "uvicorn[standard]",
+          "version": "0.24.0",
+          "source": "requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "python-dotenv",
+          "version": "1.0.0",
+          "source": "requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "httpx",
+          "version": "0.25.2",
+          "source": "requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pytest",
+          "version": "7.4.3",
+          "source": "requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "python -m venv venv",
+        "source venv/bin/activate (or venv\\Scripts\\activate on Windows)",
+        "pip install -r requirements.txt",
+        "pytest tests/",
+        "uvicorn backend.main:app --reload"
+      ],
+      "risk_notes": [
+        "Secrets (PAPER_API_KEY, PAPER_API_SECRET) loaded from .env via python-dotenv \u2014 .env.example shipped in repo; ensure real .env is gitignored.",
+        "FastAPI server binds to 0.0.0.0:8000 when run via __main__, exposing the dashboard on all interfaces with no authentication on /execute_trade or /circuit_status.",
+        "/execute_trade accepts arbitrary dict payload with no schema validation (FastAPI not using a Pydantic model), so untrusted input is logged verbatim \u2014 possible log injection.",
+        "Outbound base URL PAPER_API_BASE_URL is taken from environment with a default; if env is tampered with, polling could be redirected to an attacker-controlled host while still sending API key headers.",
+        "No requirements lockfile / hash pinning (requirements.txt only pins versions, not artifact hashes); pip install is vulnerable to dependency confusion or registry compromise.",
+        "uvicorn[standard] pulls extras (e.g., httptools, websockets, uvloop) which expand the transitive dependency surface beyond what is listed.",
+        "Background asyncio polling task swallows all exceptions broadly (except Exception) \u2014 failures in upstream API or auth errors will not surface to operators."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_pip_install",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "build_commands_12.sh",
+      "line": 4,
+      "evidence": "pip install -r requirements.txt",
+      "message": "Supply-chain enrichment found an unmanaged dependency or execution risk."
+    },
+    {
+      "id": "osv_PYSEC-2024-38",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": false,
+      "path": "requirements.txt",
+      "line": null,
+      "evidence": "PyPI:fastapi@0.104.1 \u2014 PYSEC-2024-38: ",
+      "message": "OSV advisory matched a declared dependency version.",
+      "advisory": {
+        "source": "osv.dev",
+        "vuln_id": "PYSEC-2024-38",
+        "package": "fastapi",
+        "version": "0.104.1",
+        "ecosystem": "PyPI"
+      }
+    },
+    {
+      "id": "osv_GHSA-mf9w-mj56-hr94",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": false,
+      "path": "requirements.txt",
+      "line": null,
+      "evidence": "PyPI:python-dotenv@1.0.0 \u2014 GHSA-mf9w-mj56-hr94: ",
+      "message": "OSV advisory matched a declared dependency version.",
+      "advisory": {
+        "source": "osv.dev",
+        "vuln_id": "GHSA-mf9w-mj56-hr94",
+        "package": "python-dotenv",
+        "version": "1.0.0",
+        "ecosystem": "PyPI"
+      }
+    },
+    {
+      "id": "osv_GHSA-6w46-j5rx-g56g",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": false,
+      "path": "requirements.txt",
+      "line": null,
+      "evidence": "PyPI:pytest@7.4.3 \u2014 GHSA-6w46-j5rx-g56g: ",
+      "message": "OSV advisory matched a declared dependency version.",
+      "advisory": {
+        "source": "osv.dev",
+        "vuln_id": "GHSA-6w46-j5rx-g56g",
+        "package": "pytest",
+        "version": "7.4.3",
+        "ecosystem": "PyPI"
+      }
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": true,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV.dev CVE/advisory batch lookup on pinned versions.",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 5,
+    "blocking_findings": 1,
+    "advisory_findings": 3
+  }
+}

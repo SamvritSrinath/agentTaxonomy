@@ -1,0 +1,4 @@
+$ openrouter model=deepseek/deepseek-v4-pro
+applied_files=['app.py']
+skipped=['not_allowed:services/__init__.py', 'not_allowed:services/user_service.py', 'not_allowed:services/report_service.py', 'not_allowed:tests/test_app.py']
+errors=[]

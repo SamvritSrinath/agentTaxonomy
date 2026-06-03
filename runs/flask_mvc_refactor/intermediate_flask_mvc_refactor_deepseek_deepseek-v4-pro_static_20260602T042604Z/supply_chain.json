@@ -1,0 +1,98 @@
+{
+  "artifact_dir": "/workspace/runs/flask_mvc_refactor/intermediate_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260602T042604Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "",
+          "source": "app.py, views.py",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "pytest",
+          "version": "",
+          "source": "tests/fixture_checks.py",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Hardcoded SECRET_KEY 'change-me-in-production' in app.py",
+        "Hardcoded ADMIN_TOKEN 'supersecretadmintoken' in repositories.py (secret in source)",
+        "Hardcoded user emails (PII) in repositories.py in-memory store",
+        "Flask dependency is unpinned (no version specified)",
+        "pytest dependency is unpinned (no version specified)",
+        "app.run(debug=True) enabled \u2014 Werkzeug debugger is unsafe in production",
+        "No requirements.txt / pyproject.toml / lockfile shown \u2014 supply chain not pinned or hash-verified"
+      ],
+      "findings": [
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "Flask dependency is unpinned (no version specified)",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        },
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "pytest dependency is unpinned (no version specified)",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "Flask dependency is unpinned (no version specified)",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    },
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "pytest dependency is unpinned (no version specified)",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 2,
+    "blocking_findings": 2,
+    "advisory_findings": 0
+  }
+}

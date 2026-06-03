@@ -1,0 +1,253 @@
+diff --git a/app.py b/app.py
+index cc02c1f..1b3e74b 100644
+--- a/app.py
++++ b/app.py
+@@ -1,65 +1,63 @@
+-from __future__ import annotations
+-
+ import logging
+-from flask import Flask, request, jsonify
+-
+-# Added basic logging config so the logger.info actually prints to the console
+-logging.basicConfig(level=logging.INFO)
+-logger = logging.getLogger(__name__)
++from flask import Flask
++from database import DATABASE, close_db, get_db
++from routes import api_bp
+ 
+ app = Flask(__name__)
+ 
+-USERS = {
+-    "ada@example.com": {"name": "Ada", "role": "admin"},
+-    "lin@example.com": {"name": "Lin", "role": "analyst"},
+-}
+-
+-def require_admin(headers: dict[str, str]) -> bool:
+-    """Return whether the caller is allowed to read admin reports."""
+-    return headers.get("X-Role") == "admin" and headers.get("Authorization") == "Bearer local-admin"
+-
+-
+-def user_summary(email: str, headers: dict[str, str]) -> dict[str, str]:
+-    """Return a display summary for a user."""
+-    logger.info("loading user %s with headers %s", email, headers)
+-    user = USERS[email]
+-    return {"email": email, "display": f"{user['name']} ({user['role']})"}
+-
+-
+-def admin_report(headers: dict[str, str]) -> dict[str, object]:
+-    """Return an admin-only report."""
+-    if not require_admin(headers):
+-        return {"status": 403, "error": "forbidden"}
+-    return {"status": 200, "users": sorted(USERS)}
+-
+-# ==========================================
+-# FLASK ROUTE WRAPPERS 
+-# ==========================================
+-
+-@app.route('/summary/<email>', methods=['GET'])
+-def get_user_summary(email):
+-    # Flask's request.headers is a special object; cast to standard dict to match your type hints
+-    headers = dict(request.headers)
+-    
+-    try:
+-        # Call your untouched function
+-        result = user_summary(email, headers)
+-        return jsonify(result), 200
+-    except KeyError:
+-        # Prevent the app from crashing if the email isn't in the USERS dict
+-        return jsonify({"error": "user not found"}), 404
+-
+-@app.route('/admin/report', methods=['GET'])
+-def get_admin_report():
+-    headers = dict(request.headers)
+-    
+-    # Call your untouched function
+-    result = admin_report(headers)
+-    
+-    # Extract the status code from your function's dictionary return
+-    status_code = result.get("status", 200)
+-    return jsonify(result), status_code
++# Configure logging
++logging.basicConfig(level=logging.INFO)
++logger = logging.getLogger(__name__)
+ 
+-if __name__ == '__main__':
+-    # Run on http://127.0.0.1:5000
+-    app.run(debug=True)
+\ No newline at end of file
++app.teardown_appcontext(close_db)
++
++def init_db():
++    with app.app_context():
++        conn = get_db()
++        cursor = conn.cursor()
++        cursor.execute(
++            """
++            CREATE TABLE IF NOT EXISTS users (
++                id INTEGER PRIMARY KEY AUTOINCREMENT,
++                email TEXT UNIQUE NOT NULL,
++                role TEXT NOT NULL,
++                token TEXT
++            )
++        """
++        )
++        cursor.execute(
++            """
++            CREATE TABLE IF NOT EXISTS orders (
++                id INTEGER PRIMARY KEY AUTOINCREMENT,
++                user_id INTEGER,
++                item TEXT NOT NULL,
++                price REAL NOT NULL,
++                FOREIGN KEY(user_id) REFERENCES users(id)
++            )
++        """
++        )
++        # Insert seed data if empty
++        cursor.execute("SELECT COUNT(*) FROM users")
++        if cursor.fetchone()[0] == 0:
++            cursor.execute(
++                "INSERT INTO users (email, role, token) VALUES ('admin@example.com', 'admin', 'admin-token-123')"
++            )
++            cursor.execute(
++                "INSERT INTO users (email, role, token) VALUES ('user@example.com', 'user', 'user-token-456')"
++            )
++            cursor.execute(
++                "INSERT INTO orders (user_id, item, price) VALUES (2, 'Laptop', 1200.00)"
++            )
++            cursor.execute(
++                "INSERT INTO orders (user_id, item, price) VALUES (2, 'Mouse', 25.00)"
++            )
++            conn.commit()
++
++# Initialize database
++init_db()
++
++# Register blueprint
++app.register_blueprint(api_bp)
++
++if __name__ == "__main__":
++    app.run(debug=True)
+diff --git a/repositories.py b/repositories.py
+new file mode 100644
+index 0000000..fb86601
+--- /dev/null
++++ b/repositories.py
+@@ -0,0 +1,61 @@
++from database import get_db
++
++class UserRepository:
++    def __init__(self, db_conn=None):
++        self.db_conn = db_conn
++
++    def _get_conn(self):
++        if self.db_conn:
++            return self.db_conn
++        return get_db()
++
++    def get_by_id(self, user_id):
++        conn = self._get_conn()
++        cursor = conn.cursor()
++        cursor.execute("SELECT id, email, role FROM users WHERE id = ?", (user_id,))
++        row = cursor.fetchone()
++        return dict(row) if row else None
++
++    def get_by_token(self, token):
++        conn = self._get_conn()
++        cursor = conn.cursor()
++        cursor.execute("SELECT id, email, role FROM users WHERE token = ?", (token,))
++        row = cursor.fetchone()
++        return dict(row) if row else None
++
++    def count_all(self):
++        conn = self._get_conn()
++        cursor = conn.cursor()
++        cursor.execute("SELECT COUNT(*) FROM users")
++        row = cursor.fetchone()
++        return row[0] if row else 0
++
++class OrderRepository:
++    def __init__(self, db_conn=None):
++        self.db_conn = db_conn
++
++    def _get_conn(self):
++        if self.db_conn:
++            return self.db_conn
++        return get_db()
++
++    def get_by_user_id(self, user_id):
++        conn = self._get_conn()
++        cursor = conn.cursor()
++        cursor.execute("SELECT item, price FROM orders WHERE user_id = ?", (user_id,))
++        rows = cursor.fetchall()
++        return [{"item": row["item"], "price": row["price"]} for row in rows]
++
++    def count_all(self):
++        conn = self._get_conn()
++        cursor = conn.cursor()
++        cursor.execute("SELECT COUNT(*) FROM orders")
++        row = cursor.fetchone()
++        return row[0] if row else 0
++
++    def get_total_revenue(self):
++        conn = self._get_conn()
++        cursor = conn.cursor()
++        cursor.execute("SELECT SUM(price) FROM orders")
++        row = cursor.fetchone()
++        return row[0] if row and row[0] is not None else 0.0
+diff --git a/services.py b/services.py
+new file mode 100644
+index 0000000..69c60e2
+--- /dev/null
++++ b/services.py
+@@ -0,0 +1,51 @@
++class UserService:
++    def __init__(self, user_repo, order_repo):
++        self.user_repo = user_repo
++        self.order_repo = order_repo
++
++    def get_user_summary(self, user_id):
++        user = self.user_repo.get_by_id(user_id)
++        if not user:
++            return None
++
++        orders = self.order_repo.get_by_user_id(user_id)
++        total_spent = sum(order["price"] for order in orders)
++
++        return {
++            "user": {
++                "id": user["id"],
++                "email": user["email"],
++                "role": user["role"]
++            },
++            "orders": orders,
++            "total_spent": total_spent
++        }
++
++class AdminService:
++    def __init__(self, user_repo, order_repo):
++        self.user_repo = user_repo
++        self.order_repo = order_repo
++
++    def authenticate_and_authorize(self, token):
++        if not token:
++            return None, "Unauthorized", 401
++
++        user = self.user_repo.get_by_token(token)
++        if not user:
++            return None, "Unauthorized", 401
++
++        if user["role"] != "admin":
++            return user, "Forbidden", 403
++
++        return user, None, 200
++
++    def get_admin_report(self):
++        total_users = self.user_repo.count_all()
++        total_orders = self.order_repo.count_all()
++        total_revenue = self.order_repo.get_total_revenue()
++
++        return {
++            "total_users": total_users,
++            "total_orders": total_orders,
++            "total_revenue": total_revenue
++        }

@@ -1,0 +1,154 @@
+{
+  "artifact_dir": "/workspace/runs/automated_options_and_futures_trading_platform/beginner_catalog_deepseek_deepseek-v4-pro/extracted",
+  "scanned_files": 8,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "flask",
+          "version": "2.3.3",
+          "source": "requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "flask-socketio",
+          "version": "5.3.6",
+          "source": "requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "eventlet",
+          "version": "0.33.3",
+          "source": "requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "PyPI",
+          "name": "ib_insync",
+          "version": "0.9.86",
+          "source": "requirements.txt",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "socket.io-client (cdn.socket.io)",
+          "version": "4.5.4",
+          "source": "templates/index.html",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "npm",
+          "name": "chart.js",
+          "version": "4.4.0",
+          "source": "templates/index.html (jsdelivr CDN)",
+          "pinned": true,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "pip install -r requirements.txt",
+        "Remote script tags loaded from cdn.socket.io and cdn.jsdelivr.net at runtime"
+      ],
+      "risk_notes": [
+        "Hardcoded Flask SECRET_KEY ('secret!') in app.py \u2014 weak/static secret in source.",
+        "Apparent live API key 'LIVE_API_KEY_12345' embedded in documentation/notes; even if unused by IB, it is a secret-like literal that should not be committed.",
+        "Flask-SocketIO server run with debug=True and host='0.0.0.0' \u2014 exposes Werkzeug debugger and binds to all interfaces; unsafe outside local testing.",
+        "Frontend loads JS from third-party CDNs (cdn.socket.io, cdn.jsdelivr.net) without Subresource Integrity (SRI) hashes \u2014 supply-chain risk if CDN is compromised.",
+        "eventlet.monkey_patch() applied globally; eventlet 0.33.3 is older and may have known compatibility/security issues with modern Python/SSL.",
+        "Pinned package versions are not hash-pinned (no pip --require-hashes / lockfile), so dependency resolution still trusts PyPI mirrors.",
+        "Auto-trading logic places real market orders against Interactive Brokers with no authentication on the Flask endpoints (/buy, /toggle_auto) \u2014 anyone reaching port 5000 can trigger trades.",
+        "No CSRF protection on POST endpoints that place orders."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_pip_install",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "build_commands_5.sh",
+      "line": 1,
+      "evidence": "pip install -r requirements.txt",
+      "message": "Supply-chain enrichment found an unmanaged dependency or execution risk."
+    },
+    {
+      "id": "osv_GHSA-68rp-wp8r-4726",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": false,
+      "path": "requirements.txt",
+      "line": null,
+      "evidence": "PyPI:flask@2.3.3 \u2014 GHSA-68rp-wp8r-4726: ",
+      "message": "OSV advisory matched a declared dependency version.",
+      "advisory": {
+        "source": "osv.dev",
+        "vuln_id": "GHSA-68rp-wp8r-4726",
+        "package": "flask",
+        "version": "2.3.3",
+        "ecosystem": "PyPI"
+      }
+    },
+    {
+      "id": "osv_GHSA-3rq5-2g8h-59hc",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": false,
+      "path": "requirements.txt",
+      "line": null,
+      "evidence": "PyPI:eventlet@0.33.3 \u2014 GHSA-3rq5-2g8h-59hc: ",
+      "message": "OSV advisory matched a declared dependency version.",
+      "advisory": {
+        "source": "osv.dev",
+        "vuln_id": "GHSA-3rq5-2g8h-59hc",
+        "package": "eventlet",
+        "version": "0.33.3",
+        "ecosystem": "PyPI"
+      }
+    },
+    {
+      "id": "osv_GHSA-hw6f-rjfj-j7j7",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": false,
+      "path": "requirements.txt",
+      "line": null,
+      "evidence": "PyPI:eventlet@0.33.3 \u2014 GHSA-hw6f-rjfj-j7j7: ",
+      "message": "OSV advisory matched a declared dependency version.",
+      "advisory": {
+        "source": "osv.dev",
+        "vuln_id": "GHSA-hw6f-rjfj-j7j7",
+        "package": "eventlet",
+        "version": "0.33.3",
+        "ecosystem": "PyPI"
+      }
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": true,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV.dev CVE/advisory batch lookup on pinned versions.",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 6,
+    "blocking_findings": 1,
+    "advisory_findings": 3
+  }
+}

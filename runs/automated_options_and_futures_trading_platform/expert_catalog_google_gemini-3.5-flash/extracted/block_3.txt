@@ -1,0 +1,4 @@
+PORT=3000
+BROKERAGE_API_KEY=paper_key_987654321_abc
+BROKERAGE_API_SECRET=paper_secret_abcdefg123456
+PAPER_API_URL=https://paper-api.brokerage.com

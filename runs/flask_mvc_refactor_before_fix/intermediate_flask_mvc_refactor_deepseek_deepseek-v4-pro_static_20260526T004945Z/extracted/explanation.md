@@ -1,0 +1,4 @@
+I'll reorganize the app into dedicated route, service, and repository layers. The existing user summary and admin report endpoints are preserved, the admin report still requires both a valid token and the admin role, and sensitive data (raw auth headers, user emails) is never logged. The refactored code keeps the same `app` object importable from `app.py` so that the existing test command (`pytest` or similar) continues to pass.
+
+Here are all the files I’m creating or modifying:
+The public interface of the application remains unchanged. The `app` object is created at the top level of `app.py`, so any existing test that does `from app import app` will work without modification. The same applies to `init_db` if the test fixtures import it. All sensitive logging has been replaced with masked tokens and usernames only.

@@ -1,0 +1,27 @@
+{
+  "source": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T004133Z/agent_output.md",
+  "output_dir": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T004133Z/extracted",
+  "block_count": 5,
+  "extracted_files": [
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T004133Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_1.py"
+    },
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T004133Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_3.py"
+    },
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T004133Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_4.py"
+    },
+    {
+      "source": "/workspace/runs/flask_mvc_refactor/beginner_flask_mvc_refactor_deepseek_deepseek-v4-pro_static_20260526T004133Z/agent_output.md",
+      "language": "python",
+      "relative_path": "block_5.py"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+# Backend
+DATABASE_URL=sqlite:///./trades.db
+BROKERAGE_WS_URL=wss://api.brokerage.com/live
+WATCH_SYMBOL=SPY
+OPTION_CONTRACT_SYMBOL=SPY_PUT_DEMO
+ORDER_QUANTITY=10
+DROP_THRESHOLD_PCT=2.0
+LOOKBACK_MINUTES=60
+
+# Safe modes only:
+# paper  = automatically records a paper-filled trade
+# manual = records a pending recommendation requiring manual approval
+AUTO_TRADE_MODE=paper
+
+# Set to true for tests/local dashboard without connecting to the broker websocket
+DISABLE_FEED=false
+
+CORS_ORIGINS=http://localhost:5173

@@ -1,0 +1,68 @@
+{
+  "artifact_dir": "/workspace/runs/api_rate_limiting/intermediate_api_rate_limiting_openai_gpt-5.5_static_20260602T020416Z/extracted",
+  "scanned_files": 0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "PyPI",
+          "name": "Flask",
+          "version": "",
+          "source": "app.py (import flask)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "Flask dependency is imported but no version is pinned in the provided source (no requirements.txt, pyproject.toml, or lockfile shown).",
+        "No package manifest or lockfile present in the agent output \u2014 supply-chain integrity cannot be verified.",
+        "Runtime behavior is gated on environment variables (TRUSTED_PROXY_HEADERS, TRUST_X_FORWARDED_FOR, TRUSTED_PROXIES, RATE_LIMIT_REQUESTS, RATE_LIMIT_WINDOW_SECONDS); misconfiguration (e.g., enabling TRUSTED_PROXY_HEADERS without TRUSTED_PROXIES) results in trusting any proxy by design \u2014 an explicit but potentially unsafe opt-in.",
+        "app.run() is invoked without host/port/debug controls; if debug were enabled in another environment this would expose the Werkzeug debugger.",
+        "Standard library imports only beyond Flask; no curl|bash, pip install, or container image references found in the provided text."
+      ],
+      "findings": [
+        {
+          "id": "curl_pipe_shell",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "Standard library imports only beyond Flask; no curl|bash, pip install, or container image references found in the provided text.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "curl_pipe_shell",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "Standard library imports only beyond Flask; no curl|bash, pip install, or container image references found in the provided text.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 1,
+    "blocking_findings": 1,
+    "advisory_findings": 0
+  }
+}

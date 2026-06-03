@@ -1,0 +1,4 @@
+$ openrouter model=openai/gpt-5.5
+applied_files=['app.py', 'services.py']
+skipped=['not_allowed:controllers.py', 'not_allowed:security.py', 'not_allowed:models.py', 'not_allowed:logging_utils.py']
+errors=[]
