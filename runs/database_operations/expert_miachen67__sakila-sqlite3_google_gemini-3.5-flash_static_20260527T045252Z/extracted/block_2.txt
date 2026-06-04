@@ -1,0 +1,3 @@
+
+### 2. Generate the Analysis Report
+To generate a comprehensive Markdown report at `reports/duplicate_analysis_report.md`:

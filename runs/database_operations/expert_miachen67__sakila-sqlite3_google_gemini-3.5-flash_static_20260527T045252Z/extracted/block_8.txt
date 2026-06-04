@@ -1,0 +1,6 @@
+
+---
+
+## Proposed Deletion Statements (CASE A Only)
+
+The following SQL query generates the specific `DELETE` statements for Case A duplicates. These statements are safe to run **only after receiving explicit confirmation**.

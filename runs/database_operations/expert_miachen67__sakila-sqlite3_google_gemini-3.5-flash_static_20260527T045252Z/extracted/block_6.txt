@@ -1,0 +1,7 @@
+.print
+.print ## Warnings & Safety Constraints
+.print
+.print 1. **Data Loss Warning**: For Case C duplicates, both records have rental or payment history. Deleting either record will result in orphaned records in the `rental` or `payment` tables, or violation of foreign key constraints. Do not proceed without explicit instructions on how to merge or handle these records.
+.print 2. **Authoritative Record Check**: For Case B duplicates, there are spelling differences in the names. Please review the records and specify which spelling/record is authoritative.
+.print 3. **No Automatic Execution**: No DELETE, UPDATE, or DROP statements have been executed. All changes must be explicitly confirmed by the database administrator.
+.print

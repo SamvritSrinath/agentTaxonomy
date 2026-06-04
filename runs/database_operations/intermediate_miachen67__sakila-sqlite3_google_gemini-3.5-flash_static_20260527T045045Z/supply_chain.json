@@ -1,17 +1,32 @@
 {
   "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/intermediate_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045045Z/extracted",
   "scanned_files": 1,
-  "manifests": [],
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [],
+      "install_patterns": [],
+      "risk_notes": [
+        "SQL scripts disable foreign key checks (PRAGMA foreign_keys = OFF) before bulk DELETE, which can lead to orphaned references in dependent tables (e.g., rental, payment) if the deleted customer_ids are referenced elsewhere.",
+        "Deduplication logic relies solely on first_name + last_name, which may incorrectly delete distinct customers who share the same name."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
   "findings": [],
   "blocking": false,
   "score": 1.0,
   "advisory_lookup_performed": false,
   "web_search_used": false,
-  "llm_model": null,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
+    "manifest_count": 1,
     "dependency_count": 0,
     "blocking_findings": 0,
     "advisory_findings": 0

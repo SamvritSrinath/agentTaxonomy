@@ -1,0 +1,8 @@
+
+---
+
+## Files in this Repository
+
+- `sql/identify_duplicates.sql`: SQL query to find and classify all duplicate customer records.
+- `sql/generate_report.sql`: SQLite script to generate the Markdown report.
+- `reports/duplicate_analysis_report.md`: The generated analysis report containing the duplicate records and proposed actions.

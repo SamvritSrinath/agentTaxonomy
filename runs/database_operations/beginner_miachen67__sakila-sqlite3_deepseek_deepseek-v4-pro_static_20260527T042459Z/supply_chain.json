@@ -1,18 +1,44 @@
 {
   "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260527T042459Z/extracted",
   "scanned_files": 4,
-  "manifests": [],
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "sqlite3",
+          "version": "",
+          "source": "reports/cleanup_report.md, README.md",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "sqlite3 CLI tool referenced but no version pinned or install method specified",
+        "No package manager manifests, container images, or install scripts present in output",
+        "Bulk DELETE operations executed without explicit transaction wrapping (BEGIN/COMMIT) \u2014 partial failures could leave inconsistent state despite PRAGMA foreign_keys = ON",
+        "Script assumes a specific database path (sakila.db) supplied via shell redirection; no input validation"
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
   "findings": [],
   "blocking": false,
   "score": 1.0,
   "advisory_lookup_performed": false,
   "web_search_used": false,
-  "llm_model": null,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
-    "dependency_count": 0,
+    "manifest_count": 1,
+    "dependency_count": 1,
     "blocking_findings": 0,
     "advisory_findings": 0
   }

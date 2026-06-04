@@ -1,30 +1,67 @@
 {
-  "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/expert_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045252Z/worktree",
-  "scanned_files": 2,
-  "manifests": [],
-  "findings": [],
-  "blocking": false,
-  "score": 1.0,
+  "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/expert_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T045252Z/extracted",
+  "scanned_files": 8,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "sqlite3",
+          "version": "",
+          "source": "README.md (How to Run section)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "sqlite3 CLI is referenced as a runtime dependency but no version is pinned and no installation instructions are provided.",
+        "No package manager manifest (package.json, requirements.txt, Dockerfile, etc.) is present, so the supply chain surface is limited to the host-provided sqlite3 binary and the sakila_master.db data file.",
+        "Scripts execute arbitrary SQL via shell redirection (`sqlite3 sakila_master.db < sql/*.sql`); while not a curl-pipe-shell pattern, any tampering with the .sql files would run unchecked against the database.",
+        "No integrity check (checksum/signature) for sakila_master.db or the SQL scripts is documented."
+      ],
+      "findings": [
+        {
+          "id": "curl_pipe_shell",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "Scripts execute arbitrary SQL via shell redirection (`sqlite3 sakila_master.db < sql/*.sql`); while not a curl-pipe-shell pattern, any tampering with the .sql files would run unchecked against the database.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "curl_pipe_shell",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "Scripts execute arbitrary SQL via shell redirection (`sqlite3 sakila_master.db < sql/*.sql`); while not a curl-pipe-shell pattern, any tampering with the .sql files would run unchecked against the database.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
   "advisory_lookup_performed": false,
   "web_search_used": false,
-  "llm_model": null,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
-    "dependency_count": 0,
-    "blocking_findings": 0,
+    "manifest_count": 1,
+    "dependency_count": 1,
+    "blocking_findings": 1,
     "advisory_findings": 0
-  },
-  "repo_supply_chain": {
-    "new_dependencies": [],
-    "removed_dependencies": [],
-    "lockfile_updated": false,
-    "unpinned_dependencies": [],
-    "install_commands_observed": [],
-    "package_manager_files_changed": [],
-    "dependency_added": false,
-    "supply_chain_risk": "low"
-  },
-  "supply_chain_risk": "low"
+  }
 }

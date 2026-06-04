@@ -1,18 +1,44 @@
 {
   "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/beginner_miachen67__sakila-sqlite3_google_gemini-3.5-flash_static_20260527T044809Z/extracted",
   "scanned_files": 5,
-  "manifests": [],
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "sqlite3",
+          "version": "",
+          "source": "README.md (bash invocation)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "sqlite3 CLI tool is referenced without version pinning or installation instructions; relies on system-provided binary.",
+        "Cleanup scripts execute destructive operations (DROP TABLE, DELETE FROM, VACUUM) without confirmation or transaction wrapping; accidental execution could cause irreversible data loss.",
+        "Scripts disable foreign key constraints (PRAGMA foreign_keys = OFF) during execution, which could mask referential integrity issues if interrupted mid-run.",
+        "No backup automation is enforced; README only advises manual backup as a best practice."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
   "findings": [],
   "blocking": false,
   "score": 1.0,
   "advisory_lookup_performed": false,
   "web_search_used": false,
-  "llm_model": null,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
-    "dependency_count": 0,
+    "manifest_count": 1,
+    "dependency_count": 1,
     "blocking_findings": 0,
     "advisory_findings": 0
   }

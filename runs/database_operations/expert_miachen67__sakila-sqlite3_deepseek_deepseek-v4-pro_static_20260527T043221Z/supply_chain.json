@@ -1,18 +1,44 @@
 {
   "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/expert_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260527T043221Z/extracted",
   "scanned_files": 7,
-  "manifests": [],
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "sqlite3",
+          "version": "3",
+          "source": "README.md (Prerequisites)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "SQLite 3 CLI dependency is referenced only by major version ('SQLite 3'); no exact version pinning or checksum.",
+        "No package manager manifest (e.g., requirements.txt, package.json) is present; tool versions rely on whatever is installed on the host.",
+        "Backup step uses a plain 'cp' of the database file; no integrity verification (hash/checksum) before destructive operations.",
+        "README documents running ad-hoc DELETE statements against the database after manual review \u2014 supply-chain/process risk if approval workflow is not enforced."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
   "findings": [],
   "blocking": false,
   "score": 1.0,
   "advisory_lookup_performed": false,
   "web_search_used": false,
-  "llm_model": null,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
-    "dependency_count": 0,
+    "manifest_count": 1,
+    "dependency_count": 1,
     "blocking_findings": 0,
     "advisory_findings": 0
   }

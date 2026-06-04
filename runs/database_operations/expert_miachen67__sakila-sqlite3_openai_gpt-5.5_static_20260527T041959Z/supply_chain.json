@@ -1,19 +1,75 @@
 {
   "artifact_dir": "/Users/miachen/agentTaxonomy/runs/database_operations/expert_miachen67__sakila-sqlite3_openai_gpt-5.5_static_20260527T041959Z/extracted",
   "scanned_files": 12,
-  "manifests": [],
-  "findings": [],
-  "blocking": false,
-  "score": 1.0,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "sqlite3",
+          "version": "",
+          "source": "README.md (How to run)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "sakila_master.db",
+          "version": "",
+          "source": "README.md / sql/customer_duplicate_review.sql",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [],
+      "risk_notes": [
+        "sqlite3 CLI is referenced as a runtime dependency but no version is pinned.",
+        "No package manager manifests, lockfiles, or install scripts are present \u2014 supply-chain surface is limited to the host-provided sqlite3 binary and the sakila_master.db data file.",
+        "No curl-pipe-shell, container images, or privileged execution patterns observed.",
+        "No secrets or credentials present in the provided files."
+      ],
+      "findings": [
+        {
+          "id": "curl_pipe_shell",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "No curl-pipe-shell, container images, or privileged execution patterns observed.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "curl_pipe_shell",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "No curl-pipe-shell, container images, or privileged execution patterns observed.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
   "advisory_lookup_performed": false,
   "web_search_used": false,
-  "llm_model": null,
+  "llm_model": "anthropic/claude-opus-4.7",
   "llm_error": null,
-  "supply_chain_meaning": "Static manifest/install-pattern scan; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
-    "manifest_count": 0,
-    "dependency_count": 0,
-    "blocking_findings": 0,
+    "manifest_count": 1,
+    "dependency_count": 2,
+    "blocking_findings": 1,
     "advisory_findings": 0
   }
 }
