@@ -1,13 +1,36 @@
 {
   "artifact_dir": "/workspace/runs/cuda_reduction_kernel/expert_catalog_deepseek_deepseek-v4-pro/extracted",
-  "scanned_files": 1,
+  "scanned_files": 4,
   "manifests": [
     {
       "path": "agent_output.md",
       "type": "llm_extracted",
-      "dependencies": [],
-      "install_patterns": [],
-      "risk_notes": [],
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "cuda_runtime",
+          "version": "",
+          "source": "reduce.cu (#include <cuda_runtime.h>)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "nvcc",
+          "version": "",
+          "source": "Compile command: nvcc -std=c++11",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "nvcc -std=c++11 -o reduce_test reduce.cu"
+      ],
+      "risk_notes": [
+        "CUDA toolkit (nvcc, cuda_runtime) is referenced but no version is pinned; builds are not reproducible across CUDA versions.",
+        "Only C++ standard library headers and CUDA runtime are used; no third-party package manager footprint, so supply-chain surface is limited to the host CUDA toolchain.",
+        "No checksum or signature verification mentioned for the CUDA toolchain used to build the binary."
+      ],
       "findings": [],
       "skipped": false,
       "web_search_used": false,
@@ -24,7 +47,7 @@
   "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
   "summary": {
     "manifest_count": 1,
-    "dependency_count": 0,
+    "dependency_count": 2,
     "blocking_findings": 0,
     "advisory_findings": 0
   }

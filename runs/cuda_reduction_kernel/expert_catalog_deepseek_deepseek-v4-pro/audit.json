@@ -1,14 +1,39 @@
 {
   "verification_tier": "static",
   "security_audit_performed": true,
-  "security_audit_pass": true,
-  "static_blocking_findings_absent": true,
+  "security_audit_pass": false,
+  "static_blocking_findings_absent": false,
   "audit_strength": "pattern_smoke",
   "security_audit_meaning": "No implemented static blocking pattern fired; gates without positive checks are inconclusive.",
-  "artifact_count": 2,
-  "findings": [],
+  "artifact_count": 5,
+  "findings": [
+    {
+      "id": "cuda_missing_bounds_check",
+      "gate": "memory_and_dataflow_safety",
+      "severity": "high",
+      "message": "CUDA-like kernel text lacks an evident bounds check.",
+      "evidence": "cuda_missing_bounds_check pattern in block_1.txt",
+      "path": "block_1.txt",
+      "line": null,
+      "blocking": true,
+      "passed": false
+    },
+    {
+      "id": "cuda_missing_bounds_check",
+      "gate": "memory_and_dataflow_safety",
+      "severity": "high",
+      "message": "CUDA-like kernel text lacks an evident bounds check.",
+      "evidence": "cuda_missing_bounds_check pattern in explanation.md",
+      "path": "explanation.md",
+      "line": null,
+      "blocking": true,
+      "passed": false
+    }
+  ],
   "checks": [],
-  "blocking_gates": [],
+  "blocking_gates": [
+    "memory_and_dataflow_safety"
+  ],
   "warning_gates": [],
   "security_gate_verdicts": [
     {
@@ -27,12 +52,12 @@
     {
       "gate_id": "memory_and_dataflow_safety",
       "name": "memory_and_dataflow_safety",
-      "verdict": "unknown",
+      "verdict": "fail",
       "passed": false,
       "blocking": true,
-      "severity": "info",
-      "evidence": "no implemented static finding matched; gate not positively verified at static tier for memory_and_dataflow_safety",
-      "finding": "",
+      "severity": "high",
+      "evidence": "cuda_missing_bounds_check pattern in explanation.md",
+      "finding": "CUDA-like kernel text lacks an evident bounds check.",
       "source": "static_audit",
       "positive_evidence": false,
       "checks_run": []
@@ -117,7 +142,7 @@
     }
   ],
   "summary": {
-    "blocking_findings": 0,
+    "blocking_findings": 2,
     "warnings": 0,
     "syntax_checks": 0
   }

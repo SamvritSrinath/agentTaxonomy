@@ -1,8 +1,23 @@
 {
   "source": "/workspace/runs/cuda_reduction_kernel/expert_catalog_deepseek_deepseek-v4-pro/agent_output.md",
   "output_dir": "/workspace/runs/cuda_reduction_kernel/expert_catalog_deepseek_deepseek-v4-pro/extracted",
-  "block_count": 0,
+  "block_count": 3,
   "extracted_files": [
+    {
+      "source": "/workspace/runs/cuda_reduction_kernel/expert_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "cpp",
+      "relative_path": "block_1.txt"
+    },
+    {
+      "source": "/workspace/runs/cuda_reduction_kernel/expert_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_2.sh"
+    },
+    {
+      "source": "/workspace/runs/cuda_reduction_kernel/expert_catalog_deepseek_deepseek-v4-pro/agent_output.md",
+      "language": "text",
+      "relative_path": "block_3.txt"
+    },
     {
       "source": "/workspace/runs/cuda_reduction_kernel/expert_catalog_deepseek_deepseek-v4-pro/agent_output.md",
       "language": "markdown",

@@ -1,0 +1,53 @@
+Generating large array (10,000,000 elements)...
+Running Test: Empty Array (n = 0) (N = 0)
+  GPU Sum:         0.000000e+00
+  CPU Float Sum:   0.000000e+00
+  CPU Double Sum:  0.000000e+00
+  Abs Error (vs Double): 0.000000e+00 (Allowed Tol: 1.000000e-05)
+  [PASS]
+
+Running Test: Single Element (n = 1) (N = 1)
+  GPU Sum:         4.241999e+01
+  CPU Float Sum:   4.241999e+01
+  CPU Double Sum:  4.241999e+01
+  Abs Error (vs Double): 0.000000e+00 (Allowed Tol: 1.000000e-05)
+  [PASS]
+
+Running Test: Small Array (N = 10)
+  GPU Sum:         5.500000e+01
+  CPU Float Sum:   5.500000e+01
+  CPU Double Sum:  5.500000e+01
+  Abs Error (vs Double): 0.000000e+00 (Allowed Tol: 1.000000e-05)
+  [PASS]
+
+Running Test: Non-Power-of-Two Size (N = 10007)
+  GPU Sum:         1.000700e+04
+  CPU Float Sum:   1.000700e+04
+  CPU Double Sum:  1.000700e+04
+  Abs Error (vs Double): 0.000000e+00 (Allowed Tol: 1.000000e-05)
+  [PASS]
+
+Running Test: Alternating Positive/Negative Values (N = 5000)
+  GPU Sum:         0.000000e+00
+  CPU Float Sum:   0.000000e+00
+  CPU Double Sum:  0.000000e+00
+  Abs Error (vs Double): 0.000000e+00 (Allowed Tol: 1.000000e-05)
+  [PASS]
+
+Running Test: Mixed-Magnitude Values (N = 10001)
+  GPU Sum:         1.000010e+06
+  CPU Float Sum:   1.000010e+06
+  CPU Double Sum:  1.000010e+06
+  Abs Error (vs Double): 0.000000e+00 (Allowed Tol: 1.000000e-05)
+  [PASS]
+
+Running Test: Large Array (N = 10000000)
+  GPU Sum:         -1.348359e+03
+  CPU Float Sum:   -1.348344e+03
+  CPU Double Sum:  -1.348359e+03
+  Abs Error (vs Double): 1.220703e-04 (Allowed Tol: 3.250553e-03)
+  [PASS]
+
+=========================================
+All tests passed successfully!
+=========================================

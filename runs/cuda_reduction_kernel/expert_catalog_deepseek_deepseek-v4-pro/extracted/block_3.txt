@@ -1,0 +1,11 @@
+CUDA Reduction Tests
+====================
+n=0                            CPU: 0            GPU: 0           PASS
+n=1                            CPU: 42           GPU: 42          PASS
+small (n=5)                    CPU: 15           GPU: 15          PASS
+non-power-of-two (n=1000)      CPU: 500500       GPU: 500500      PASS
+large (n=1e6)                  CPU: 4.99995e+11  GPU: 4.99995e+11 PASS
+negative values (n=1000)       CPU: 0            GPU: 0           PASS
+mixed magnitudes (n=1000)      CPU: 1e+10        GPU: 1e+10       PASS
+
+All tests completed.

@@ -5,7 +5,7 @@
   "static_blocking_findings_absent": true,
   "audit_strength": "pattern_smoke",
   "security_audit_meaning": "No implemented static blocking pattern fired; gates without positive checks are inconclusive.",
-  "artifact_count": 4,
+  "artifact_count": 5,
   "findings": [],
   "checks": [],
   "blocking_gates": [],

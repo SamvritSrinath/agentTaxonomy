@@ -1,1 +1,1 @@
-nvcc -O3 -arch=sm_70 reduction.cu -o reduction
+nvcc -O3 -arch=sm_60 reduction.cu -o reduction
