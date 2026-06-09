@@ -1,0 +1,9 @@
+[PASS] n = 0                        n=0          gpu=0                cpu=0                abs_err=0             tol=0
+[PASS] n = 1                        n=1          gpu=42.5             cpu=42.5             abs_err=0             tol=0.000525
+[PASS] small array                  n=5          gpu=15               cpu=15               abs_err=0             tol=0.00025
+[PASS] negative values              n=5          gpu=-16.625          cpu=-16.625          abs_err=0             tol=0.00026625
+[PASS] non-power-of-two             n=1003       gpu=...              cpu=...              abs_err=...           tol=...
+[PASS] large random array           n=1048699    gpu=...              cpu=...              abs_err=...           tol=...
+[PASS] mixed magnitudes             n=10007      gpu=...              cpu=...              abs_err=...           tol=...
+
+Result: ALL TESTS PASSED

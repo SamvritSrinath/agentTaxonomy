@@ -1,0 +1,37 @@
+{
+  "source": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_openai_gpt-5.5/agent_output.md",
+  "output_dir": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_openai_gpt-5.5/extracted",
+  "block_count": 5,
+  "extracted_files": [
+    {
+      "source": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "cpp",
+      "relative_path": "block_1.txt"
+    },
+    {
+      "source": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_2.sh"
+    },
+    {
+      "source": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "bash",
+      "relative_path": "build_commands_3.sh"
+    },
+    {
+      "source": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "text",
+      "relative_path": "block_4.txt"
+    },
+    {
+      "source": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "cpp",
+      "relative_path": "block_5.txt"
+    },
+    {
+      "source": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_openai_gpt-5.5/agent_output.md",
+      "language": "markdown",
+      "relative_path": "explanation.md"
+    }
+  ]
+}

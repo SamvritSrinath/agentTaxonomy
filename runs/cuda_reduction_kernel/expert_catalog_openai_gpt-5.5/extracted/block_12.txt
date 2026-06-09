@@ -1,0 +1,2 @@
+input[idx]
+input[idx + BLOCK_SIZE]

@@ -1,0 +1,232 @@
+```cpp
+// reduction.cu
+//
+// CUDA C++ reduction: sum a float array on GPU, validate against CPU.
+// Supports any input length, including non‑power‑of‑two sizes.
+//
+// Compile with:
+//   nvcc -o reduction reduction.cu -arch=sm_60   # or higher
+
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <cuda_runtime.h>
+
+// ----------------------------------------------------------------------
+// utility macros
+// ----------------------------------------------------------------------
+#define CHECK_CUDA(err)                                                       \
+    do {                                                                      \
+        cudaError_t e = (err);                                                \
+        if (e != cudaSuccess) {                                               \
+            fprintf(stderr, "CUDA error at %s:%d : %s\n", __FILE__, __LINE__, \
+                    cudaGetErrorString(e));                                   \
+            exit(EXIT_FAILURE);                                               \
+        }                                                                     \
+    } while(0)
+
+// ----------------------------------------------------------------------
+// kernel: block‑level shared‑memory reduction
+// ----------------------------------------------------------------------
+__global__
+void sumReductionKernel(const float* input, float* output, size_t N)
+{
+    extern __shared__ float sdata[];               // size = blockDim.x elements
+
+    unsigned int tid = threadIdx.x;
+    // each thread loads one element, or 0 if out of bounds
+    size_t globalIdx = blockIdx.x * blockDim.x + tid;
+    float val = (globalIdx < N) ? input[globalIdx] : 0.0f;
+
+    sdata[tid] = val;
+    __syncthreads();
+
+    // tree reduction in shared memory (blockDim.x must be a power of two)
+    for (unsigned int s = blockDim.x / 2; s > 0; s >>= 1) {
+        if (tid < s) {
+            sdata[tid] += sdata[tid + s];
+        }
+        __syncthreads();   // all threads must reach sync after each tree level
+    }
+
+    // thread 0 writes the block's partial sum to global memory
+    if (tid == 0) {
+        output[blockIdx.x] = sdata[0];
+    }
+}
+
+// ----------------------------------------------------------------------
+// helper: ceil division
+// ----------------------------------------------------------------------
+static inline size_t ceilDiv(size_t a, size_t b) {
+    return (a + b - 1) / b;
+}
+
+// ----------------------------------------------------------------------
+// GPU reduction manager – repeatedly calls the kernel until only one value remains
+// ----------------------------------------------------------------------
+float reduceOnGPU(const float* h_input, size_t N, int blockSize = 256)
+{
+    if (N == 0) return 0.0f;
+
+    // query device limits
+    cudaDeviceProp prop;
+    CHECK_CUDA(cudaGetDeviceProperties(&prop, 0));
+    int maxGridSize = prop.maxGridSize[0];
+
+    // allocate two device buffers:
+    //   d_bufA – holds the original input data (large)
+    //   d_bufB – holds partial sums (small, up to maxGridSize)
+    float *d_bufA = nullptr, *d_bufB = nullptr;
+    CHECK_CUDA(cudaMalloc(&d_bufA, N * sizeof(float)));
+    CHECK_CUDA(cudaMalloc(&d_bufB, maxGridSize * sizeof(float)));
+
+    // copy input to device
+    CHECK_CUDA(cudaMemcpy(d_bufA, h_input, N * sizeof(float), cudaMemcpyHostToDevice));
+
+    float* d_input  = d_bufA;   // current input buffer
+    float* d_output = d_bufB;   // buffer for reduction output
+    size_t curSize  = N;
+
+    while (curSize > 1) {
+        // choose grid size: at most maxGridSize, at least 1
+        size_t grid = ceilDiv(curSize, blockSize);
+        if (grid > (size_t)maxGridSize) grid = maxGridSize;
+
+        // launch kernel
+        sumReductionKernel<<<grid, blockSize, blockSize * sizeof(float)>>>(
+            d_input, d_output, curSize);
+        CHECK_CUDA(cudaGetLastError());
+        CHECK_CUDA(cudaDeviceSynchronize());
+
+        // swap buffers for the next iteration
+        float* tmp = d_input;
+        d_input  = d_output;
+        d_output = tmp;
+        curSize  = grid;
+    }
+
+    // at this point curSize == 1, the final sum resides in d_input[0]
+    float result = 0.0f;
+    CHECK_CUDA(cudaMemcpy(&result, d_input, sizeof(float), cudaMemcpyDeviceToHost));
+
+    CHECK_CUDA(cudaFree(d_bufA));
+    CHECK_CUDA(cudaFree(d_bufB));
+
+    return result;
+}
+
+// ----------------------------------------------------------------------
+// CPU reference – accumulate in double for high precision, then cast to float
+// ----------------------------------------------------------------------
+float reduceOnCPU(const float* data, size_t N)
+{
+    double sum = 0.0;
+    for (size_t i = 0; i < N; ++i) {
+        sum += data[i];
+    }
+    return (float)sum;
+}
+
+// ----------------------------------------------------------------------
+// validation with a relative/absolute tolerance
+// ----------------------------------------------------------------------
+bool compareFloats(float gpuVal, float cpuVal)
+{
+    double cpuRef = (double)cpuVal;   // use double to avoid extra precision bumps
+    double diff   = fabs(gpuVal - cpuRef);
+    double maxVal = fmax(fabs(cpuRef), 1.0);
+    double tol    = 1e-4 * maxVal;    // tolerance scales with magnitude
+    return (diff <= tol);
+}
+
+// ----------------------------------------------------------------------
+// test helper
+// ----------------------------------------------------------------------
+void testCase(const float* data, size_t N, const char* description)
+{
+    float cpuResult = reduceOnCPU(data, N);
+    float gpuResult = reduceOnGPU(data, N);
+    bool  ok        = compareFloats(gpuResult, cpuResult);
+
+    printf("[%s] N = %zu  CPU = %f  GPU = %f  %s\n",
+           description, N, cpuResult, gpuResult, ok ? "PASS" : "FAIL");
+}
+
+// ----------------------------------------------------------------------
+// main – run through all required test cases
+// ----------------------------------------------------------------------
+int main()
+{
+    printf("CUDA reduction test suite\n\n");
+
+    // 1. one element
+    {
+        float arr[] = { 42.0f };
+        testCase(arr, 1, "One element");
+    }
+
+    // 2. small array (3 elements)
+    {
+        float arr[] = { 1.0f, 2.0f, 3.0f };
+        testCase(arr, 3, "Small array");
+    }
+
+    // 3. non‑power‑of‑two length (1000)
+    {
+        const size_t N = 1000;
+        float* arr = (float*)malloc(N * sizeof(float));
+        for (size_t i = 0; i < N; ++i) arr[i] = (float)(rand() % 2001 - 1000) / 100.0f; // -10..10
+        testCase(arr, N, "Non power of two");
+        free(arr);
+    }
+
+    // 4. large array (1M + 1 for non‑power‑of‑two)
+    {
+        const size_t N = (1u << 20) + 1;
+        float* arr = (float*)malloc(N * sizeof(float));
+        for (size_t i = 0; i < N; ++i) arr[i] = (float)(rand() % 2001 - 1000) / 100.0f;
+        testCase(arr, N, "Large array");
+        free(arr);
+    }
+
+    // 5. negative values
+    {
+        const size_t N = 500;
+        float* arr = (float*)malloc(N * sizeof(float));
+        for (size_t i = 0; i < N; ++i) arr[i] = -100.0f + (float)(rand() % 20001) / 100.0f; // -100..100
+        testCase(arr, N, "Negative values");
+        free(arr);
+    }
+
+    return 0;
+}
+```
+
+**Compile command**
+
+```bash
+nvcc -o reduction reduction.cu -arch=sm_60   # use an architecture that matches your GPU
+```
+
+**Explanation of grid size and block size choices**
+
+- **Block size** is fixed to **256** threads. This is a typical power-of‑two value that gives good occupancy on all modern CUDA GPUs while keeping the shared memory reduction loop simple (only works correctly with power-of‑two block sizes).
+
+- **Grid size** for the first pass is `ceilDiv(N, blockSize)`, clamped to `maxGridSize[0]` of the device. If `N` is small, the grid has a single block. For very large `N` (e.g., tens of millions), the grid is capped, and the resulting partial sums are further reduced in subsequent passes.
+
+- **Why not assume `N % blockSize == 0`?** The kernel handles any length by loading a zero for threads whose global index falls beyond `N`. The reduction then naturally incorporates those zeros, so no special padding is needed on the host side. The grid is computed with a ceiling division that guarantees all input elements are covered, and no out‑of‑bounds global memory reads occur because of the explicit `if (globalIdx < N)` check.
+
+**How partial block results are combined**
+
+The program uses an iterative on‑device reduction:
+
+1. The first call to `sumReductionKernel` processes the whole input array. Each block computes a partial sum of its segment and writes it to a dedicated output array (size = number of blocks).
+
+2. After synchronisation, the number of partial values becomes the new “problem size”. The roles of the two device buffers are swapped.
+
+3. If the new size is still larger than 1, the kernel is launched again, now reading the partial‑sum array as input and writing an even smaller set of partial sums.
+
+4. This process repeats until exactly one value remains, which is the final sum.
+
+This hierarchical strategy gracefully handles any initial array length and naturally respects the device’s `maxGridSize` limit. All buffer management (allocation, pointer swaps, and final copy) is done on the host, and every CUDA API call is checked for errors.

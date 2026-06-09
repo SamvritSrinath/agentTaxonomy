@@ -1,0 +1,62 @@
+{
+  "artifact_dir": "/workspace/runs/cuda_reduction_kernel/intermediate_catalog_google_gemini-3.5-flash/extracted",
+  "scanned_files": 4,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "cuda_runtime (CUDA Toolkit)",
+          "version": "",
+          "source": "reduction.cu (#include <cuda_runtime.h>)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "nvcc (NVIDIA CUDA Compiler)",
+          "version": "",
+          "source": "Compile Command",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "C++ standard library (iostream, vector, cmath, string, numeric)",
+          "version": "",
+          "source": "reduction.cu includes",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "nvcc -O3 -arch=sm_60 reduction.cu -o reduction"
+      ],
+      "risk_notes": [
+        "CUDA Toolkit / nvcc version is not pinned; build reproducibility depends on the host's installed toolkit.",
+        "Target GPU architecture flag (-arch=sm_60) is hardcoded but suggested to be edited manually, which can cause silent ABI/perf mismatches if not adjusted.",
+        "No package manager or lockfile is used; all dependencies are implicit system-level (CUDA runtime, C++ stdlib)."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 3,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

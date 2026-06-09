@@ -1,0 +1,6 @@
+for (unsigned int offset = BLOCK_SIZE / 2; offset > 32; offset >>= 1) {
+    if (tid < offset) {
+        shared[tid] += shared[tid + offset];
+    }
+    __syncthreads();
+}

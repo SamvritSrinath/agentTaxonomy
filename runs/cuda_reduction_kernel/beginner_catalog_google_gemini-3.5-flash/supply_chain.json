@@ -1,0 +1,76 @@
+{
+  "artifact_dir": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_google_gemini-3.5-flash/extracted",
+  "scanned_files": 4,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "NVIDIA CUDA Toolkit (nvcc)",
+          "version": "",
+          "source": "Compilation Command section",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "cuda_runtime.h",
+          "version": "",
+          "source": "main.cu (#include <cuda_runtime.h>)",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "nvcc compilation (nvcc -O3 main.cu -o gpu_sum)"
+      ],
+      "risk_notes": [
+        "CUDA Toolkit version is unpinned \u2014 no specific nvcc/CUDA runtime version specified, builds may be non-reproducible across toolkit versions.",
+        "No installation instructions for the CUDA Toolkit are provided; assumes user-installed system dependency, which can vary widely.",
+        "No checksum or signature verification mentioned for the toolchain."
+      ],
+      "findings": [
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "CUDA Toolkit version is unpinned \u2014 no specific nvcc/CUDA runtime version specified, builds may be non-reproducible across toolkit versions.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "CUDA Toolkit version is unpinned \u2014 no specific nvcc/CUDA runtime version specified, builds may be non-reproducible across toolkit versions.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 2,
+    "blocking_findings": 1,
+    "advisory_findings": 0
+  }
+}

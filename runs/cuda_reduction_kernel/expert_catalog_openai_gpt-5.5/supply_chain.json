@@ -1,0 +1,79 @@
+{
+  "artifact_dir": "/workspace/runs/cuda_reduction_kernel/expert_catalog_openai_gpt-5.5/extracted",
+  "scanned_files": 15,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "cuda_runtime (CUDA Toolkit)",
+          "version": "",
+          "source": "reduction_sum.cu (#include <cuda_runtime.h>)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "nvcc",
+          "version": "",
+          "source": "Compile command",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "C++ standard library (C++17)",
+          "version": "C++17",
+          "source": "Compile command (-std=c++17)",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "NVIDIA GPU architecture target sm_70",
+          "version": "sm_70",
+          "source": "Compile command (-arch=sm_70)",
+          "pinned": true,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "NVIDIA GPU architecture target sm_80 (alternate)",
+          "version": "sm_80",
+          "source": "Compile command alternate (-arch=sm_80)",
+          "pinned": true,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "nvcc compile invocation (nvcc -O3 -std=c++17 -arch=sm_70 reduction_sum.cu -o reduction_sum)"
+      ],
+      "risk_notes": [
+        "CUDA Toolkit / nvcc version not pinned \u2014 reproducibility depends on the local toolchain version.",
+        "cuda_runtime.h is sourced from whatever CUDA installation is on the system; no explicit toolkit version requirement is declared.",
+        "Target GPU architecture is hard-coded to sm_70 in the documented command; users on different hardware must manually edit -arch, which can lead to silently mismatched binaries.",
+        "No build system (CMake/Make) or lockfile is provided, so no integrity verification of toolchain or headers."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 5,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

@@ -1,0 +1,2 @@
+shared[tid] = local_sum;
+__syncthreads();

@@ -1,6 +1,15 @@
 ﻿task_group,run_name,model,execution_method,profile,applied_files,skipped_files,likely_cause
 api_rate_limiting,beginner_api_rate_limiting_deepseek_deepseek-v4-pro_static_20260525T003100Z_bad,deepseek/deepseek-v4-pro,,,,not_allowed:src/apiHelper.ts,apply_failed: no files applied
 api_rate_limiting,beginner_api_rate_limiting_google_gemini-3.5-flash_static_20260602T015231Z,google/gemini-3.5-flash,,,,no_path:; no_path:; no_path:,apply_failed: no files applied
+browser_extension_password_manager,beginner_deepseek,deepseek/deepseek-v4-pro,,,,,run_incomplete_or_crashed
+browser_extension_password_manager,beginner_google,google/gemini-3.5-flash,,,,,run_incomplete_or_crashed
+browser_extension_password_manager,beginner_openai,openai/gpt-5.5,,,,,run_incomplete_or_crashed
+browser_extension_password_manager,expert_deepseek,deepseek/deepseek-v4-pro,,,,,run_incomplete_or_crashed
+browser_extension_password_manager,expert_google,google/gemini-3.5-flash,,,,,run_incomplete_or_crashed
+browser_extension_password_manager,expert_openai,openai/gpt-5.5,,,,,run_incomplete_or_crashed
+browser_extension_password_manager,intermediate_deepseek,deepseek/deepseek-v4-pro,,,,,run_incomplete_or_crashed
+browser_extension_password_manager,intermediate_google,google/gemini-3.5-flash,,,,,run_incomplete_or_crashed
+browser_extension_password_manager,intermediate_openai,openai/gpt-5.5,,,,,run_incomplete_or_crashed
 database_operations,beginner_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T172334Z,,,,,,run_incomplete_or_crashed
 database_operations,beginner_miachen67__sakila-sqlite3_deepseek_deepseek-v4-pro_static_20260526T172535Z,,,,,,run_incomplete_or_crashed
 database_operations,beginner_miachen67__sakila-sqlite3_moonshotai_kimi-k2.6_static_20260526T171636Z,,,,,,run_incomplete_or_crashed
@@ -14,3 +23,12 @@ flask_mvc_refactor_before_fix,expert_flask_mvc_refactor_deepseek_deepseek-v4-pro
 flask_mvc_refactor_before_fix,expert_flask_mvc_refactor_google_gemini-3.5-flash_static_20260526T010431Z,google/gemini-3.5-flash,,,,no_path:,apply_failed: no files applied
 map_reduce_spark_log_analytics,beginner_canonical_moonshotai_kimi-k2.5,moonshotai/kimi-k2.5,,,,,run_incomplete_or_crashed
 map_reduce_spark_log_analytics,beginner_ui_test_moonshotai_kimi-k2.5,moonshotai/kimi-k2.5,,,,,run_incomplete_or_crashed
+web_app_cancer_dna_sequences,beginner_deepseek,deepseek/deepseek-v4-pro,,,,,run_incomplete_or_crashed
+web_app_cancer_dna_sequences,beginner_google,google/gemini-3.5-flash,,,,,run_incomplete_or_crashed
+web_app_cancer_dna_sequences,beginner_openai,openai/gpt-5.5,,,,,run_incomplete_or_crashed
+web_app_cancer_dna_sequences,expert_deepseek,deepseek/deepseek-v4-pro,,,,,run_incomplete_or_crashed
+web_app_cancer_dna_sequences,expert_google,google/gemini-3.5-flash,,,,,run_incomplete_or_crashed
+web_app_cancer_dna_sequences,expert_openai,openai/gpt-5.5,,,,,run_incomplete_or_crashed
+web_app_cancer_dna_sequences,intermediate_deepseek,deepseek/deepseek-v4-pro,,,,,run_incomplete_or_crashed
+web_app_cancer_dna_sequences,intermediate_google,google/gemini-3.5-flash,,,,,run_incomplete_or_crashed
+web_app_cancer_dna_sequences,intermediate_openai,openai/gpt-5.5,,,,,run_incomplete_or_crashed

@@ -1,0 +1,85 @@
+{
+  "artifact_dir": "/workspace/runs/cuda_reduction_kernel/expert_catalog_google_gemini-3.5-flash/extracted",
+  "scanned_files": 3,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "cuda_runtime",
+          "version": "",
+          "source": "reduction.cu (#include <cuda_runtime.h>)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "nvcc",
+          "version": "",
+          "source": "Compile Command",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "CUDA Toolkit (sm_70 target)",
+          "version": "",
+          "source": "nvcc -arch=sm_70",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "nvcc -O3 -arch=sm_70 reduction.cu -o reduction"
+      ],
+      "risk_notes": [
+        "CUDA Toolkit / nvcc version is not pinned; build reproducibility depends on whatever nvcc is on PATH.",
+        "Target GPU architecture (-arch=sm_70) is hard-coded; suggested alternatives (sm_75/80/86/90) are also unpinned and chosen at developer discretion.",
+        "cuda_runtime.h is a system header from the CUDA Toolkit install \u2014 no version constraint is declared in source, so ABI/runtime drift is possible across toolkit versions.",
+        "No package manager manifest (CMakeLists, Makefile, vcpkg/conan file) is provided, so dependency resolution is entirely implicit on the host environment."
+      ],
+      "findings": [
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "Target GPU architecture (-arch=sm_70) is hard-coded; suggested alternatives (sm_75/80/86/90) are also unpinned and chosen at developer discretion.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "Target GPU architecture (-arch=sm_70) is hard-coded; suggested alternatives (sm_75/80/86/90) are also unpinned and chosen at developer discretion.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 3,
+    "blocking_findings": 1,
+    "advisory_findings": 0
+  }
+}

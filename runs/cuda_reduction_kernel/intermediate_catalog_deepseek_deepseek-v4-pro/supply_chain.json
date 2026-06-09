@@ -1,0 +1,54 @@
+{
+  "artifact_dir": "/workspace/runs/cuda_reduction_kernel/intermediate_catalog_deepseek_deepseek-v4-pro/extracted",
+  "scanned_files": 3,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "CUDA Toolkit (nvcc / cuda_runtime)",
+          "version": "",
+          "source": "reduction.cu (#include <cuda_runtime.h>) and compile command",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "CUDA compute capability sm_60",
+          "version": "sm_60",
+          "source": "nvcc compile command (-arch=sm_60)",
+          "pinned": true,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "nvcc -o reduction reduction.cu -arch=sm_60"
+      ],
+      "risk_notes": [
+        "CUDA Toolkit version is not pinned; build reproducibility depends on whatever nvcc/cuda_runtime is installed on the host.",
+        "Target GPU architecture is hard-coded to sm_60; running on older devices will fail and on newer devices may miss optimizations, but this is a correctness/perf note rather than a supply-chain risk.",
+        "No package manager, lockfile, or container image is referenced, so the toolchain provenance (CUDA install source) is entirely implicit and unverified."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 2,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

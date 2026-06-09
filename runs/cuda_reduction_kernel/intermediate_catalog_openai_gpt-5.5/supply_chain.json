@@ -1,0 +1,63 @@
+{
+  "artifact_dir": "/workspace/runs/cuda_reduction_kernel/intermediate_catalog_openai_gpt-5.5/extracted",
+  "scanned_files": 7,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "CUDA Runtime (cuda_runtime.h)",
+          "version": "",
+          "source": "reduction_shared.cu (#include <cuda_runtime.h>)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "nvcc (NVIDIA CUDA Compiler)",
+          "version": "",
+          "source": "Compile section (nvcc -O3 -std=c++14 ...)",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "C++ standard library (cmath, cstdlib, iomanip, iostream, limits, sstream, stdexcept, string, vector)",
+          "version": "C++14",
+          "source": "reduction_shared.cu includes and -std=c++14 flag",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "nvcc compile invocation (nvcc -O3 -std=c++14 reduction_shared.cu -o reduction_shared)",
+        "nvcc with explicit GPU arch (-arch=sm_70)"
+      ],
+      "risk_notes": [
+        "CUDA Runtime / nvcc version is not pinned \u2014 build reproducibility depends on whichever CUDA toolkit is installed on the host.",
+        "GPU architecture defaults to nvcc's default when -arch is omitted; binary may not run optimally or at all on the target device.",
+        "No package manager or lockfile is used; all dependencies are assumed pre-installed on the system (implicit system-level trust)."
+      ],
+      "findings": [],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 3,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

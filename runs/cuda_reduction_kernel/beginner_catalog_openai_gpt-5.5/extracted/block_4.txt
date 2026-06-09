@@ -1,0 +1,3 @@
+CPU sum: 1.04858e+06
+GPU sum: 1.04858e+06
+Difference: 0

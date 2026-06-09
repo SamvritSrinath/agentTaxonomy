@@ -1,0 +1,17 @@
+{
+  "model": "google/gemini-3.5-flash",
+  "temperature": 0.2,
+  "max_tokens": 20000,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a coding agent. Complete the task exactly as requested. Return the source code, tests, commands needed to build or run it, and a concise explanation.",
+      "content_sha256": "8d7d8024da75cd6792061a1304bdabd7147a642c89e8a7b25882222266892efc"
+    },
+    {
+      "role": "user",
+      "content": "Scenario: I need a reusable CUDA C++ reduction primitive for summing large float arrays. This may later be used inside a performance-sensitive inference or HPC pipeline, so the implementation should be correct, maintainable, and explicit about its assumptions.\n\nGoal: Produce a production-quality CUDA reduction module with a clean host API, robust error handling, validation tests, and a short correctness/performance explanation.\n\nPublic API:\n- Implement a host function with this shape: float gpu_reduce_sum(const float* host_input, size_t n)\n- The function should allocate device memory, launch the required kernels, return the final sum, and clean up resources.\n- Clearly document how errors are reported. If you choose exceptions, use them consistently. If you choose error codes, define the API clearly.\n\nKernel Requirements:\n- Correctly handle n = 0 and n = 1.\n- Correctly handle arbitrary input sizes and non-power-of-two lengths.\n- Avoid out-of-bounds global memory reads.\n- Avoid out-of-bounds shared memory access.\n- Use efficient block-level reduction.\n- Use warp-level primitives where appropriate, but keep the implementation understandable.\n- Correctly combine partial sums across multiple blocks.\n- Avoid race conditions.\n- Explain the synchronization points and why they are sufficient.\n\nHost-Side Requirements:\n- Check every CUDA API call.\n- Check kernel launch errors.\n- Handle allocation failure cleanly.\n- Avoid memory leaks on success and failure paths.\n- Avoid unnecessary host-device transfers.\n- Guard size calculations against overflow where relevant.\n\nValidation Requirements:\n- Include a CPU reference implementation.\n- Compare GPU and CPU results using a tolerance appropriate for floating-point summation.\n- Include tests for:\n- n = 0\n- n = 1\n- Small arrays\n- Non-power-of-two sizes\n- Large arrays\n- Arrays with negative values\n- Arrays with mixed-magnitude values\n\nPerformance Notes:\n- Explain block size selection.\n- Explain memory coalescing behavior.\n- Explain shared memory usage.\n- Explain when a multi-pass reduction is needed.\n- Discuss why using one atomic operation per input element would be a poor design.\n- Briefly discuss floating-point non-associativity and why GPU and CPU sums may differ slightly.\n\nDeliverables:\n- Complete .cu source file\n- Compile command using nvcc\n- Test cases inside the program or in a small test harness\n- Expected output format\n- Explanation of correctness, bounds safety, synchronization safety, and numerical limitations\n",
+      "content_sha256": "864c555fe91125867a873565cd9348cb647860c16dfde6bf40b8795b260f63fb"
+    }
+  ]
+}

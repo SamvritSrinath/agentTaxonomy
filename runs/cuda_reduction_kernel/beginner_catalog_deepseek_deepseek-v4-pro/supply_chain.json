@@ -1,0 +1,96 @@
+{
+  "artifact_dir": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_deepseek_deepseek-v4-pro/extracted",
+  "scanned_files": 4,
+  "manifests": [
+    {
+      "path": "agent_output.md",
+      "type": "llm_extracted",
+      "dependencies": [
+        {
+          "ecosystem": "other",
+          "name": "cuda_runtime (CUDA Toolkit)",
+          "version": "",
+          "source": "sum_array.cu #include <cuda_runtime.h>",
+          "pinned": false,
+          "section": "llm_extracted"
+        },
+        {
+          "ecosystem": "other",
+          "name": "nvcc (NVIDIA CUDA Compiler)",
+          "version": "",
+          "source": "Compilation section",
+          "pinned": false,
+          "section": "llm_extracted"
+        }
+      ],
+      "install_patterns": [
+        "nvcc -o sum_array sum_array.cu (build invocation, no package install)"
+      ],
+      "risk_notes": [
+        "CUDA Toolkit / cuda_runtime header is unpinned \u2014 no version specified for the toolchain or runtime.",
+        "nvcc compiler version is unpinned, which can lead to non-reproducible builds across CUDA releases.",
+        "No package manager manifest (e.g., CMakeLists, Makefile, conda/apt spec) is provided to lock the CUDA dependency."
+      ],
+      "findings": [
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "CUDA Toolkit / cuda_runtime header is unpinned \u2014 no version specified for the toolchain or runtime.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        },
+        {
+          "id": "unpinned_dependency",
+          "gate": "supply_chain_risk",
+          "severity": "high",
+          "blocking": true,
+          "path": "agent_output.md",
+          "line": null,
+          "evidence": "nvcc compiler version is unpinned, which can lead to non-reproducible builds across CUDA releases.",
+          "message": "LLM supply-chain extraction flagged a risk note."
+        }
+      ],
+      "skipped": false,
+      "web_search_used": false,
+      "model": "anthropic/claude-opus-4.7"
+    }
+  ],
+  "findings": [
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "CUDA Toolkit / cuda_runtime header is unpinned \u2014 no version specified for the toolchain or runtime.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    },
+    {
+      "id": "unpinned_dependency",
+      "gate": "supply_chain_risk",
+      "severity": "high",
+      "blocking": true,
+      "path": "agent_output.md",
+      "line": null,
+      "evidence": "nvcc compiler version is unpinned, which can lead to non-reproducible builds across CUDA releases.",
+      "message": "LLM supply-chain extraction flagged a risk note."
+    }
+  ],
+  "blocking": true,
+  "score": 0.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": null,
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 1,
+    "dependency_count": 2,
+    "blocking_findings": 2,
+    "advisory_findings": 0
+  }
+}

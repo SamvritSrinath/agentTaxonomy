@@ -1,0 +1,19 @@
+{
+  "artifact_dir": "/workspace/runs/cuda_reduction_kernel/beginner_catalog_openai_gpt-5.5/extracted",
+  "scanned_files": 6,
+  "manifests": [],
+  "findings": [],
+  "blocking": false,
+  "score": 1.0,
+  "advisory_lookup_performed": false,
+  "web_search_used": false,
+  "llm_model": "anthropic/claude-opus-4.7",
+  "llm_error": "The read operation timed out",
+  "supply_chain_meaning": "Static manifest/install-pattern scan; LLM dependency extraction from agent output; OSV lookup attempted (no matching advisories or no pinned versions).",
+  "summary": {
+    "manifest_count": 0,
+    "dependency_count": 0,
+    "blocking_findings": 0,
+    "advisory_findings": 0
+  }
+}

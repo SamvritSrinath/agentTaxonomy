@@ -1,0 +1,10 @@
+while (idx < n) {
+    local_sum += input[idx];
+
+    size_t second = idx + BLOCK_SIZE;
+    if (second < n) {
+        local_sum += input[second];
+    }
+
+    idx += stride;
+}
